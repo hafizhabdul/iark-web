@@ -1,8 +1,24 @@
 @import "tailwindcss";
 
+/* PrimeReact CSS */
+@import "primereact/resources/themes/lara-light-indigo/theme.css";
+@import "primereact/resources/primereact.min.css";
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* IARK Brand Colors */
+  --iark-red: #E21C24;
+  --iark-blue: #2E3192;
+  --iark-yellow: #FFD200;
+  --iark-white: #FFFFFF;
+  --iark-black: #000000;
+
+  /* Gradient transition colors */
+  --iark-light-coral: #FF8B8F;
+  --iark-light-purple: #8B8FCF;
+  --iark-soft-pink: #FFD5DC;
 }
 
 @theme inline {
@@ -10,6 +26,13 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* IARK Brand Colors */
+  --color-iark-red: var(--iark-red);
+  --color-iark-blue: var(--iark-blue);
+  --color-iark-yellow: var(--iark-yellow);
+  --color-iark-white: var(--iark-white);
+  --color-iark-black: var(--iark-black);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,4 +46,97 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* IARK Gradient Background - 3-color with subtle soft pink middle */
+.bg-iark-gradient {
+  background: linear-gradient(
+    180deg,
+    var(--iark-red) 0%,
+    var(--iark-soft-pink) 50%,
+    var(--iark-blue) 100%
+  );
+}
+
+/* Hero Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes float-delayed {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-25px);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.3;
+  }
+}
+
+@keyframes drift {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(10px, -10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 7s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+.animate-drift {
+  animation: drift 8s ease-in-out infinite;
+}
+
+/* PrimeReact OrganizationChart Custom Styling */
+/* Hide the outline boxes around node content */
+.p-organizationchart .p-organizationchart-node-content {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* Hide the expand/collapse toggle buttons */
+.p-organizationchart .p-node-toggler {
+  display: none !important;
 }

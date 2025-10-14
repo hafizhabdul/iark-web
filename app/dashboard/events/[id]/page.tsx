@@ -95,7 +95,13 @@ const mockEvents: Event[] = [
 ];
 
 // Extended event details (in real app, this would come from API)
-const extendedEventDetails: { [key: string]: any } = {
+const extendedEventDetails: Record<string, {
+  fullDescription: string;
+  agenda: Array<{ time: string; activity: string }>;
+  speakers: Array<{ name: string; role: string; avatar: string }>;
+  requirements: string[];
+  benefits: string[];
+}> = {
   '1': {
     fullDescription: 'Workshop ini dirancang khusus untuk para pemimpin muda yang ingin menciptakan perubahan positif di komunitas mereka. Melalui sesi interaktif, studi kasus, dan diskusi kelompok, peserta akan mempelajari berbagai strategi kepemimpinan yang efektif dan bagaimana menerapkannya dalam konteks sosial.',
     agenda: [
@@ -164,7 +170,7 @@ export default function EventDetailPage() {
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Event not found</h2>
-          <p className="text-gray-600 mb-4">The event you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-4">The event you&apos;re looking for doesn&apos;t exist.</p>
           <button
             onClick={() => router.push('/dashboard/events')}
             className="text-iark-red hover:underline font-semibold"
@@ -334,7 +340,7 @@ export default function EventDetailPage() {
               >
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Agenda</h2>
                 <div className="space-y-3">
-                  {details.agenda.map((item: any, index: number) => (
+                  {details.agenda.map((item, index: number) => (
                     <div key={index} className="flex gap-4 p-3 bg-gray-50 rounded-lg">
                       <div className="flex-shrink-0 font-semibold text-iark-red text-sm">
                         {item.time}
@@ -358,7 +364,7 @@ export default function EventDetailPage() {
               >
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Pembicara</h2>
                 <div className="grid md:grid-cols-2 gap-4">
-                  {details.speakers.map((speaker: any, index: number) => (
+                  {details.speakers.map((speaker, index: number) => (
                     <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                       <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
                         <Image src={speaker.avatar} alt={speaker.name} fill className="object-cover" />

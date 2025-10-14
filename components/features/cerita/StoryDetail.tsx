@@ -118,7 +118,7 @@ export function StoryDetail({ story }: StoryDetailProps) {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            "{story.quote}"
+            &ldquo;{story.quote}&rdquo;
           </motion.blockquote>
         )}
 

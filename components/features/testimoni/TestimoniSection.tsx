@@ -74,7 +74,7 @@ export function TestimoniSection({ className = '' }: TestimoniSectionProps) {
               className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 flex flex-col"
             >
               {/* Large Quote Mark */}
-              <div className="text-6xl text-iark-red leading-none mb-4">"</div>
+              <div className="text-6xl text-iark-red leading-none mb-4">&ldquo;</div>
 
               {/* Quote */}
               <p className="text-gray-700 leading-relaxed mb-6 flex-grow italic">

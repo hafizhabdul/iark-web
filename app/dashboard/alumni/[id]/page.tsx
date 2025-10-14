@@ -126,7 +126,7 @@ const mockAlumni: Alumni[] = [
     field: 'Environment',
     location: 'Bali',
     avatar: 'https://ui-avatars.com/api/?name=Maya+Putri&background=EA580C&color=fff',
-    bio: 'Environmental activist and marine conservation specialist working to protect Indonesia\'s ocean ecosystems. Leading coastal community initiatives for sustainable fishing and plastic waste reduction.',
+    bio: 'Environmental activist and marine conservation specialist working to protect Indonesia&apos;s ocean ecosystems. Leading coastal community initiatives for sustainable fishing and plastic waste reduction.',
     currentRole: 'Marine Conservation Manager',
     company: 'WWF Indonesia',
     skills: ['Marine Conservation', 'Environmental Policy', 'Community Engagement', 'Sustainability', 'Research & Analysis'],
@@ -199,7 +199,7 @@ export default function AlumniDetailPage() {
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Alumni not found</h2>
-          <p className="text-gray-600 mb-4">The alumni profile you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-4">The alumni profile you&apos;re looking for doesn&apos;t exist.</p>
           <button
             onClick={() => router.push('/dashboard/alumni')}
             className="text-iark-red hover:underline font-semibold"

@@ -185,7 +185,7 @@ export function CeritaSection({ className = '' }: CeritaSectionProps) {
 
                   {featuredStory.quote && (
                     <blockquote className="border-l-4 border-iark-red pl-4 py-2 mb-6 italic text-gray-700">
-                      "{featuredStory.quote}"
+                      &ldquo;{featuredStory.quote}&rdquo;
                     </blockquote>
                   )}
 

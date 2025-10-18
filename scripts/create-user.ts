@@ -37,6 +37,7 @@ async function createUserManually(username: string, password: string) {
   const { error: insertError } = await supabase.from("profiles").insert({
     id: user.user.id,
     username,
+    email,
   });
 
   if (insertError) {

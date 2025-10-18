@@ -15,18 +15,44 @@ export function DashboardSidebar() {
   const router = useRouter();
 
   useEffect(() => {
-    async function getUser() {
+    async function getUserData() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      setUser(user);
+
+      if (!user) {
+        setUser(null);
+        return;
+      }
+
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("username, email")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        setUser(null);
+        return;
+      }
+
+      setUser({
+        ...user,
+        ...profile,
+      });
     }
-    getUser();
+
+    getUserData();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      if (session?.user) {
+        getUserData();
+      } else {
+        setUser(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -163,13 +189,13 @@ export function DashboardSidebar() {
               {user?.avatar ? (
                 <Image
                   src={user.avatar}
-                  alt={user.name}
+                  alt={user.username}
                   fill
                   className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full bg-iark-red flex items-center justify-center text-white font-bold">
-                  {user?.email.charAt(0).toUpperCase()}
+                  {user?.username.charAt(0).toUpperCase()}
                 </div>
               )}
             </div>
@@ -177,7 +203,7 @@ export function DashboardSidebar() {
               <p className="font-semibold text-sm text-gray-900 truncate">
                 {user?.name}
               </p>
-              <p className="text-xs text-gray-600 truncate">{user?.email}</p>
+              <p className="text-xs text-gray-600 truncate">{user?.username}</p>
             </div>
           </div>
 

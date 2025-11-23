@@ -1,21 +1,19 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { useState } from "react";
+import Image from 'next/image';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 export interface HeroSectionProps {
   className?: string;
 }
 
-export function HeroSection({ className = "" }: HeroSectionProps) {
+export function HeroSection({ className = '' }: HeroSectionProps) {
   const [isButtonHovered, setIsButtonHovered] = useState(false);
 
   return (
-    <section
-      className={`relative min-h-screen bg-white overflow-hidden ${className}`}
-    >
+    <section className={`relative min-h-screen bg-white overflow-hidden ${className}`}>
       {/* Subtle gradient orbs background */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-iark-red/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-iark-blue/5 rounded-full blur-3xl" />
@@ -34,13 +32,10 @@ export function HeroSection({ className = "" }: HeroSectionProps) {
         </div>
 
         {/* Headline */}
-        <h1
-          className="text-5xl md:text-6xl lg:text-7xl font-bold text-center text-gray-900 mb-6 max-w-5xl leading-tight"
-          style={{
-            textShadow:
-              "2px 2px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white, 0 2px 0 white, 0 -2px 0 white, 2px 0 0 white, -2px 0 0 white",
-          }}
-        >
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-center text-gray-900 mb-6 max-w-5xl leading-tight"
+            style={{
+              textShadow: '2px 2px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white, 0 2px 0 white, 0 -2px 0 white, 2px 0 0 white, -2px 0 0 white'
+            }}>
           Menginspirasi Kepemimpinan
           <br />
           <span className="text-iark-red">Berintegritas</span> untuk
@@ -50,8 +45,8 @@ export function HeroSection({ className = "" }: HeroSectionProps) {
 
         {/* Subheadline */}
         <p className="text-lg md:text-xl text-center text-gray-600 mb-10 max-w-2xl">
-          Wadah kolaborasi alumni Rumah Kepemimpinan yang menumbuhkan semangat
-          kepemimpinan sejati dan berdampak nyata
+          Wadah kolaborasi alumni Rumah Kepemimpinan yang menumbuhkan
+          semangat kepemimpinan sejati dan berdampak nyata
         </p>
 
         {/* CTA Button */}
@@ -62,24 +57,24 @@ export function HeroSection({ className = "" }: HeroSectionProps) {
             onHoverEnd={() => setIsButtonHovered(false)}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
           >
             {/* Background shimmer effect */}
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-              initial={{ x: "-100%" }}
-              animate={{ x: isButtonHovered ? "100%" : "-100%" }}
-              transition={{ duration: 0.7, ease: "easeInOut" }}
+              initial={{ x: '-100%' }}
+              animate={{ x: isButtonHovered ? '100%' : '-100%' }}
+              transition={{ duration: 0.7, ease: 'easeInOut' }}
             />
 
-            <span className="relative z-10">Masuk</span>
+            <span className="relative z-10">Bergabung Sekarang</span>
             <motion.svg
               className="w-5 h-5 relative z-10"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
               animate={{ x: isButtonHovered ? 5 : 0 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
             >
               <path
                 strokeLinecap="round"

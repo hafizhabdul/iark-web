@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
     // Redirect to alumni directory by default
-    router.push("/dashboard/alumni");
+    router.push('/dashboard/alumni');
   }, [router]);
 
   return (

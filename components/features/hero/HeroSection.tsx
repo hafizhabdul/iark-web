@@ -1,9 +1,9 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { EventCarousel } from './EventCarousel';
 
 export interface HeroSectionProps {
   className?: string;
@@ -24,7 +24,7 @@ export function HeroSection({ className = '' }: HeroSectionProps) {
       <div className="absolute bottom-1/3 right-20 w-10 h-10 bg-iark-yellow rounded-full opacity-30 animate-pulse-slow" />
 
       {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center px-8 py-24 min-h-screen">
+      <div className="relative z-10 flex flex-col items-center justify-center px-8 pt-24 pb-16 min-h-screen">
         {/* Decorative icon with animation */}
         <div className="mb-6 flex items-center gap-2">
           <div className="w-8 h-8 bg-iark-red/20 rounded-lg rotate-12 animate-pulse-slow" />
@@ -85,91 +85,10 @@ export function HeroSection({ className = '' }: HeroSectionProps) {
             </motion.svg>
           </motion.div>
         </Link>
-      </div>
 
-      {/* Floating Photo Cards with better separation and animations */}
-      {/* Card 1 - Top Left - Red Background - Further left with float animation */}
-      <div className="hidden lg:block absolute top-20 left-4 xl:left-8 w-56 h-64 bg-iark-red rounded-3xl p-3 shadow-2xl transform rotate-[-8deg] hover:rotate-[-4deg] transition-transform duration-300 animate-float">
-        <div className="w-full h-full rounded-2xl overflow-hidden relative">
-          <Image
-            src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&q=80"
-            alt="IARK Team Collaboration"
-            fill
-            className="object-cover"
-            unoptimized
-          />
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/50 z-10 pointer-events-none" />
-        </div>
-      </div>
-
-      {/* Card 2 - Top Right - Blue Background - Further right with delayed float animation */}
-      <div className="hidden lg:block absolute top-28 right-4 xl:right-8 w-64 h-72 bg-iark-blue rounded-3xl p-3 shadow-2xl transform rotate-[10deg] hover:rotate-[5deg] transition-transform duration-300 animate-float-delayed">
-        <div className="w-full h-full rounded-2xl overflow-hidden relative">
-          <Image
-            src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400&q=80"
-            alt="Leadership Training"
-            fill
-            className="object-cover"
-            unoptimized
-          />
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/50 z-10 pointer-events-none" />
-        </div>
-      </div>
-
-      {/* Card 3 - Bottom Center - Yellow Background - Slow float animation */}
-      <div className="hidden lg:block absolute bottom-28 left-16 xl:left-24 w-52 h-60 bg-iark-yellow rounded-3xl p-3 shadow-2xl transform rotate-[-4deg] hover:rotate-[-2deg] transition-transform duration-300 animate-float-slow">
-        <div className="w-full h-full rounded-2xl overflow-hidden relative">
-          <Image
-            src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&q=80"
-            alt="Alumni Network"
-            fill
-            className="object-cover"
-            unoptimized
-          />
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/50 z-10 pointer-events-none" />
-        </div>
-      </div>
-
-      {/* Mobile decorative element - small photo preview */}
-      <div className="lg:hidden absolute bottom-16 left-1/2 transform -translate-x-1/2 flex gap-4">
-        <div className="w-20 h-20 bg-iark-red rounded-2xl p-1 shadow-lg">
-          <div className="w-full h-full rounded-xl overflow-hidden relative">
-            <Image
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=100&q=80"
-              alt="Team"
-              fill
-              className="object-cover"
-              unoptimized
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/50 z-10 pointer-events-none" />
-          </div>
-        </div>
-        <div className="w-20 h-20 bg-iark-blue rounded-2xl p-1 shadow-lg">
-          <div className="w-full h-full rounded-xl overflow-hidden relative">
-            <Image
-              src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=100&q=80"
-              alt="Leadership"
-              fill
-              className="object-cover"
-              unoptimized
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/50 z-10 pointer-events-none" />
-          </div>
-        </div>
-        <div className="w-20 h-20 bg-iark-yellow rounded-2xl p-1 shadow-lg">
-          <div className="w-full h-full rounded-xl overflow-hidden relative">
-            <Image
-              src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=100&q=80"
-              alt="Network"
-              fill
-              className="object-cover"
-              unoptimized
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/50 z-10 pointer-events-none" />
-          </div>
+        {/* Event Carousel */}
+        <div className="mt-16 w-full">
+          <EventCarousel />
         </div>
       </div>
     </section>

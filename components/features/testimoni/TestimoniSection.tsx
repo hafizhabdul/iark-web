@@ -1,41 +1,28 @@
-import Image from 'next/image';
+'use client';
+
+import { useState } from 'react';
+import { TestimoniSlider } from './TestimoniSlider';
+import { testimonialData } from '@/lib/data/testimonialData';
 
 export interface TestimoniSectionProps {
   className?: string;
 }
 
-interface Testimoni {
-  quote: string;
-  name: string;
-  title: string;
-  angkatan: string;
-  photo: string;
-}
+type FilterType = 'all' | 'ketua_angkatan' | 'tokoh_ternama';
 
 export function TestimoniSection({ className = '' }: TestimoniSectionProps) {
-  const testimonials: Testimoni[] = [
-    {
-      quote: 'Rumah Kepemimpinan membentuk karakter saya dalam memimpin dengan integritas. IARK menjadi wadah untuk terus berkontribusi dan berbagi dengan generasi selanjutnya.',
-      name: 'Dr. Ahmad Fauzi',
-      title: 'CEO Tech Startup',
-      angkatan: 'Angkatan 5',
-      photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
-    },
-    {
-      quote: 'Nilai-nilai kepemimpinan yang saya pelajari di RK menjadi fondasi dalam setiap langkah karir saya. Bersama IARK, kita terus menginspirasi pemimpin masa depan.',
-      name: 'Sarah Wijaya, M.Sc.',
-      title: 'Aktivis Sosial & Pendiri NGO',
-      angkatan: 'Angkatan 8',
-      photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
-    },
-    {
-      quote: 'IARK bukan hanya organisasi alumni, tapi keluarga besar yang saling mendukung. Di sini saya belajar bahwa kepemimpinan sejati adalah tentang melayani.',
-      name: 'Budi Santoso',
-      title: 'Pengusaha & Mentor Startup',
-      angkatan: 'Angkatan 12',
-      photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80',
-    },
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+
+  const filters: { label: string; value: FilterType }[] = [
+    { label: 'Semua', value: 'all' },
+    { label: 'Ketua Angkatan', value: 'ketua_angkatan' },
+    { label: 'Tokoh Ternama', value: 'tokoh_ternama' },
   ];
+
+  const filteredTestimonials =
+    activeFilter === 'all'
+      ? testimonialData
+      : testimonialData.filter((t) => t.type === activeFilter);
 
   return (
     <section className={`relative py-24 px-8 bg-white overflow-hidden ${className}`}>
@@ -62,54 +49,32 @@ export function TestimoniSection({ className = '' }: TestimoniSectionProps) {
         </h2>
 
         {/* Subtitle */}
-        <p className="text-lg md:text-xl text-center text-gray-600 mb-16 max-w-3xl mx-auto">
+        <p className="text-lg md:text-xl text-center text-gray-600 mb-12 max-w-3xl mx-auto">
           Cerita inspiratif dari para alumni yang terus berkontribusi
         </p>
 
-        {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 flex flex-col"
+        {/* Filter Tabs */}
+        <div className="flex justify-center gap-2 mb-12 flex-wrap">
+          {filters.map((filter) => (
+            <button
+              key={filter.value}
+              onClick={() => setActiveFilter(filter.value)}
+              className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                activeFilter === filter.value
+                  ? 'bg-iark-red text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
             >
-              {/* Large Quote Mark */}
-              <div className="text-6xl text-iark-red leading-none mb-4">&ldquo;</div>
-
-              {/* Quote */}
-              <p className="text-gray-700 leading-relaxed mb-6 flex-grow italic">
-                {testimonial.quote}
-              </p>
-
-              {/* Person Info */}
-              <div className="flex items-center gap-4 pt-6 border-t border-gray-200">
-                {/* Photo */}
-                <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
-                  <Image
-                    src={testimonial.photo}
-                    alt={testimonial.name}
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
-                </div>
-
-                {/* Name & Title */}
-                <div>
-                  <h4 className="font-bold text-gray-900">
-                    {testimonial.name}
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    {testimonial.title}
-                  </p>
-                  <p className="text-sm text-iark-red font-medium">
-                    {testimonial.angkatan}
-                  </p>
-                </div>
-              </div>
-            </div>
+              {filter.label}
+            </button>
           ))}
         </div>
+
+        {/* Testimonials Slider */}
+        <TestimoniSlider
+          testimonials={filteredTestimonials}
+          autoPlayInterval={6000}
+        />
       </div>
     </section>
   );

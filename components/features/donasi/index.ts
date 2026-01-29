@@ -3,3 +3,4 @@ export { DonasiPageSection } from './DonasiPageSection';
 export type { DonasiPageSectionProps } from './DonasiPageSection';
 export { FinancialReportModal } from './FinancialReportModal';
 export type { FinancialReportModalProps } from './FinancialReportModal';
+export { StickyDonationCTA } from './StickyDonationCTA';

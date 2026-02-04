@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import DOMPurify from 'isomorphic-dompurify';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -271,7 +272,7 @@ export default function StoryDetailPage() {
           {/* Content */}
           <div className="prose prose-lg max-w-none">
             <div
-              dangerouslySetInnerHTML={{ __html: story.content }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(story.content) }}
               className="whitespace-pre-wrap"
             />
           </div>

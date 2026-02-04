@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { Event } from '@/components/features/dashboard/EventCard';
 import { ArrowLeft, Calendar, Clock, MapPin, Users, Share2, Bookmark, Info, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import DOMPurify from 'isomorphic-dompurify';
 
 interface SupabaseEvent {
   id: string;
@@ -272,9 +273,9 @@ export default function EventDetailPage() {
                 <h2 className="text-xl font-bold text-gray-900 mb-3">Tentang Event</h2>
                 <p className="text-gray-700 leading-relaxed mb-4">{event.description}</p>
                 {content && (
-                  <div 
+                  <div
                     className="text-gray-700 leading-relaxed prose max-w-none"
-                    dangerouslySetInnerHTML={{ __html: content }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
                   />
                 )}
               </div>

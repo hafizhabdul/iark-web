@@ -1,9 +1,21 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { ManagementCard } from './ManagementCard';
-import { createClient } from '@/lib/supabase/client';
+import { createPublicClient } from '@/lib/supabase/public';
+import { unstable_cache } from 'next/cache';
+
+const getMembers = unstable_cache(
+  async () => {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from('management')
+      .select('*')
+      .order('order_index', { ascending: true });
+
+    if (error) throw error;
+    return (data || []) as ManagementMember[];
+  },
+  ['management-home'],
+  { revalidate: 3600, tags: ['management'] }
+);
 
 export interface ManagementMember {
   id: string;
@@ -21,31 +33,16 @@ export interface ManagementGridProps {
   className?: string;
 }
 
-export function ManagementGrid({ className = '' }: ManagementGridProps) {
-  const [members, setMembers] = useState<ManagementMember[]>([]);
-  const [loading, setLoading] = useState(true);
+export async function ManagementGrid({ className = '' }: ManagementGridProps) {
+  let allMembers: ManagementMember[] = [];
+  try {
+    allMembers = await getMembers();
+  } catch (error) {
+    console.error('Error fetching management:', error);
+  }
 
-  useEffect(() => {
-    async function fetchManagement() {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('management')
-        .select('*')
-        .order('order_index', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching management:', error);
-      } else {
-        setMembers(data || []);
-      }
-      setLoading(false);
-    }
-
-    fetchManagement();
-  }, []);
-
-  const pengurusInti = members.filter((m) => m.role === 'pengurus_inti');
-  const ketuaAngkatan = members.filter((m) => m.role === 'ketua_angkatan');
+  const pengurusInti = allMembers.filter((m) => m.role === 'pengurus_inti');
+  const ketuaAngkatan = allMembers.filter((m) => m.role === 'ketua_angkatan');
 
   return (
     <section className={`relative py-24 px-8 bg-gray-50 overflow-hidden ${className}`}>
@@ -76,48 +73,33 @@ export function ManagementGrid({ className = '' }: ManagementGridProps) {
           Kenali para pemimpin yang menggerakkan IARK dengan dedikasi dan integritas
         </p>
 
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="w-8 h-8 border-4 border-iark-blue border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : (
-          <>
-            {/* Pengurus Inti Grid - With Photos */}
-            <motion.div
-              layout
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16"
-            >
-              {pengurusInti.map((member, index) => (
-                <ManagementCard key={member.id} member={member} index={index} />
-              ))}
-            </motion.div>
+        {/* Pengurus Inti Grid - With Photos */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          {pengurusInti.map((member, index) => (
+            <ManagementCard key={member.id} member={member} index={index} />
+          ))}
+        </div>
 
-            {/* Ketua Angkatan Section - Text Only */}
-            {ketuaAngkatan.length > 0 && (
-              <div className="mt-12">
-                <h3 className="text-2xl font-bold text-center mb-8 text-iark-black">
-                  Ketua Angkatan
-                </h3>
-                <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {ketuaAngkatan.map((member, index) => (
-                      <motion.div
-                        key={member.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.05 }}
-                        viewport={{ once: true }}
-                        className="text-center p-3 rounded-xl hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <p className="font-semibold text-gray-900 text-sm">{member.name}</p>
-                        <p className="text-xs text-iark-red mt-1">{member.position}</p>
-                      </motion.div>
-                    ))}
+        {/* Ketua Angkatan Section - Text Only */}
+        {ketuaAngkatan.length > 0 && (
+          <div className="mt-12">
+            <h3 className="text-2xl font-bold text-center mb-8 text-iark-black">
+              Ketua Angkatan
+            </h3>
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {ketuaAngkatan.map((member, index) => (
+                  <div
+                    key={member.id}
+                    className="text-center p-3 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    <p className="font-semibold text-gray-900 text-sm">{member.name}</p>
+                    <p className="text-xs text-iark-red mt-1">{member.position}</p>
                   </div>
-                </div>
+                ))}
               </div>
-            )}
-          </>
+            </div>
+          </div>
         )}
       </div>
     </section>

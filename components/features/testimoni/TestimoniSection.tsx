@@ -1,10 +1,32 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createPublicClient } from '@/lib/supabase/public';
 import type { Database } from '@/lib/supabase/types';
 import Image from 'next/image';
 import Link from 'next/link';
+import { unstable_cache } from 'next/cache';
+
+const getStories = unstable_cache(
+  async () => {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from('stories')
+      .select(`
+        *,
+        profiles:author_id (
+          name,
+          photo,
+          angkatan
+        )
+      `)
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(3);
+
+    if (error) throw error;
+    return data as StoryWithAuthor[];
+  },
+  ['stories-home'],
+  { revalidate: 3600, tags: ['stories'] }
+);
 
 type Story = Database['public']['Tables']['stories']['Row'];
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -17,38 +39,13 @@ export interface TestimoniSectionProps {
   className?: string;
 }
 
-export function TestimoniSection({ className = '' }: TestimoniSectionProps) {
-  const [stories, setStories] = useState<StoryWithAuthor[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchStories() {
-      const supabase = createClient();
-      
-      const { data, error } = await supabase
-        .from('stories')
-        .select(`
-          *,
-          profiles:author_id (
-            name,
-            photo,
-            angkatan
-          )
-        `)
-        .eq('status', 'published')
-        .order('published_at', { ascending: false })
-        .limit(3);
-
-      if (error) {
-        console.error('Error fetching stories:', error);
-      } else {
-        setStories(data as StoryWithAuthor[]);
-      }
-      setLoading(false);
-    }
-
-    fetchStories();
-  }, []);
+export async function TestimoniSection({ className = '' }: TestimoniSectionProps) {
+  let stories: StoryWithAuthor[] = [];
+  try {
+    stories = await getStories();
+  } catch (error) {
+    console.error('Error fetching stories:', error);
+  }
 
   return (
     <section className={`relative py-24 px-8 bg-white overflow-hidden ${className}`}>
@@ -79,14 +76,7 @@ export function TestimoniSection({ className = '' }: TestimoniSectionProps) {
           Kisah inspiratif dan blog dari para alumni yang terus berkontribusi
         </p>
 
-        {/* Loading State */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-gray-100 rounded-2xl h-96 animate-pulse" />
-            ))}
-          </div>
-        ) : stories.length === 0 ? (
+        {stories.length === 0 ? (
           <p className="text-center text-gray-500">Belum ada cerita yang dipublikasikan.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -167,7 +157,7 @@ export function TestimoniSection({ className = '' }: TestimoniSectionProps) {
         )}
 
         {/* View All Link */}
-        {!loading && stories.length > 0 && (
+        {stories.length > 0 && (
           <div className="text-center mt-12">
             <Link
               href="/stories"

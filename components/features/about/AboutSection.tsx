@@ -1,17 +1,53 @@
+import { createPublicClient } from '@/lib/supabase/public';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { unstable_cache } from 'next/cache';
 
 export interface AboutSectionProps {
   className?: string;
   showSeeMore?: boolean;
 }
 
-export function AboutSection({ className = '', showSeeMore = true }: AboutSectionProps) {
-  const stats = [
-    { value: '500+', label: 'Alumni' },
-    { value: '23', label: 'Chapters of Impact' },
-    { value: '15+', label: 'Tahun Berdampak' },
+const getStats = unstable_cache(
+  async () => {
+    const supabase = createPublicClient();
+
+    // Fetch real counts from DB
+    const { count: alumniCount } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true });
+
+    const { count: batchCount } = await supabase
+      .from('batches')
+      .select('*', { count: 'exact', head: true });
+
+    // For years, we can calculate from the first batch or hardcode the start year
+    const startYear = 2005; // Example start year
+    const currentYear = new Date().getFullYear();
+    const yearsActive = currentYear - startYear;
+
+    return [
+      { value: `${alumniCount || 0}+`, label: 'Alumni' },
+      { value: `${batchCount || 0}`, label: 'Angkatan' }, // Changed 'Chapters' to 'Angkatan' as per schema
+      { value: `${yearsActive}+`, label: 'Tahun Berdampak' },
+    ];
+  },
+  ['about-stats'],
+  { revalidate: 86400, tags: ['stats'] } // Cache for 24 hours
+);
+
+export async function AboutSection({ className = '', showSeeMore = true }: AboutSectionProps) {
+  let stats = [
+    { value: '...', label: 'Alumni' },
+    { value: '...', label: 'Angkatan' },
+    { value: '...', label: 'Tahun Berdampak' },
   ];
+
+  try {
+    stats = await getStats();
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+  }
 
   return (
     <section className={`relative py-24 px-8 bg-white overflow-hidden ${className}`}>

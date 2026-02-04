@@ -1,10 +1,25 @@
-'use client';
-
-import { useState, useEffect } from 'react';
+import { createPublicClient } from '@/lib/supabase/public';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { ActivityCard } from './ActivityCard';
-import { createClient } from '@/lib/supabase/client';
+import { unstable_cache } from 'next/cache';
+
+const getActivities = unstable_cache(
+  async () => {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from('activities')
+      .select('*')
+      .eq('is_active', true)
+      .order('date', { ascending: false })
+      .limit(5);
+
+    if (error) throw error;
+    return (data || []) as Activity[];
+  },
+  ['activities-home'],
+  { revalidate: 3600, tags: ['activities'] }
+);
 
 export interface Activity {
   id: string;
@@ -25,28 +40,13 @@ export interface PastActivitiesSectionProps {
   className?: string;
 }
 
-export function PastActivitiesSection({ className = '' }: PastActivitiesSectionProps) {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchActivities() {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('activities')
-        .select('*')
-        .eq('is_active', true);
-
-      if (error) {
-        console.error('Error fetching activities:', error);
-      } else {
-        setActivities(data || []);
-      }
-      setLoading(false);
-    }
-
-    fetchActivities();
-  }, []);
+export async function PastActivitiesSection({ className = '' }: PastActivitiesSectionProps) {
+  let activities: Activity[] = [];
+  try {
+    activities = await getActivities();
+  } catch (error) {
+    console.error('Error fetching activities:', error);
+  }
 
   return (
     <section className={`relative py-24 px-8 bg-gray-50 overflow-hidden ${className}`}>
@@ -69,7 +69,7 @@ export function PastActivitiesSection({ className = '' }: PastActivitiesSectionP
 
         {/* Title */}
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 text-iark-black">
-          Kebanggaan Komunitas
+          Jejak Kegiatan Kami
         </h2>
 
         {/* Subtitle */}
@@ -79,11 +79,7 @@ export function PastActivitiesSection({ className = '' }: PastActivitiesSectionP
 
         {/* Activity Cards */}
         <div className="space-y-6 mb-12">
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="w-8 h-8 border-4 border-iark-blue border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : activities.length > 0 ? (
+          {activities.length > 0 ? (
             activities.map((activity, index) => (
               <ActivityCard key={activity.id} activity={activity} index={index} />
             ))

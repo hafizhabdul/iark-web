@@ -45,12 +45,12 @@ export function TestimoniSection({ className = '' }: TestimoniSectionProps) {
 
         {/* Title */}
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 text-iark-black">
-          Testimoni Tokoh
+          Cerita Alumni
         </h2>
 
         {/* Subtitle */}
         <p className="text-lg md:text-xl text-center text-gray-600 mb-12 max-w-3xl mx-auto">
-          Cerita inspiratif dari para alumni yang terus berkontribusi
+          Kisah inspiratif dan blog dari para alumni yang terus berkontribusi
         </p>
 
         {/* Filter Tabs */}

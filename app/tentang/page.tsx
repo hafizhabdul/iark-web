@@ -25,7 +25,7 @@ export default function TentangPage() {
       </section>
 
       {/* About Section */}
-      <AboutSection />
+      <AboutSection showSeeMore={false} />
 
       {/* Pengurus Section */}
       <PengurusSection />

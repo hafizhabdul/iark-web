@@ -1,8 +1,12 @@
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
+
 export interface AboutSectionProps {
   className?: string;
+  showSeeMore?: boolean;
 }
 
-export function AboutSection({ className = '' }: AboutSectionProps) {
+export function AboutSection({ className = '', showSeeMore = true }: AboutSectionProps) {
   const stats = [
     { value: '500+', label: 'Alumni' },
     { value: '23', label: 'Chapters of Impact' },
@@ -35,11 +39,27 @@ export function AboutSection({ className = '' }: AboutSectionProps) {
         </h2>
 
         {/* Description */}
-        <p className="text-lg md:text-xl text-center text-gray-700 leading-relaxed mb-16 max-w-3xl mx-auto">
+        <p className="text-lg md:text-xl text-center text-gray-700 leading-relaxed mb-8 max-w-3xl mx-auto">
           IARK adalah <span className="font-semibold text-iark-red">Ikatan Alumni Rumah Kepemimpinan</span>,
           wadah kolaborasi lintas angkatan yang menjadi tempat berbagi, berkontribusi,
           dan menumbuhkan semangat kepemimpinan berintegritas untuk Indonesia.
         </p>
+
+        {/* See More Button - Only show when showSeeMore is true */}
+        {showSeeMore && (
+          <div className="flex justify-center mb-16">
+            <Link
+              href="/tentang"
+              className="inline-flex items-center gap-2 text-iark-red hover:text-red-700 font-semibold transition-all duration-300 group"
+            >
+              Lihat Selengkapnya
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+            </Link>
+          </div>
+        )}
+
+        {/* Add spacing when button is hidden */}
+        {!showSeeMore && <div className="mb-16" />}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

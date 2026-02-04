@@ -10,7 +10,7 @@ export interface BidangPreview {
 export const bidangData: BidangPreview[] = [
   {
     id: '1',
-    name: 'Bidang IELTS',
+    name: 'Cluster IELTS',
     shortName: 'IELTS',
     description: 'Subsidi IELTS dan Pendampingan Beasiswa',
     icon: 'GraduationCap',
@@ -18,7 +18,7 @@ export const bidangData: BidangPreview[] = [
   },
   {
     id: '2',
-    name: 'Bidang Keputrian',
+    name: 'Cluster Keputrian',
     shortName: 'Keputrian',
     description: 'Keputrian dan Kekeluargaan',
     icon: 'Heart',
@@ -26,7 +26,7 @@ export const bidangData: BidangPreview[] = [
   },
   {
     id: '3',
-    name: 'Bidang Ngaji',
+    name: 'Cluster Ngaji',
     shortName: 'Ngaji',
     description: 'Ngaji Sebentar dan Asah Nurani',
     icon: 'BookOpen',
@@ -34,7 +34,7 @@ export const bidangData: BidangPreview[] = [
   },
   {
     id: '4',
-    name: 'Bidang Bisnis',
+    name: 'Cluster Bisnis',
     shortName: 'Bisnis',
     description: 'Kolaborasi Bisnis Alumni',
     icon: 'Briefcase',
@@ -42,7 +42,7 @@ export const bidangData: BidangPreview[] = [
   },
   {
     id: '5',
-    name: 'Bidang Politik',
+    name: 'Cluster Politik',
     shortName: 'Politik',
     description: 'Pendampingan dan Kaderisasi Politik',
     icon: 'Landmark',
@@ -50,7 +50,7 @@ export const bidangData: BidangPreview[] = [
   },
   {
     id: '6',
-    name: 'Bidang Distrik Barat',
+    name: 'Cluster Distrik Barat',
     shortName: 'Distrik Barat',
     description: 'Koordinasi Alumni Wilayah Barat',
     icon: 'MapPin',
@@ -58,7 +58,7 @@ export const bidangData: BidangPreview[] = [
   },
   {
     id: '7',
-    name: 'Bidang Distrik Timur',
+    name: 'Cluster Distrik Timur',
     shortName: 'Distrik Timur',
     description: 'Koordinasi Alumni Wilayah Timur',
     icon: 'MapPin',
@@ -66,7 +66,7 @@ export const bidangData: BidangPreview[] = [
   },
   {
     id: '8',
-    name: 'Bidang Karir',
+    name: 'Cluster Karir',
     shortName: 'Karir',
     description: 'Persiapan dan Pengembangan Karir Alumni',
     icon: 'TrendingUp',
@@ -74,7 +74,7 @@ export const bidangData: BidangPreview[] = [
   },
   {
     id: '9',
-    name: 'Bidang Kajian',
+    name: 'Cluster Kajian',
     shortName: 'Kajian',
     description: 'Sharing Alumni dan Kolaborasi Kajian Strategis',
     icon: 'Lightbulb',
@@ -82,7 +82,7 @@ export const bidangData: BidangPreview[] = [
   },
   {
     id: '10',
-    name: 'Bidang HFVN RK',
+    name: 'Cluster HFVN RK',
     shortName: 'HFVN RK',
     description: 'Program HFVN Rumah Kepemimpinan',
     icon: 'Users',
@@ -90,7 +90,7 @@ export const bidangData: BidangPreview[] = [
   },
   {
     id: '11',
-    name: 'Bidang IT Center',
+    name: 'Cluster IT Center',
     shortName: 'IT Center',
     description: 'Teknologi Informasi dan Digital',
     icon: 'Monitor',
@@ -98,7 +98,7 @@ export const bidangData: BidangPreview[] = [
   },
   {
     id: '12',
-    name: 'Bidang Media',
+    name: 'Cluster Media',
     shortName: 'Media',
     description: 'Media dan Komunikasi',
     icon: 'Megaphone',

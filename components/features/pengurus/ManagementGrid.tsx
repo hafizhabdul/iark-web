@@ -1,29 +1,17 @@
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ManagementCard } from './ManagementCard';
-import { managementData, ManagementMember } from '@/lib/data/managementData';
+import { managementData } from '@/lib/data/managementData';
 
 export interface ManagementGridProps {
   className?: string;
 }
 
-type FilterType = 'all' | 'pengurus_inti' | 'ketua_angkatan';
-
 export function ManagementGrid({ className = '' }: ManagementGridProps) {
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
-
-  const filters: { label: string; value: FilterType }[] = [
-    { label: 'Semua', value: 'all' },
-    { label: 'Pengurus Inti', value: 'pengurus_inti' },
-    { label: 'Ketua Angkatan', value: 'ketua_angkatan' },
-  ];
-
-  const filteredMembers: ManagementMember[] =
-    activeFilter === 'all'
-      ? managementData
-      : managementData.filter((m) => m.role === activeFilter);
+  // Separate pengurus inti and ketua angkatan
+  const pengurusInti = managementData.filter((m) => m.role === 'pengurus_inti');
+  const ketuaAngkatan = managementData.filter((m) => m.role === 'ketua_angkatan');
 
   return (
     <section className={`relative py-24 px-8 bg-gray-50 overflow-hidden ${className}`}>
@@ -46,7 +34,7 @@ export function ManagementGrid({ className = '' }: ManagementGridProps) {
 
         {/* Title */}
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 text-iark-black">
-          Pengurus IARK
+          Pengurus Inti IARK
         </h2>
 
         {/* Subtitle */}
@@ -54,32 +42,41 @@ export function ManagementGrid({ className = '' }: ManagementGridProps) {
           Kenali para pemimpin yang menggerakkan IARK dengan dedikasi dan integritas
         </p>
 
-        {/* Filter Tabs */}
-        <div className="flex justify-center gap-2 mb-12 flex-wrap">
-          {filters.map((filter) => (
-            <button
-              key={filter.value}
-              onClick={() => setActiveFilter(filter.value)}
-              className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
-                activeFilter === filter.value
-                  ? 'bg-iark-red text-white shadow-lg'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 shadow'
-              }`}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Grid */}
+        {/* Pengurus Inti Grid - With Photos */}
         <motion.div
           layout
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16"
         >
-          {filteredMembers.map((member, index) => (
+          {pengurusInti.map((member, index) => (
             <ManagementCard key={member.id} member={member} index={index} />
           ))}
         </motion.div>
+
+        {/* Ketua Angkatan Section - Text Only */}
+        {ketuaAngkatan.length > 0 && (
+          <div className="mt-12">
+            <h3 className="text-2xl font-bold text-center mb-8 text-iark-black">
+              Ketua Angkatan
+            </h3>
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {ketuaAngkatan.map((member, index) => (
+                  <motion.div
+                    key={member.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    viewport={{ once: true }}
+                    className="text-center p-3 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    <p className="font-semibold text-gray-900 text-sm">{member.name}</p>
+                    <p className="text-xs text-iark-red mt-1">{member.position}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

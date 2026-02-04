@@ -108,12 +108,12 @@ export function BidangPreviewSection({ className = '' }: BidangPreviewSectionPro
 
         {/* Title */}
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 text-iark-black">
-          12 Bidang IARK
+          12 Cluster IARK
         </h2>
 
         {/* Subtitle */}
         <p className="text-lg md:text-xl text-center text-gray-600 mb-12 max-w-3xl mx-auto">
-          Bidang-bidang yang berdedikasi melayani alumni dan mengembangkan kepemimpinan berintegritas
+          Cluster-cluster yang berdedikasi melayani alumni dan mengembangkan kepemimpinan berintegritas
         </p>
 
         {/* Bidang Grid */}

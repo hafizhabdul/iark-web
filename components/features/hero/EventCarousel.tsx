@@ -86,12 +86,12 @@ export function EventCarousel({
 
   return (
     <div
-      className={`relative w-full max-w-4xl mx-auto ${className}`}
+      className={`relative w-full max-w-6xl mx-auto ${className}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* Main Carousel Container */}
-      <div className="relative aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl bg-gray-100">
+      <div className="relative aspect-[21/9] rounded-2xl overflow-hidden shadow-2xl bg-gray-100">
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={currentIndex}

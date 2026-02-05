@@ -1,7 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
+import { fetchAllUsers } from '@/lib/queries/dashboard';
+import { queryKeys, staleTime } from '@/lib/queries';
+import type { Profile } from '@/lib/supabase/types';
 import {
   Search,
   Shield,
@@ -12,69 +16,46 @@ import {
   GraduationCap,
 } from 'lucide-react';
 
-interface UserProfile {
-  id: string;
-  email: string;
-  name: string;
-  photo: string | null;
-  angkatan: number | null;
-  bio: string | null;
-  role: 'alumni' | 'admin';
-  created_at: string;
-}
-
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<UserProfile[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'alumni'>('all');
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    fetchUsers();
-  }, [roleFilter]);
+  const { data: users = [], isLoading } = useQuery<Profile[]>({
+    queryKey: [...queryKeys.profiles, roleFilter],
+    queryFn: () => fetchAllUsers(roleFilter === 'all' ? undefined : roleFilter),
+    staleTime: staleTime.semiDynamic,
+  });
 
-  async function fetchUsers() {
-    setLoading(true);
-    const supabase = createClient();
+  const updateRoleMutation = useMutation({
+    mutationFn: async ({ userId, newRole }: { userId: string; newRole: string }) => {
+      const supabase = createClient();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any)
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('id', userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.profiles });
+    },
+  });
 
-    let query = supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (roleFilter !== 'all') {
-      query = query.eq('role', roleFilter);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Error fetching users:', error);
-    } else {
-      setUsers(data || []);
-    }
-    setLoading(false);
-  }
-
-  async function toggleAdminRole(userId: string, currentRole: string) {
+  function toggleAdminRole(userId: string, currentRole: string) {
     const newRole = currentRole === 'admin' ? 'alumni' : 'admin';
     const action = newRole === 'admin' ? 'menjadikan admin' : 'mencabut hak admin';
 
     if (!confirm(`Apakah Anda yakin ingin ${action} user ini?`)) return;
 
-    const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
-      .from('profiles')
-      .update({ role: newRole })
-      .eq('id', userId);
-
-    if (error) {
-      console.error('Error updating user role:', error);
-      alert('Gagal mengubah role user');
-    } else {
-      fetchUsers();
-    }
+    updateRoleMutation.mutate(
+      { userId, newRole },
+      {
+        onError: () => {
+          alert('Gagal mengubah role user');
+        },
+      }
+    );
   }
 
   const filteredUsers = users.filter(
@@ -123,7 +104,7 @@ export default function AdminUsersPage() {
 
       {/* Users Table */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        {loading ? (
+        {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-iark-red" />
           </div>

@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 import {
   FileText,
   Users,
@@ -11,100 +10,71 @@ import {
   Eye,
 } from 'lucide-react';
 import Link from 'next/link';
+import { fetchDashboardStats, fetchPendingStories } from '@/lib/queries/dashboard';
+import { queryKeys, staleTime } from '@/lib/queries';
 
 interface DashboardStats {
-  totalStories: number;
-  pendingStories: number;
-  totalUsers: number;
-  totalEvents: number;
+  total_stories: number;
+  pending_stories: number;
+  total_users: number;
+  total_events: number;
+  upcoming_events: number;
 }
 
 interface PendingStory {
   id: string;
   title: string;
+  slug: string;
+  excerpt: string | null;
+  category: string;
   created_at: string;
-  profiles: {
+  author: {
     name: string;
-  };
+    angkatan: string | null;
+    photo: string | null;
+  } | null;
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalStories: 0,
-    pendingStories: 0,
-    totalUsers: 0,
-    totalEvents: 0,
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: queryKeys.dashboardStats,
+    queryFn: fetchDashboardStats,
+    staleTime: staleTime.semiDynamic,
   });
-  const [pendingStories, setPendingStories] = useState<PendingStory[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchDashboardData() {
-      const supabase = createClient();
+  const { data: pendingStories = [], isLoading: pendingLoading } = useQuery<PendingStory[]>({
+    queryKey: queryKeys.storiesPublished('pending'),
+    queryFn: fetchPendingStories,
+    staleTime: staleTime.semiDynamic,
+  });
 
-      try {
-        // Fetch stats in parallel
-        const [storiesRes, pendingRes, usersRes, eventsRes] = await Promise.all([
-          supabase.from('stories').select('id', { count: 'exact', head: true }),
-          supabase
-            .from('stories')
-            .select('id', { count: 'exact', head: true })
-            .eq('status', 'pending'),
-          supabase.from('profiles').select('id', { count: 'exact', head: true }),
-          supabase.from('events').select('id', { count: 'exact', head: true }),
-        ]);
-
-        setStats({
-          totalStories: storiesRes.count || 0,
-          pendingStories: pendingRes.count || 0,
-          totalUsers: usersRes.count || 0,
-          totalEvents: eventsRes.count || 0,
-        });
-
-        // Fetch pending stories for review
-        const { data: pending } = await supabase
-          .from('stories')
-          .select('id, title, created_at, profiles(name)')
-          .eq('status', 'pending')
-          .order('created_at', { ascending: false })
-          .limit(5);
-
-        setPendingStories((pending as PendingStory[]) || []);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchDashboardData();
-  }, []);
+  const loading = statsLoading || pendingLoading;
 
   const statCards = [
     {
       label: 'Total Cerita',
-      value: stats.totalStories,
+      value: stats?.total_stories ?? 0,
       icon: FileText,
       color: 'bg-blue-500',
       href: '/admin/stories',
     },
     {
       label: 'Menunggu Review',
-      value: stats.pendingStories,
+      value: stats?.pending_stories ?? 0,
       icon: Clock,
       color: 'bg-yellow-500',
       href: '/admin/stories?status=pending',
     },
     {
       label: 'Total Users',
-      value: stats.totalUsers,
+      value: stats?.total_users ?? 0,
       icon: Users,
       color: 'bg-green-500',
       href: '/admin/users',
     },
     {
       label: 'Total Events',
-      value: stats.totalEvents,
+      value: stats?.total_events ?? 0,
       icon: Calendar,
       color: 'bg-purple-500',
       href: '/admin/events',
@@ -186,7 +156,7 @@ export default function AdminDashboard() {
                     {story.title}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    oleh {story.profiles?.name || 'Anonymous'} •{' '}
+                    oleh {story.author?.name || 'Anonymous'} •{' '}
                     {new Date(story.created_at).toLocaleDateString('id-ID')}
                   </p>
                 </div>

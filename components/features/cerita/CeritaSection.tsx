@@ -2,9 +2,11 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { createClient } from '@/lib/supabase/client';
+import { useQuery } from '@tanstack/react-query';
+import { fetchPublishedStories, type Story as APIStory } from '@/lib/queries/stories';
+import { queryKeys, staleTime } from '@/lib/queries';
 import type { StoryCategory } from '@/lib/supabase/types';
 
 export interface CeritaSectionProps {
@@ -32,76 +34,30 @@ const categories = [
   { id: 'kepemimpinan', label: 'Kepemimpinan', color: 'red' },
 ];
 
+function mapStory(story: APIStory): Story {
+  return {
+    id: story.id,
+    slug: story.slug,
+    name: story.author_name,
+    batch: story.author_angkatan ? `RK Angkatan ${story.author_angkatan}` : '',
+    title: story.title,
+    excerpt: story.excerpt || '',
+    photo: story.hero_image || story.author_photo || '/images/placeholder.jpg',
+    category: story.category,
+    featured: story.featured,
+  };
+}
+
 export function CeritaSection({ className = '' }: CeritaSectionProps) {
   const [activeCategory, setActiveCategory] = useState('semua');
-  const [stories, setStories] = useState<Story[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchStories() {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('stories')
-        .select(`
-          id,
-          title,
-          slug,
-          excerpt,
-          hero_image,
-          category,
-          featured,
-          published_at,
-          author:profiles!author_id (
-            name,
-            angkatan,
-            photo
-          )
-        `)
-        .eq('status', 'published')
-        .order('published_at', { ascending: false });
+  const { data: apiStories = [], isLoading } = useQuery({
+    queryKey: queryKeys.storiesPublished(),
+    queryFn: () => fetchPublishedStories(),
+    staleTime: staleTime.semiDynamic,
+  });
 
-      if (error) {
-        console.error('Error fetching stories:', error);
-        setLoading(false);
-        return;
-      }
-
-      interface StoryResponse {
-        id: string;
-        slug: string;
-        title: string;
-        excerpt: string | null;
-        hero_image: string | null;
-        category: StoryCategory;
-        featured: boolean;
-        published_at: string | null;
-        author: {
-          name: string;
-          angkatan: number | null;
-          photo: string | null;
-        } | null;
-      }
-
-      const mappedStories: Story[] = ((data || []) as StoryResponse[]).map((story) => {
-        return {
-          id: story.id,
-          slug: story.slug,
-          name: story.author?.name || 'Anonymous',
-          batch: story.author?.angkatan ? `RK Angkatan ${story.author.angkatan}` : '',
-          title: story.title,
-          excerpt: story.excerpt || '',
-          photo: story.hero_image || story.author?.photo || '/images/placeholder.jpg',
-          category: story.category,
-          featured: story.featured,
-        };
-      });
-
-      setStories(mappedStories);
-      setLoading(false);
-    }
-
-    fetchStories();
-  }, []);
+  const stories = apiStories.map(mapStory);
 
   const featuredStory = stories.find((story) => story.featured);
   const regularStories = stories.filter((story) => !story.featured);
@@ -124,7 +80,7 @@ export function CeritaSection({ className = '' }: CeritaSectionProps) {
     return category;
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <section className={`relative py-16 px-8 bg-white overflow-hidden ${className}`}>
         <div className="max-w-7xl mx-auto">

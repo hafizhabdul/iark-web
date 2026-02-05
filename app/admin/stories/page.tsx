@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
+import { queryKeys, staleTime } from '@/lib/queries';
 import {
   Search,
   Filter,
@@ -36,76 +38,76 @@ const statusConfig = {
 };
 
 export default function AdminStoriesPage() {
-  const [stories, setStories] = useState<Story[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const searchParams = useSearchParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const statusFilter = searchParams.get('status') || 'all';
 
-  useEffect(() => {
-    fetchStories();
-  }, [statusFilter]);
+  const { data: stories = [], isLoading } = useQuery({
+    queryKey: [...queryKeys.stories, statusFilter],
+    queryFn: async () => {
+      const supabase = createClient();
+      let query = supabase
+        .from('stories')
+        .select('id, title, excerpt, status, created_at, updated_at, profiles(name, email)')
+        .order('created_at', { ascending: false });
 
-  async function fetchStories() {
-    setLoading(true);
-    const supabase = createClient();
+      if (statusFilter !== 'all') {
+        query = query.eq('status', statusFilter);
+      }
 
-    let query = supabase
-      .from('stories')
-      .select('id, title, excerpt, status, created_at, updated_at, profiles(name, email)')
-      .order('created_at', { ascending: false });
+      const { data, error } = await query;
+      if (error) throw error;
+      return (data as Story[]) || [];
+    },
+    staleTime: staleTime.semiDynamic,
+  });
 
-    if (statusFilter !== 'all') {
-      query = query.eq('status', statusFilter);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Error fetching stories:', error);
-    } else {
-      setStories((data as Story[]) || []);
-    }
-
-    setLoading(false);
-  }
-
-  async function updateStoryStatus(storyId: string, newStatus: 'published' | 'rejected') {
-    const supabase = createClient();
-
-    const updateData: { status: string; published_at?: string } = { status: newStatus };
-    if (newStatus === 'published') {
-      updateData.published_at = new Date().toISOString();
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
-      .from('stories')
-      .update(updateData)
-      .eq('id', storyId);
-
-    if (error) {
-      console.error('Error updating story:', error);
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ storyId, newStatus }: { storyId: string; newStatus: 'published' | 'rejected' }) => {
+      const supabase = createClient();
+      const updateData: { status: string; published_at?: string } = { status: newStatus };
+      if (newStatus === 'published') {
+        updateData.published_at = new Date().toISOString();
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any)
+        .from('stories')
+        .update(updateData)
+        .eq('id', storyId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.stories });
+    },
+    onError: () => {
       alert('Gagal mengupdate status cerita');
-    } else {
-      fetchStories();
-    }
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (storyId: string) => {
+      const supabase = createClient();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any).from('stories').delete().eq('id', storyId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.stories });
+    },
+    onError: () => {
+      alert('Gagal menghapus cerita');
+    },
+  });
+
+  function handleUpdateStatus(storyId: string, newStatus: 'published' | 'rejected') {
+    updateStatusMutation.mutate({ storyId, newStatus });
   }
 
-  async function deleteStory(storyId: string) {
+  function handleDelete(storyId: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus cerita ini?')) return;
-
-    const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).from('stories').delete().eq('id', storyId);
-
-    if (error) {
-      console.error('Error deleting story:', error);
-      alert('Gagal menghapus cerita');
-    } else {
-      fetchStories();
-    }
+    deleteMutation.mutate(storyId);
   }
 
   const filteredStories = stories.filter(
@@ -157,7 +159,7 @@ export default function AdminStoriesPage() {
 
       {/* Stories Table */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        {loading ? (
+        {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-iark-red" />
           </div>
@@ -236,14 +238,14 @@ export default function AdminStoriesPage() {
                           {story.status === 'pending' && (
                             <>
                               <button
-                                onClick={() => updateStoryStatus(story.id, 'published')}
+                                onClick={() => handleUpdateStatus(story.id, 'published')}
                                 className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                                 title="Approve"
                               >
                                 <CheckCircle className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => updateStoryStatus(story.id, 'rejected')}
+                                onClick={() => handleUpdateStatus(story.id, 'rejected')}
                                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                 title="Reject"
                               >
@@ -252,7 +254,7 @@ export default function AdminStoriesPage() {
                             </>
                           )}
                           <button
-                            onClick={() => deleteStory(story.id)}
+                            onClick={() => handleDelete(story.id)}
                             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Hapus"
                           >

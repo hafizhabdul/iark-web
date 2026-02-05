@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { BatchTabs } from './BatchTabs';
 import { FunFactCard } from './FunFactCard';
 import { LeaderProfileCard } from './LeaderProfileCard';
-import { createClient } from '@/lib/supabase/client';
-import type { Batch, BatchLeader, Testimonial } from '@/lib/supabase/types';
+import { fetchBatchStoriesData } from '@/lib/queries/batches';
+import { queryKeys, staleTime } from '@/lib/queries';
 
 export interface BatchStoriesSectionProps {
   className?: string;
@@ -15,46 +16,18 @@ export interface BatchStoriesSectionProps {
 
 type MainTabType = 'angkatan' | 'tokoh';
 
-interface BatchWithLeader extends Batch {
-  batch_leaders: BatchLeader[];
-}
-
 export function BatchStoriesSection({ className = '' }: BatchStoriesSectionProps) {
   const [mainTab, setMainTab] = useState<MainTabType>('angkatan');
   const [activeAngkatan, setActiveAngkatan] = useState(1);
-  const [batches, setBatches] = useState<BatchWithLeader[]>([]);
-  const [tokohTernama, setTokohTernama] = useState<Testimonial[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchData() {
-      const supabase = createClient();
+  const { data, isLoading } = useQuery({
+    queryKey: queryKeys.batchesWithLeaders,
+    queryFn: fetchBatchStoriesData,
+    staleTime: staleTime.static,
+  });
 
-      const [batchesRes, tokohRes] = await Promise.all([
-        supabase
-          .from('batches')
-          .select('*, batch_leaders(*)')
-          .order('angkatan', { ascending: true }),
-        supabase
-          .from('testimonials')
-          .select('*')
-          .eq('type', 'tokoh_ternama')
-          .eq('is_active', true)
-          .order('order_index', { ascending: true }),
-      ]);
-
-      if (batchesRes.data) {
-        setBatches(batchesRes.data as BatchWithLeader[]);
-      }
-      if (tokohRes.data) {
-        setTokohTernama(tokohRes.data);
-      }
-
-      setLoading(false);
-    }
-
-    fetchData();
-  }, []);
+  const batches = data?.batches || [];
+  const tokohTernama = data?.tokohTernama || [];
 
   const currentBatch = batches.find((b) => b.angkatan === activeAngkatan) || batches[0];
   const currentLeader = currentBatch?.batch_leaders?.find((l) => l.is_ketua) || currentBatch?.batch_leaders?.[0];
@@ -64,7 +37,7 @@ export function BatchStoriesSection({ className = '' }: BatchStoriesSectionProps
     { label: 'Tokoh', value: 'tokoh' },
   ];
 
-  if (loading) {
+  if (isLoading) {
     return (
       <section className={`relative py-24 px-8 bg-white overflow-hidden ${className}`}>
         <div className="max-w-6xl mx-auto text-center">

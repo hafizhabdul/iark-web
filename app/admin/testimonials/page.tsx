@@ -1,7 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
+import { fetchTestimonialsAdmin } from '@/lib/queries/homepage';
+import { queryKeys, staleTime } from '@/lib/queries';
 import {
   Plus,
   Search,
@@ -36,13 +39,18 @@ const TYPE_LABELS: Record<Testimonial['type'], string> = {
 };
 
 export default function AdminTestimonialsPage() {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+
+  const { data: testimonials = [], isLoading } = useQuery<Testimonial[]>({
+    queryKey: queryKeys.testimonialsAdmin,
+    queryFn: () => fetchTestimonialsAdmin(),
+    staleTime: staleTime.semiDynamic,
+  });
+
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('');
   const [showModal, setShowModal] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
-  const [saving, setSaving] = useState(false);
 
   // Form state
   const [name, setName] = useState('');
@@ -54,25 +62,111 @@ export default function AdminTestimonialsPage() {
   const [isActive, setIsActive] = useState(true);
   const [uploading, setUploading] = useState(false);
 
-  useEffect(() => {
-    fetchTestimonials();
-  }, []);
+  const saveMutation = useMutation({
+    mutationFn: async (data: {
+      isEditing: boolean;
+      id?: string;
+      payload: {
+        name: string;
+        title: string;
+        angkatan: string | null;
+        photo: string | null;
+        quote: string;
+        type: Testimonial['type'];
+        is_active: boolean;
+        order_index?: number;
+      };
+    }) => {
+      const supabase = createClient();
+      if (data.isEditing && data.id) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
+          .from('testimonials')
+          .update(data.payload)
+          .eq('id', data.id);
+        if (error) throw error;
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any).from('testimonials').insert(data.payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.testimonialsAdmin });
+      closeModal();
+    },
+    onError: (error) => {
+      console.error('Error saving testimonial:', error);
+      alert('Gagal menyimpan testimonial');
+    },
+  });
 
-  async function fetchTestimonials() {
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from('testimonials')
-      .select('*')
-      .order('order_index', { ascending: true, nullsFirst: false })
-      .order('created_at', { ascending: false });
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const supabase = createClient();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any).from('testimonials').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.testimonialsAdmin });
+    },
+    onError: (error) => {
+      console.error('Error deleting testimonial:', error);
+      alert('Gagal menghapus testimonial');
+    },
+  });
 
-    if (error) {
-      console.error('Error fetching testimonials:', error);
-    } else {
-      setTestimonials(data || []);
-    }
-    setLoading(false);
-  }
+  const toggleStatusMutation = useMutation({
+    mutationFn: async ({ id, currentStatus }: { id: string; currentStatus: boolean }) => {
+      const supabase = createClient();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any)
+        .from('testimonials')
+        .update({ is_active: !currentStatus })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.testimonialsAdmin });
+    },
+    onError: (error) => {
+      console.error('Error toggling testimonial status:', error);
+    },
+  });
+
+  const reorderMutation = useMutation({
+    mutationFn: async ({
+      currentId,
+      swapId,
+      currentOrderIndex,
+      swapOrderIndex,
+    }: {
+      currentId: string;
+      swapId: string;
+      currentOrderIndex: number | null;
+      swapOrderIndex: number | null;
+    }) => {
+      const supabase = createClient();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: error1 } = await (supabase as any)
+        .from('testimonials')
+        .update({ order_index: swapOrderIndex })
+        .eq('id', currentId);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: error2 } = await (supabase as any)
+        .from('testimonials')
+        .update({ order_index: currentOrderIndex })
+        .eq('id', swapId);
+      if (error1 || error2) throw error1 || error2;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.testimonialsAdmin });
+    },
+    onError: (error) => {
+      console.error('Error reordering testimonials:', error);
+    },
+  });
 
   function openModal(testimonial?: Testimonial) {
     if (testimonial) {
@@ -138,98 +232,50 @@ export default function AdminTestimonialsPage() {
     setUploading(false);
   }
 
-  async function saveTestimonial() {
+  function saveTestimonial() {
     if (!name.trim() || !title.trim() || !quote.trim()) {
       alert('Name, title, dan quote wajib diisi');
       return;
     }
 
-    setSaving(true);
-    const supabase = createClient();
+    const payload = {
+      name: name.trim(),
+      title: title.trim(),
+      angkatan: angkatan.trim() || null,
+      photo: photo || null,
+      quote: quote.trim(),
+      type,
+      is_active: isActive,
+    };
 
     if (editingTestimonial) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
-        .from('testimonials')
-        .update({
-          name: name.trim(),
-          title: title.trim(),
-          angkatan: angkatan.trim() || null,
-          photo: photo || null,
-          quote: quote.trim(),
-          type,
-          is_active: isActive,
-        })
-        .eq('id', editingTestimonial.id);
-
-      if (error) {
-        console.error('Error updating testimonial:', error);
-        alert('Gagal mengupdate testimonial');
-      } else {
-        fetchTestimonials();
-        closeModal();
-      }
+      saveMutation.mutate({
+        isEditing: true,
+        id: editingTestimonial.id,
+        payload,
+      });
     } else {
       const maxOrderIndex = testimonials.reduce(
         (max, t) => Math.max(max, t.order_index || 0),
         0
       );
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from('testimonials').insert({
-        name: name.trim(),
-        title: title.trim(),
-        angkatan: angkatan.trim() || null,
-        photo: photo || null,
-        quote: quote.trim(),
-        type,
-        order_index: maxOrderIndex + 1,
-        is_active: isActive,
+      saveMutation.mutate({
+        isEditing: false,
+        payload: { ...payload, order_index: maxOrderIndex + 1 },
       });
-
-      if (error) {
-        console.error('Error creating testimonial:', error);
-        alert('Gagal membuat testimonial');
-      } else {
-        fetchTestimonials();
-        closeModal();
-      }
     }
-
-    setSaving(false);
   }
 
-  async function deleteTestimonial(id: string) {
+  function deleteTestimonial(id: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus testimonial ini?')) return;
-
-    const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).from('testimonials').delete().eq('id', id);
-
-    if (error) {
-      console.error('Error deleting testimonial:', error);
-      alert('Gagal menghapus testimonial');
-    } else {
-      fetchTestimonials();
-    }
+    deleteMutation.mutate(id);
   }
 
-  async function toggleTestimonialStatus(id: string, currentStatus: boolean) {
-    const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
-      .from('testimonials')
-      .update({ is_active: !currentStatus })
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error toggling testimonial status:', error);
-    } else {
-      fetchTestimonials();
-    }
+  function toggleTestimonialStatus(id: string, currentStatus: boolean) {
+    toggleStatusMutation.mutate({ id, currentStatus });
   }
 
-  async function moveTestimonial(id: string, direction: 'up' | 'down') {
+  function moveTestimonial(id: string, direction: 'up' | 'down') {
     const currentIndex = testimonials.findIndex((t) => t.id === id);
     if (currentIndex === -1) return;
 
@@ -239,25 +285,12 @@ export default function AdminTestimonialsPage() {
     const current = testimonials[currentIndex];
     const swap = testimonials[swapIndex];
 
-    const supabase = createClient();
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: error1 } = await (supabase as any)
-      .from('testimonials')
-      .update({ order_index: swap.order_index })
-      .eq('id', current.id);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: error2 } = await (supabase as any)
-      .from('testimonials')
-      .update({ order_index: current.order_index })
-      .eq('id', swap.id);
-
-    if (error1 || error2) {
-      console.error('Error reordering testimonials:', error1 || error2);
-    } else {
-      fetchTestimonials();
-    }
+    reorderMutation.mutate({
+      currentId: current.id,
+      swapId: swap.id,
+      currentOrderIndex: current.order_index,
+      swapOrderIndex: swap.order_index,
+    });
   }
 
   const filteredTestimonials = testimonials.filter((testimonial) => {
@@ -312,7 +345,7 @@ export default function AdminTestimonialsPage() {
 
       {/* Testimonials Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loading ? (
+        {isLoading ? (
           <div className="col-span-full flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-iark-red" />
           </div>
@@ -576,10 +609,10 @@ export default function AdminTestimonialsPage() {
               </button>
               <button
                 onClick={saveTestimonial}
-                disabled={saving}
+                disabled={saveMutation.isPending}
                 className="px-4 py-2 bg-iark-red text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
               >
-                {saving ? 'Menyimpan...' : 'Simpan'}
+                {saveMutation.isPending ? 'Menyimpan...' : 'Simpan'}
               </button>
             </div>
           </div>

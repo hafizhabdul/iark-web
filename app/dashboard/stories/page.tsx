@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/providers/AuthContext';
+import { fetchStoriesByAuthor } from '@/lib/queries/stories';
+import { queryKeys, staleTime } from '@/lib/queries';
 import {
   Plus,
   FileText,
@@ -35,47 +37,35 @@ const statusConfig = {
 
 export default function MyStoriesPage() {
   const { user } = useAuth();
-  const [stories, setStories] = useState<Story[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (user) {
-      fetchStories();
-    }
-  }, [user]);
+  const { data: stories = [], isLoading } = useQuery<Story[]>({
+    queryKey: queryKeys.storiesByAuthor(user?.id ?? ''),
+    queryFn: () => fetchStoriesByAuthor(user!.id) as Promise<Story[]>,
+    enabled: !!user?.id,
+    staleTime: staleTime.semiDynamic,
+  });
 
-  async function fetchStories() {
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from('stories')
-      .select('id, slug, title, excerpt, status, rejected_reason, created_at, published_at')
-      .eq('author_id', user?.id as string)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching stories:', error);
-    } else {
-      setStories(data || []);
-    }
-    setLoading(false);
-  }
-
-  async function deleteStory(storyId: string) {
-    if (!confirm('Apakah Anda yakin ingin menghapus cerita ini?')) return;
-
-    const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).from('stories').delete().eq('id', storyId);
-
-    if (error) {
-      console.error('Error deleting story:', error);
+  const deleteMutation = useMutation({
+    mutationFn: async (storyId: string) => {
+      const supabase = createClient();
+      const { error } = await supabase.from('stories').delete().eq('id', storyId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.storiesByAuthor(user?.id ?? '') });
+    },
+    onError: () => {
       alert('Gagal menghapus cerita');
-    } else {
-      fetchStories();
-    }
+    },
+  });
+
+  function handleDelete(storyId: string) {
+    if (!confirm('Apakah Anda yakin ingin menghapus cerita ini?')) return;
+    deleteMutation.mutate(storyId);
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-iark-red" />
@@ -191,7 +181,7 @@ export default function MyStoriesPage() {
                       </Link>
                     )}
                     <button
-                      onClick={() => deleteStory(story.id)}
+                      onClick={() => handleDelete(story.id)}
                       className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       title="Hapus"
                     >

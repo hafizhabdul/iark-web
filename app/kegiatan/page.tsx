@@ -1,52 +1,34 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Header, Footer } from '@/components/layout';
 import { ActivityCard, Activity } from '@/components/features/activities';
 import { Search, Calendar, Loader2 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { fetchActivities } from '@/lib/queries/homepage';
+import { queryKeys, staleTime } from '@/lib/queries';
 
 export default function KegiatanPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
-    const [activities, setActivities] = useState<Activity[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [categories, setCategories] = useState<string[]>([]);
 
-    useEffect(() => {
-        async function fetchActivities() {
-            setLoading(true);
-            const supabase = createClient();
+    const { data: activities = [], isLoading } = useQuery({
+        queryKey: queryKeys.activities,
+        queryFn: fetchActivities,
+        staleTime: staleTime.semiDynamic,
+    });
 
-            const { data, error } = await supabase
-                .from('activities')
-                .select('*')
-                .eq('is_active', true)
-                .order('date', { ascending: false });
-
-            if (error) {
-                console.error('Error fetching activities:', error);
-                setLoading(false);
-                return;
-            }
-
-            setActivities(data || []);
-
-            // Extract unique categories
-            const uniqueCategories = Array.from(
-                new Set(
-                    (data || [])
-                        .map((e) => e.category)
-                        .filter((c): c is string => c !== null)
-                )
-            );
-            setCategories(uniqueCategories);
-            setLoading(false);
-        }
-
-        fetchActivities();
-    }, []);
+    // Extract unique categories from activities
+    const categories = useMemo(() => {
+        return Array.from(
+            new Set(
+                activities
+                    .map((e) => e.category)
+                    .filter((c): c is string => c !== null)
+            )
+        );
+    }, [activities]);
 
     // Filter activities based on search and category
     const filteredActivities = activities.filter((activity) => {
@@ -193,7 +175,7 @@ export default function KegiatanPage() {
                         </div>
 
                         {/* Loading State */}
-                        {loading ? (
+                        {isLoading ? (
                             <div className="flex items-center justify-center py-16">
                                 <Loader2 className="w-8 h-8 text-iark-red animate-spin" />
                                 <span className="ml-3 text-gray-600">Memuat kegiatan...</span>

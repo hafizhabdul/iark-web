@@ -1,52 +1,38 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { AlumniCard, Alumni } from '@/components/features/dashboard/AlumniCard';
 import { CustomDropdown } from '@/components/ui/CustomDropdown';
 import { motion } from 'framer-motion';
-import { createClient } from '@/lib/supabase/client';
+import { fetchAlumni } from '@/lib/queries/dashboard';
+import { queryKeys, staleTime } from '@/lib/queries';
 import type { Profile } from '@/lib/supabase/types';
 
 export default function AlumniDirectoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBatch, setSelectedBatch] = useState('');
-  const [alumni, setAlumni] = useState<Alumni[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchAlumni() {
-      setLoading(true);
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, name, email, angkatan, photo, job_title, company, location, linkedin, instagram');
+  const { data: profilesData = [], isLoading } = useQuery({
+    queryKey: queryKeys.alumni,
+    queryFn: fetchAlumni,
+    staleTime: staleTime.semiDynamic,
+  });
 
-      if (error) {
-        console.error('Error fetching alumni:', error);
-        setLoading(false);
-        return;
-      }
-
-      const profiles = (data || []) as Profile[];
-      const mapped: Alumni[] = profiles.map((profile) => ({
-        id: profile.id,
-        name: profile.name || '',
-        email: profile.email || '',
-        batch: profile.angkatan ? `RK Angkatan ${profile.angkatan}` : '',
-        field: profile.job_title || '',
-        location: profile.location || '',
-        avatar: profile.photo || undefined,
-        currentRole: profile.job_title || undefined,
-        company: profile.company || undefined,
-        linkedin: profile.linkedin || undefined,
-      }));
-
-      setAlumni(mapped);
-      setLoading(false);
-    }
-
-    fetchAlumni();
-  }, []);
+  const alumni: Alumni[] = useMemo(() => {
+    return (profilesData as Profile[]).map((profile) => ({
+      id: profile.id,
+      name: profile.name || '',
+      email: profile.email || '',
+      batch: profile.angkatan ? `RK Angkatan ${profile.angkatan}` : '',
+      field: profile.job_title || '',
+      location: profile.location || '',
+      avatar: profile.photo || undefined,
+      currentRole: profile.job_title || undefined,
+      company: profile.company || undefined,
+      linkedin: profile.linkedin || undefined,
+    }));
+  }, [profilesData]);
 
   const filteredAlumni = useMemo(() => {
     return alumni.filter((a) => {
@@ -142,7 +128,7 @@ export default function AlumniDirectoryPage() {
       </div>
 
       {/* Loading State */}
-      {loading ? (
+      {isLoading ? (
         <div className="flex items-center justify-center py-16">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-iark-red border-t-transparent"></div>
         </div>

@@ -1,95 +1,51 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { EventCard, Event } from '@/components/features/dashboard/EventCard';
 import { CustomDropdown } from '@/components/ui/CustomDropdown';
 import { Search, Calendar, MapPin, Users, Loader2 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
-
-interface SupabaseEvent {
-  id: string;
-  title: string;
-  description: string | null;
-  date: string;
-  time: string | null;
-  end_date: string | null;
-  location: string | null;
-  category: string | null;
-  image_url: string | null;
-  is_live: boolean;
-  is_featured: boolean;
-  capacity: number | null;
-  registration_url: string | null;
-  organizer_id: string | null;
-}
+import { fetchEventsWithRegistrations } from '@/lib/queries/events';
+import { queryKeys, staleTime } from '@/lib/queries';
 
 export default function EventsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState<string[]>([]);
 
-  useEffect(() => {
-    async function fetchEvents() {
-      setLoading(true);
-      const supabase = createClient();
+  const { data: rawEvents = [], isLoading: loading } = useQuery({
+    queryKey: queryKeys.eventsWithRegistrations,
+    queryFn: fetchEventsWithRegistrations,
+    staleTime: staleTime.semiDynamic,
+  });
 
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .order('date', { ascending: true });
+  const events: Event[] = useMemo(() => {
+    return rawEvents.map((event) => ({
+      id: event.id,
+      title: event.title,
+      description: event.description || '',
+      date: formatDate(event.date),
+      time: event.time || '',
+      location: event.location || 'TBD',
+      category: event.category || 'Umum',
+      imageUrl: event.image_url || '',
+      isLive: event.is_live,
+      capacity: event.capacity || 0,
+      registered: event.registration_count,
+      organizer: 'IARK',
+    }));
+  }, [rawEvents]);
 
-      if (error) {
-        console.error('Error fetching events:', error);
-        setLoading(false);
-        return;
-      }
-
-      const mappedEvents: Event[] = (data as SupabaseEvent[]).map((event) => ({
-        id: event.id,
-        title: event.title,
-        description: event.description || '',
-        date: formatDate(event.date),
-        time: event.time || '',
-        location: event.location || 'TBD',
-        category: event.category || 'Umum',
-        imageUrl: event.image_url || '',
-        isLive: event.is_live,
-        capacity: event.capacity || 0,
-        registered: 0, // Will need event_registrations count
-        organizer: 'IARK',
-      }));
-
-      // Fetch registration counts for each event
-      const eventsWithRegistrations = await Promise.all(
-        mappedEvents.map(async (event) => {
-          const { count } = await supabase
-            .from('event_registrations')
-            .select('*', { count: 'exact', head: true })
-            .eq('event_id', event.id);
-          return { ...event, registered: count || 0 };
-        })
-      );
-
-      setEvents(eventsWithRegistrations);
-
-      // Extract unique categories
-      const uniqueCategories = Array.from(
-        new Set(
-          (data as SupabaseEvent[])
-            .map((e) => e.category)
-            .filter((c): c is string => c !== null)
-        )
-      );
-      setCategories(uniqueCategories);
-      setLoading(false);
-    }
-
-    fetchEvents();
-  }, []);
+  const categories = useMemo(() => {
+    return Array.from(
+      new Set(
+        rawEvents
+          .map((e) => e.category)
+          .filter((c): c is string => c !== null)
+      )
+    );
+  }, [rawEvents]);
 
   function formatDate(dateString: string): string {
     const date = new Date(dateString);

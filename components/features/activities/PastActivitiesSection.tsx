@@ -24,15 +24,15 @@ const getActivities = unstable_cache(
 export interface Activity {
   id: string;
   category: string;
-  author: string;
+  author: string | null;
   title: string;
-  subtitle: string;
-  date: string;
-  read_time: string;
+  subtitle: string | null;
+  date: string | null;
+  read_time: string | null;
   likes: number;
   comments: number;
-  image_url: string;
-  link: string;
+  image_url: string | null;
+  link: string | null;
   is_active: boolean;
 }
 

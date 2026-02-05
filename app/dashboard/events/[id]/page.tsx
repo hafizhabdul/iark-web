@@ -1,69 +1,28 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Event } from '@/components/features/dashboard/EventCard';
 import { ArrowLeft, Calendar, Clock, MapPin, Users, Share2, Bookmark, Info, Loader2 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { fetchEventById } from '@/lib/queries/events';
+import { queryKeys, staleTime } from '@/lib/queries';
 import DOMPurify from 'isomorphic-dompurify';
-
-interface SupabaseEvent {
-  id: string;
-  title: string;
-  slug: string;
-  description: string | null;
-  content: string | null;
-  date: string;
-  time: string | null;
-  end_date: string | null;
-  location: string | null;
-  category: string | null;
-  image_url: string | null;
-  is_live: boolean;
-  is_featured: boolean;
-  capacity: number | null;
-  organizer_id: string | null;
-  registration_url: string | null;
-}
 
 export default function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
   const eventId = params.id as string;
 
-  const [event, setEvent] = useState<Event | null>(null);
-  const [content, setContent] = useState<string | null>(null);
-  const [registrationUrl, setRegistrationUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: eventData, isLoading } = useQuery({
+    queryKey: queryKeys.eventDetail(eventId),
+    queryFn: () => fetchEventById(eventId),
+    staleTime: staleTime.semiDynamic,
+  });
 
-  useEffect(() => {
-    async function fetchEvent() {
-      setLoading(true);
-      const supabase = createClient();
-
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('id', eventId)
-        .single();
-
-      if (error || !data) {
-        console.error('Error fetching event:', error);
-        setLoading(false);
-        return;
-      }
-
-      const eventData = data as SupabaseEvent;
-
-      // Fetch registration count
-      const { count } = await supabase
-        .from('event_registrations')
-        .select('*', { count: 'exact', head: true })
-        .eq('event_id', eventId);
-
-      const mappedEvent: Event = {
+  const event: Event | null = eventData
+    ? {
         id: eventData.id,
         title: eventData.title,
         description: eventData.description || '',
@@ -74,18 +33,13 @@ export default function EventDetailPage() {
         imageUrl: eventData.image_url || '',
         isLive: eventData.is_live,
         capacity: eventData.capacity || 0,
-        registered: count || 0,
+        registered: eventData.registration_count,
         organizer: 'IARK',
-      };
+      }
+    : null;
 
-      setEvent(mappedEvent);
-      setContent(eventData.content);
-      setRegistrationUrl(eventData.registration_url);
-      setLoading(false);
-    }
-
-    fetchEvent();
-  }, [eventId]);
+  const content = eventData?.content ?? null;
+  const registrationUrl = eventData?.registration_url ?? null;
 
   function formatDate(dateString: string): string {
     const date = new Date(dateString);
@@ -104,7 +58,7 @@ export default function EventDetailPage() {
     return `${dayName}, ${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`;
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <Loader2 className="w-8 h-8 text-iark-red animate-spin" />

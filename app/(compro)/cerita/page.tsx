@@ -1,4 +1,3 @@
-import { Header, Footer } from '@/components/layout';
 import { CeritaSection } from '@/components/features/cerita';
 import { fetchPublishedStories } from '@/lib/queries/stories';
 
@@ -6,9 +5,8 @@ export default async function CeritaPage() {
   const stories = await fetchPublishedStories(20);
 
   return (
-    <div className="min-h-screen">
-      <Header />
-      {/* ... Hero Banner code ... */}
+    <>
+      {/* Hero Banner */}
       <section className="relative bg-gradient-to-br from-iark-red to-iark-blue text-white py-20 px-8 overflow-hidden">
         {/* Floating decorative elements */}
         <div className="absolute top-10 right-20 w-16 h-16 bg-iark-yellow rounded-full opacity-50 animate-float" />
@@ -29,8 +27,6 @@ export default async function CeritaPage() {
 
       {/* Main Content */}
       <CeritaSection initialData={stories} />
-
-      <Footer />
-    </div>
+    </>
   );
 }

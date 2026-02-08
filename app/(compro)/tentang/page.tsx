@@ -1,11 +1,9 @@
-import { Header, Footer } from '@/components/layout';
-import { BidangSection } from '@/components/features/bidang';
+import { AboutSection } from '@/components/features/about';
+import { PengurusSection } from '@/components/features/pengurus';
 
-export default function BidangPage() {
+export default function TentangPage() {
   return (
-    <div className="min-h-screen">
-      <Header />
-
+    <>
       {/* Hero Banner */}
       <section className="relative bg-gradient-to-br from-iark-red to-iark-blue text-white py-20 px-8 overflow-hidden">
         {/* Floating decorative elements */}
@@ -15,18 +13,19 @@ export default function BidangPage() {
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Bidang IARK
+            Tentang IARK
           </h1>
           <p className="text-xl md:text-2xl leading-relaxed">
-            12 Bidang yang Berdedikasi Melayani Alumni dan Mengembangkan Kepemimpinan Berintegritas
+            Ikatan Alumni Rumah Kepemimpinan - Wadah Kolaborasi untuk Indonesia Lebih Baik
           </p>
         </div>
       </section>
 
-      {/* Bidang Section */}
-      <BidangSection />
+      {/* About Section */}
+      <AboutSection showSeeMore={false} />
 
-      <Footer />
-    </div>
+      {/* Pengurus Section */}
+      <PengurusSection />
+    </>
   );
 }

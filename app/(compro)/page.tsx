@@ -1,4 +1,3 @@
-import { Header, Footer } from '@/components/layout';
 import { HeroSection } from '@/components/features/hero';
 import { AboutSection } from '@/components/features/about';
 import { BidangPreviewSection } from '@/components/features/bidang';
@@ -19,8 +18,7 @@ export default async function Home() {
   ]);
 
   return (
-    <div className="min-h-screen">
-      <Header />
+    <>
       <HeroSection initialData={homepageData.heroSlides} />
       <AboutSection />
       <BidangPreviewSection initialData={homepageData.clusters} />
@@ -30,8 +28,7 @@ export default async function Home() {
       <PastActivitiesSection initialData={homepageData.recentActivities} />
       <AsramaGallerySection initialData={homepageData.dormitories} />
       <DonasiSection />
-      <Footer />
       <StickyDonationCTA />
-    </div>
+    </>
   );
 }

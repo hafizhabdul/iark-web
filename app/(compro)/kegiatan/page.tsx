@@ -3,8 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Header, Footer } from '@/components/layout';
-import { ActivityCard, Activity } from '@/components/features/activities';
+import { ActivityCard } from '@/components/features/activities';
 import { Search, Calendar, Loader2 } from 'lucide-react';
 import { fetchActivities } from '@/lib/queries/homepage';
 import { queryKeys, staleTime } from '@/lib/queries';
@@ -41,10 +40,7 @@ export default function KegiatanPage() {
     });
 
     return (
-        <div className="min-h-screen bg-white">
-            <Header />
-
-            <main className="relative overflow-hidden">
+        <main className="relative overflow-hidden bg-white">
                 {/* Background decorations */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-iark-red/5 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-iark-blue/5 rounded-full blur-3xl pointer-events-none" />
@@ -197,9 +193,6 @@ export default function KegiatanPage() {
                         )}
                     </div>
                 </div>
-            </main>
-
-            <Footer />
-        </div>
+        </main>
     );
 }

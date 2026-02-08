@@ -1,4 +1,3 @@
-import { Header, Footer } from '@/components/layout';
 import { StoryDetail } from '@/components/features/cerita';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -86,11 +85,5 @@ export default async function StoryDetailPage({ params }: { params: Promise<{ id
     photo: author?.photo || '/images/default-avatar.png',
   };
 
-  return (
-    <div className="min-h-screen bg-white">
-      <Header />
-      <StoryDetail story={story} />
-      <Footer />
-    </div>
-  );
+  return <StoryDetail story={story} />;
 }

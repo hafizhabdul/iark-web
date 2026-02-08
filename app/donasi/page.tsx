@@ -1,11 +1,8 @@
-import { Header, Footer } from '@/components/layout';
 import { DonasiPageSection } from '@/components/features/donasi';
 
 export default function DonasiPage() {
   return (
-    <div className="min-h-screen">
-      <Header />
-
+    <div>
       {/* Hero Banner */}
       <section className="relative bg-gradient-to-br from-iark-red to-iark-blue text-white py-20 px-8 overflow-hidden">
         {/* Floating decorative elements */}
@@ -27,8 +24,6 @@ export default function DonasiPage() {
 
       {/* Main Content */}
       <DonasiPageSection />
-
-      <Footer />
     </div>
   );
 }

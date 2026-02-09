@@ -8,6 +8,8 @@ import {
   Clock,
   TrendingUp,
   Eye,
+  Heart,
+  UserCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 import { fetchDashboardStats, fetchPendingStories } from '@/lib/queries/dashboard';
@@ -19,6 +21,9 @@ interface DashboardStats {
   total_users: number;
   total_events: number;
   upcoming_events: number;
+  total_registrations: number;
+  total_donations: number;
+  total_donations_amount: number;
 }
 
 interface PendingStory {
@@ -78,6 +83,25 @@ export default function AdminDashboard() {
       icon: Calendar,
       color: 'bg-purple-500',
       href: '/admin/events',
+    },
+    {
+      label: 'Pendaftar Event',
+      value: stats?.total_registrations ?? 0,
+      icon: UserCheck,
+      color: 'bg-indigo-500',
+      href: '/admin/events',
+    },
+    {
+      label: 'Total Donasi',
+      value: new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(stats?.total_donations_amount ?? 0),
+      icon: Heart,
+      color: 'bg-pink-500',
+      href: '/admin/donations',
     },
   ];
 

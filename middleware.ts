@@ -4,6 +4,16 @@ import { updateSession } from '@/lib/supabase/middleware';
 export async function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
   const url = request.nextUrl.clone();
+  const { pathname } = url;
+
+  // Skip internal Next.js paths (static files, API internals, etc.)
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.includes('.')
+  ) {
+    return await updateSession(request);
+  }
 
   // Subdomain detection
   const isEventSubdomain = host.startsWith('event.');
@@ -36,17 +46,27 @@ export async function middleware(request: NextRequest) {
   }
 
   // Rewrite: event.ia-rk.com/* → /event/*
+  // Skip in development - handled by next.config.ts rewrites
   if (isEventSubdomain && !url.pathname.startsWith('/event')) {
-    url.pathname = `/event${url.pathname}`;
-    const response = NextResponse.rewrite(url);
-    return response;
+    // In production, middleware handles the rewrite
+    if (process.env.NODE_ENV === 'production') {
+      url.pathname = `/event${url.pathname}`;
+      return NextResponse.rewrite(url);
+    }
+    // In development, let next.config.ts rewrites handle it
+    return await updateSession(request);
   }
 
   // Rewrite: donasi.ia-rk.com/* → /donasi/*
+  // Skip in development - handled by next.config.ts rewrites
   if (isDonasiSubdomain && !url.pathname.startsWith('/donasi')) {
-    url.pathname = `/donasi${url.pathname}`;
-    const response = NextResponse.rewrite(url);
-    return response;
+    // In production, middleware handles the rewrite
+    if (process.env.NODE_ENV === 'production') {
+      url.pathname = `/donasi${url.pathname}`;
+      return NextResponse.rewrite(url);
+    }
+    // In development, let next.config.ts rewrites handle it
+    return await updateSession(request);
   }
 
   // Default: main domain + session update

@@ -137,7 +137,7 @@ export function BatchStoriesSection({
                     <FunFactCard
                       funFact={currentBatch.fun_fact || ''}
                       angkatan={currentBatch.angkatan}
-                      year={currentBatch.year}
+                      year={currentBatch.year?.toString() || ''}
                     />
                     {currentLeader && (
                       <LeaderProfileCard

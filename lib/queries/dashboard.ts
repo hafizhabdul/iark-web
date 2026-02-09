@@ -6,6 +6,9 @@ export interface DashboardStats {
   total_users: number;
   total_events: number;
   upcoming_events: number;
+  total_registrations: number;
+  total_donations: number;
+  total_donations_amount: number;
 }
 
 // Fetch dashboard stats using RPC (single query)
@@ -26,13 +29,20 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 async function fetchDashboardStatsFallback(): Promise<DashboardStats> {
   const supabase = createClient();
   
-  const [storiesRes, pendingRes, usersRes, eventsRes, upcomingRes] = await Promise.all([
-    supabase.from('stories').select('id', { count: 'exact', head: true }).eq('status', 'published'),
-    supabase.from('stories').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('profiles').select('id', { count: 'exact', head: true }),
-    supabase.from('events').select('id', { count: 'exact', head: true }),
-    supabase.from('events').select('id', { count: 'exact', head: true }).gte('date', new Date().toISOString().split('T')[0]),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  
+  const [storiesRes, pendingRes, usersRes, eventsRes, upcomingRes, registrationsRes, donationsRes] = await Promise.all([
+    client.from('stories').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+    client.from('stories').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    client.from('profiles').select('id', { count: 'exact', head: true }),
+    client.from('events').select('id', { count: 'exact', head: true }),
+    client.from('events').select('id', { count: 'exact', head: true }).gte('date', new Date().toISOString().split('T')[0]),
+    client.from('event_registrations').select('id', { count: 'exact', head: true }),
+    client.from('donations').select('amount').eq('payment_status', 'paid'),
   ]);
+  
+  const donationsAmount = (donationsRes.data || []).reduce((sum: number, d: { amount: number }) => sum + d.amount, 0);
   
   return {
     total_stories: storiesRes.count || 0,
@@ -40,6 +50,9 @@ async function fetchDashboardStatsFallback(): Promise<DashboardStats> {
     total_users: usersRes.count || 0,
     total_events: eventsRes.count || 0,
     upcoming_events: upcomingRes.count || 0,
+    total_registrations: registrationsRes.count || 0,
+    total_donations: donationsRes.data?.length || 0,
+    total_donations_amount: donationsAmount,
   };
 }
 

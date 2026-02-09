@@ -26,17 +26,17 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return {
       beforeFiles: [
-        // event.localhost:3000 -> /event/*
+        // event.localhost:3000 -> /event/* (exclude static paths)
         {
-          source: '/:path*',
+          source: '/:path((?!_next|api|favicon|logos|images).*)',
           has: [{ type: 'host', value: 'event.localhost' }],
-          destination: '/event/:path*',
+          destination: '/event/:path',
         },
-        // donasi.localhost:3000 -> /donasi/*
+        // donasi.localhost:3000 -> /donasi/* (exclude static paths)
         {
-          source: '/:path*',
+          source: '/:path((?!_next|api|favicon|logos|images).*)',
           has: [{ type: 'host', value: 'donasi.localhost' }],
-          destination: '/donasi/:path*',
+          destination: '/donasi/:path',
         },
       ],
     };

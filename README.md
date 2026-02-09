@@ -2,118 +2,109 @@
 
 Official website for IARK (Ikatan Alumni Rumah Kepemimpinan), a collaborative platform for alumni of Rumah Kepemimpinan to foster leadership, collaboration, and positive impact across Indonesia.
 
-🌐 **Live Demo**: [https://ia-rk.com](https://ia-rk.com)
+🌐 **Live**: [https://ia-rk.com](https://ia-rk.com)
 
 ---
 
 ## 📋 Project Overview
 
-**IARK** is a web platform designed to connect and empower alumni of Rumah Kepemimpinan (Leadership House), creating a vibrant community focused on:
-- **Networking & Collaboration**: Connecting alumni across different batches and fields
-- **Knowledge Sharing**: Sharing success stories and inspirational journeys
-- **Event Management**: Organizing workshops, seminars, and community gatherings
-- **Community Building**: Fostering long-term relationships and social impact initiatives
+**IARK** is a multi-portal web platform connecting alumni of Rumah Kepemimpinan through:
+- **Company Profile**: Public-facing website with stories, testimonials, and information
+- **Event Portal**: Event discovery, registration, and ticket management
+- **Donation Portal**: Secure donation processing with payment gateway integration
+- **Admin CMS**: Content management for stories, events, and donations
 
 ---
 
-## 🎯 Project Status
+## 🏗️ Architecture
 
-**Current Stage**: Demo/MVP Phase
+The platform uses a **subdomain-based architecture** to separate concerns:
 
-This is currently a **demonstration website** showcasing the core features and design direction. All data (alumni profiles, events, stories) are **mock data** for demonstration purposes.
+| Domain | Purpose | Route Group |
+|--------|---------|-------------|
+| `ia-rk.com` | Company Profile | `app/(compro)` |
+| `event.ia-rk.com` | Event Portal | `app/event` |
+| `donasi.ia-rk.com` | Donation Portal | `app/donasi` |
+| `ia-rk.com/admin` | CMS Dashboard | `app/admin` |
 
-### ✅ What's Implemented
+### Subdomain Routing
 
-#### Public Pages
-- **Landing Page** (`/`)
-  - Hero section with animated elements
-  - About IARK section
-  - Success stories carousel
-  - Testimonials from alumni
-  - Interactive donation section
-  - Footer with social media links
-
-- **Stories Page** (`/cerita`)
-  - Featured story showcase
-  - Category filtering (Karir, Pengabdian, Akademik, Kepemimpinan)
-  - Story grid with search functionality
-  - Individual story detail pages (`/cerita/[id]`)
-
-#### Dashboard (Authentication Required)
-- **Sign In/Sign Up** (`/masuk`, `/daftar`)
-  - Mock authentication (any credentials work)
-  - Email/password and Google sign-in UI
-
-- **Alumni Directory** (`/dashboard/alumni`)
-  - Searchable alumni database
-  - Filter by batch (angkatan)
-  - Custom dropdown components
-  - Detailed alumni profiles (`/dashboard/alumni/[id]`)
-
-- **Events Page** (`/dashboard/events`)
-  - Hero section with search
-  - Event listing with filters
-  - Category and date filtering
-  - Event detail pages (`/dashboard/events/[id]`)
-  - Registration interface (UI only)
-
-### 🚧 What's Not Yet Implemented
-
-- **Backend Integration**: No database, API, or real authentication
-- **Real User Management**: All authentication is mock/demo
-- **Payment Processing**: Donation form is UI only
-- **Event Registration**: Registration buttons are non-functional
-- **Admin Dashboard**: No content management system
-- **Email Notifications**: No email system integrated
-- **Profile Editing**: Users cannot edit their profiles
-- **Search Functionality**: Limited to frontend filtering
+Middleware (`middleware.ts`) handles subdomain detection and rewrites:
+- Requests to `event.*` → `/event/*` routes
+- Requests to `donasi.*` → `/donasi/*` routes
+- Main domain serves company profile from `/(compro)` route group
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
-- **Language**: TypeScript
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **State Management**: React Context API
-- **Package Manager**: pnpm
+| Category | Technology |
+|----------|------------|
+| **Framework** | Next.js 16 (App Router) |
+| **Language** | TypeScript |
+| **Styling** | Tailwind CSS 4 |
+| **Database** | Supabase (PostgreSQL) |
+| **Auth** | Supabase Auth |
+| **Data Fetching** | TanStack Query |
+| **Payment Gateway** | Pakasir |
+| **Email** | Nodemailer + Sumopod SMTP |
+| **Bot Protection** | Cloudflare Turnstile |
+| **Animations** | Framer Motion |
+| **Icons** | Lucide React |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
-- pnpm (recommended) or npm/yarn
+- pnpm (recommended)
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/iark-web.git
-   cd iark-web
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/hafizhabdul/iark-web.git
+cd iark-web
 
-2. **Install dependencies**
-   ```bash
-   pnpm install
-   ```
+# Install dependencies
+pnpm install
 
-3. **Run the development server**
-   ```bash
-   pnpm dev
-   ```
+# Copy environment variables
+cp .env.example .env.local
 
-4. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+# Run development server
+pnpm dev
+```
 
-### Build for Production
+### Local Subdomain Testing
+
+To test subdomains locally, add these entries to your hosts file:
+
+**Linux/macOS**: `/etc/hosts`
+**Windows**: `C:\Windows\System32\drivers\etc\hosts`
+
+```
+127.0.0.1 localhost
+127.0.0.1 event.localhost
+127.0.0.1 donasi.localhost
+```
+
+Then access:
+- Main site: http://localhost:3000
+- Event portal: http://event.localhost:3000
+- Donation portal: http://donasi.localhost:3000
+
+### Available Commands
 
 ```bash
-pnpm build
-pnpm start
+pnpm dev          # Start development server
+pnpm build        # Build for production
+pnpm start        # Start production server
+pnpm lint         # Run ESLint
+pnpm test         # Run unit tests (Vitest)
+pnpm test:e2e     # Run E2E tests (Playwright)
 ```
 
 ---
@@ -122,169 +113,148 @@ pnpm start
 
 ```
 iark-web/
-├── app/                          # Next.js App Router pages
-│   ├── page.tsx                  # Landing page
-│   ├── cerita/                   # Stories section
-│   │   ├── page.tsx             # Stories listing
-│   │   └── [id]/page.tsx        # Story detail
-│   ├── masuk/                    # Sign in
-│   ├── daftar/                   # Sign up
-│   └── dashboard/                # Protected dashboard
-│       ├── alumni/              # Alumni directory
-│       │   ├── page.tsx         # Alumni listing
-│       │   └── [id]/page.tsx    # Alumni profile
-│       └── events/              # Events management
-│           ├── page.tsx         # Events listing
-│           └── [id]/page.tsx    # Event detail
+├── app/
+│   ├── (compro)/              # Company Profile (ia-rk.com)
+│   │   ├── page.tsx           # Landing page
+│   │   ├── cerita/            # Stories section
+│   │   ├── masuk/             # Sign in
+│   │   └── daftar/            # Sign up
+│   │
+│   ├── event/                 # Event Portal (event.ia-rk.com)
+│   │   ├── page.tsx           # Event listing
+│   │   ├── [slug]/            # Event detail & registration
+│   │   └── tiket/             # Ticket management
+│   │
+│   ├── donasi/                # Donation Portal (donasi.ia-rk.com)
+│   │   ├── page.tsx           # Donation campaigns
+│   │   ├── [slug]/            # Campaign detail
+│   │   └── riwayat/           # Donation history
+│   │
+│   ├── admin/                 # CMS Dashboard (ia-rk.com/admin)
+│   │   ├── page.tsx           # Dashboard overview
+│   │   ├── stories/           # Story management
+│   │   ├── events/            # Event management
+│   │   └── donations/         # Donation management
+│   │
+│   ├── api/                   # API routes
+│   │   ├── auth/              # Auth callbacks
+│   │   ├── payment/           # Payment webhooks
+│   │   └── cron/              # Scheduled tasks
+│   │
+│   └── auth/                  # Auth pages
 │
-├── components/                   # React components
-│   ├── layout/                  # Layout components
-│   │   ├── Header.tsx           # Navigation header
-│   │   ├── Footer.tsx           # Site footer
-│   │   └── LogoCard.tsx         # Logo component
-│   ├── features/                # Feature-specific components
-│   │   ├── auth/               # Authentication forms
-│   │   ├── cerita/             # Story components
-│   │   ├── dashboard/          # Dashboard components
-│   │   ├── donation/           # Donation section
-│   │   └── testimoni/          # Testimonial section
-│   ├── providers/               # Context providers
-│   │   ├── AuthContext.tsx     # Auth state management
-│   │   └── TransitionContext.tsx # Page transitions
-│   ├── guards/                  # Route guards
-│   │   └── ProtectedRoute.tsx  # Auth protection
-│   └── ui/                      # Reusable UI components
-│       └── CustomDropdown.tsx   # Custom dropdown
+├── components/
+│   ├── ui/                    # shadcn/ui components
+│   ├── layout/                # Header, Footer, etc.
+│   └── features/              # Feature-specific components
 │
-├── public/                       # Static assets
-│   └── logos/                   # IARK logos
+├── lib/
+│   ├── supabase/              # Supabase client config
+│   ├── pakasir/               # Payment gateway utils
+│   └── utils.ts               # Shared utilities
 │
-└── styles/                       # Global styles
-    └── globals.css              # Tailwind + custom CSS
+├── __tests__/                 # Unit tests (Vitest)
+├── e2e/                       # E2E tests (Playwright)
+└── public/                    # Static assets
 ```
 
 ---
 
-## 🎨 Design System
+## 🔐 Environment Variables
 
-### Color Palette
-- **Primary Red** (`iark-red`): `#E21C24` - Main brand color
-- **Blue** (`iark-blue`): `#1E40AF` - Secondary accent
-- **Yellow** (`iark-yellow`): `#FBBF24` - Highlights
+Create a `.env.local` file with the following variables:
 
-### Typography
-- **Primary Font**: Geist Sans
-- **Monospace**: Geist Mono
+### Supabase
 
-### Animation Principles
-- **Timing**: `easeOut` transitions (no spring bounce)
-- **Duration**: 0.2-0.5s for most interactions
-- **Hover Effects**: Subtle scale (1.02-1.05) and elevation changes
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
 
----
+### Cloudflare Turnstile
 
-## 🤝 Contributing
+```env
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=your-site-key
+TURNSTILE_SECRET_KEY=your-secret-key
+```
 
-We welcome contributions! Here's how you can help:
+### Pakasir Payment Gateway
 
-### For Developers
+```env
+NEXT_PUBLIC_PAKASIR_API_URL=https://api.pakasir.com
+PAKASIR_API_KEY=your-api-key
+PAKASIR_WEBHOOK_SECRET=your-webhook-secret
+```
 
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-3. **Make your changes**
-   - Follow the existing code style
-   - Use TypeScript for type safety
-   - Keep components small and focused
-   - Add comments for complex logic
-4. **Test your changes**
-   ```bash
-   pnpm build
-   ```
-5. **Commit with descriptive messages**
-   ```bash
-   git commit -m "feat: add new feature"
-   ```
-6. **Push and create a Pull Request**
+### SMTP (Nodemailer + Sumopod)
 
-### Contribution Ideas
+```env
+SMTP_HOST=smtp.sumopod.com
+SMTP_PORT=587
+SMTP_USER=your-smtp-user
+SMTP_PASS=your-smtp-password
+SMTP_FROM_EMAIL=noreply@ia-rk.com
+SMTP_FROM_NAME=IARK
+```
 
-**High Priority:**
-- Backend integration (Firebase, Supabase, or custom API)
-- Real authentication system
-- Database schema design
-- Admin CMS for content management
+### Cron Jobs
 
-**Medium Priority:**
-- Payment gateway integration
-- Email notification system
-- Image upload and optimization
-- SEO improvements
-
-**Nice to Have:**
-- Mobile app (React Native)
-- Newsletter system
-- Event calendar integration
-- Analytics dashboard
-
-### Code Guidelines
-
-- **Components**: Use functional components with hooks
-- **Styling**: Tailwind CSS classes, avoid inline styles
-- **State**: Context API for global state, local state for component-specific
-- **Types**: Always define TypeScript interfaces for props
-- **Naming**: Use PascalCase for components, camelCase for functions
-- **Files**: One component per file, co-locate related files
+```env
+CRON_SECRET=your-cron-secret
+```
 
 ---
 
-## 🧪 Testing the Demo
+## 🧪 Testing
 
-### Mock Authentication
-- **Email**: Any email format works
-- **Password**: Any non-empty password
-- After login, you'll be redirected to `/dashboard/alumni`
+### Unit Tests (Vitest)
 
-### Exploring Features
-1. **Browse Alumni** - Filter by name, field, or batch
-2. **View Profiles** - Click any alumni card to see full profile
-3. **Browse Events** - Use search and category filters
-4. **View Event Details** - Click any event to see full information
-5. **Read Stories** - Filter by category and read success stories
+```bash
+# Run all tests
+pnpm test
+
+# Run with coverage
+pnpm test:coverage
+
+# Watch mode
+pnpm test:watch
+```
+
+### E2E Tests (Playwright)
+
+```bash
+# Run all E2E tests
+pnpm test:e2e
+
+# Run in UI mode
+pnpm test:e2e --ui
+
+# Run specific test file
+pnpm test:e2e e2e/donation.spec.ts
+```
 
 ---
 
-## 📝 Roadmap
+## 🚢 Deployment
 
-### Phase 1: Foundation (Current)
-- ✅ Design system and UI components
-- ✅ Landing page and navigation
-- ✅ Alumni directory with profiles
-- ✅ Events listing and details
-- ✅ Stories section
+### Vercel Deployment
 
-### Phase 2: Backend Integration
-- [ ] Database setup (PostgreSQL/MongoDB)
-- [ ] REST API or GraphQL
-- [ ] Real authentication (NextAuth.js or Clerk)
-- [ ] File upload (images, documents)
-- [ ] Admin panel
+The project is deployed on Vercel with the following subdomain configuration:
 
-### Phase 3: Enhanced Features
-- [ ] Event registration and management
-- [ ] Payment processing for donations
-- [ ] Email notifications
-- [ ] User profile editing
-- [ ] Advanced search and filtering
+1. **Add domains in Vercel**:
+   - `ia-rk.com` (primary)
+   - `event.ia-rk.com`
+   - `donasi.ia-rk.com`
 
-### Phase 4: Community Features
-- [ ] Discussion forums
-- [ ] Job board
-- [ ] Mentorship program matching
-- [ ] Alumni networking tools
-- [ ] Resource library
+2. **DNS Configuration** (Cloudflare or your DNS provider):
+   ```
+   A     ia-rk.com       76.76.21.21
+   CNAME event           cname.vercel-dns.com
+   CNAME donasi          cname.vercel-dns.com
+   ```
+
+3. **Environment Variables**: Add all variables from the Environment Variables section to Vercel project settings.
 
 ---
 
@@ -296,20 +266,9 @@ This project is proprietary and confidential. All rights reserved by IARK (Ikata
 
 ## 📞 Contact
 
-For questions, suggestions, or collaboration opportunities:
-
 - **Website**: [https://ia-rk.com](https://ia-rk.com)
 - **Email**: info@ia-rk.com
 - **Instagram**: [@iark.official](https://instagram.com/iark.official)
-
----
-
-## 🙏 Acknowledgments
-
-Special thanks to:
-- All IARK alumni for their inspiration and feedback
-- Rumah Kepemimpinan for fostering leadership values
-- Open source community for amazing tools and libraries
 
 ---
 

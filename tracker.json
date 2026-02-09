@@ -242,7 +242,7 @@
           "id": "P1-34",
           "title": "Update Supabase types",
           "description": "Regenerate lib/supabase/types.ts dengan tabel baru",
-          "status": "todo",
+          "status": "done",
           "priority": "high",
           "note": "Run: npx supabase gen types typescript --project-id YOUR_PROJECT_ID > lib/supabase/types.ts"
         },
@@ -323,195 +323,195 @@
     {
       "id": "P2",
       "name": "Event Subdomain",
-      "status": "todo",
+      "status": "in_progress",
       "tasks": [
         {
           "id": "P2-01",
           "title": "Buat event/page.tsx - list events",
           "description": "List upcoming events dengan filter kategori (ISR)",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-02",
           "title": "Buat EventCard component",
           "description": "Card component untuk event dengan countdown",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-03",
           "title": "Buat event/[slug]/page.tsx - detail",
           "description": "Event detail dengan info lengkap + CTA daftar (ISR)",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-04",
           "title": "Buat CountdownTimer component",
           "description": "Client-side countdown untuk event date",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P2-05",
           "title": "Buat event/register/[slug]/page.tsx",
           "description": "Page registrasi event",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-06",
           "title": "Buat RegisterButton component",
           "description": "Tombol Google OAuth + Guest option",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-07",
           "title": "Buat GuestRegistrationForm component",
           "description": "Form manual untuk guest registration",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-08",
           "title": "Buat LoggedInRegistrationForm component",
           "description": "Form auto-fill untuk logged-in user",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-09",
           "title": "Integrate Turnstile di registration form",
           "description": "Anti-spam untuk guest registration",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-10",
           "title": "Implement registration via RPC",
           "description": "Call register_for_event function (race-safe)",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-11",
           "title": "Double submit prevention - client",
           "description": "Disable button saat submitting",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P2-12",
           "title": "Server-side validation registration",
           "description": "Validate semua input di server",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-13",
           "title": "Registration success page/state",
           "description": "Tampilkan konfirmasi setelah daftar",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P2-14",
           "title": "Buat event/my-events/page.tsx",
           "description": "List events yang sudah didaftar user (SSR)",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-15",
           "title": "Protect my-events route",
           "description": "Redirect ke login kalau belum auth",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-16",
           "title": "Buat lib/queries/events.ts",
           "description": "Extend query hooks untuk event portal",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-17",
           "title": "Buat lib/queries/registrations.ts",
           "description": "Query hooks untuk registrations",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-18",
           "title": "Buat admin/events/[id]/registrations/page.tsx",
           "description": "Admin view list peserta per event",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-19",
           "title": "Admin: export registrations ke CSV",
           "description": "Tombol export data peserta",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P2-20",
           "title": "Admin: update registration status",
           "description": "Ubah status: confirmed, cancelled, attended",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P2-21",
           "title": "Email: sendRegistrationConfirmation",
           "description": "Kirim email konfirmasi setelah daftar",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-22",
           "title": "Email: graceful failure",
           "description": "Jangan gagalkan flow kalau email error",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-23",
           "title": "Test: registration validation",
           "description": "Unit test server-side validation",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P2-24",
           "title": "Test: race condition registration",
           "description": "Integration test tidak oversell",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P2-25",
           "title": "Test: Turnstile verification",
           "description": "Unit test reject invalid token",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P2-26",
           "title": "Update admin events page",
           "description": "Tambah link ke registrations per event",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P2-27",
           "title": "Update admin dashboard stats",
           "description": "Tambah total registrations stat",
-          "status": "todo",
+          "status": "done",
           "priority": "low"
         }
       ]
@@ -525,203 +525,203 @@
           "id": "P3-01",
           "title": "Update donasi/page.tsx",
           "description": "Extend existing untuk subdomain (ISR)",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-02",
           "title": "Buat donasi/checkout/page.tsx",
           "description": "Form pilih nominal + data donor",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-03",
           "title": "Buat CheckoutForm component",
           "description": "Form donasi dengan tier selection",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-04",
           "title": "Integrate Turnstile di checkout",
           "description": "Anti-spam untuk form donasi",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-05",
           "title": "Generate order_id",
           "description": "Format: DON-{timestamp}-{random}",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-06",
           "title": "Save donation pending ke DB",
           "description": "Insert donation dengan status pending",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-07",
           "title": "Redirect ke Pakasir",
           "description": "Build Pakasir URL dengan order_id dan redirect",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-08",
           "title": "Buat donasi/success/page.tsx",
           "description": "Thank you page dengan order detail (SSR)",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-09",
           "title": "Handle success page loading state",
           "description": "Show loading while checking payment status",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P3-10",
           "title": "Buat donasi/donors/page.tsx",
           "description": "Wall of fame donatur (ISR)",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P3-11",
           "title": "Buat DonorCard component",
           "description": "Card untuk display donor",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P3-12",
           "title": "Buat api/webhooks/pakasir/route.ts",
           "description": "Webhook endpoint untuk Pakasir callback",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-13",
           "title": "Webhook: signature validation",
           "description": "Verify HMAC signature dari Pakasir",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-14",
           "title": "Webhook: idempotency check",
           "description": "Check webhook_processed_at sebelum proses",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-15",
           "title": "Webhook: update donation status",
           "description": "Update payment_status ke paid",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-16",
           "title": "Buat lib/supabase/admin.ts",
           "description": "Admin client untuk bypass RLS (webhook)",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-17",
           "title": "Buat admin/donations/page.tsx",
           "description": "Admin list donasi masuk",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-18",
           "title": "Admin: filter donasi by status",
           "description": "Filter: all, pending, paid",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P3-19",
           "title": "Admin: donation detail modal",
           "description": "View detail donasi",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P3-20",
           "title": "Admin: export donations ke CSV",
           "description": "Tombol export data donasi",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P3-21",
           "title": "Email: sendDonationThankYou",
           "description": "Kirim email thank you setelah paid",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-22",
           "title": "Email: graceful failure donation",
           "description": "Jangan gagalkan webhook kalau email error",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-23",
           "title": "Buat lib/queries/donations.ts",
           "description": "Query hooks untuk donations",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-24",
           "title": "Server-side validation checkout",
           "description": "Validate amount, email, name",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-25",
           "title": "Test: webhook signature validation",
           "description": "Unit test reject invalid signature",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-26",
           "title": "Test: webhook idempotency",
           "description": "Unit test tidak proses duplicate",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-27",
           "title": "Test: webhook error handling",
           "description": "Unit test handle errors gracefully",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P3-28",
           "title": "Update admin dashboard stats",
           "description": "Tambah total donations stat",
-          "status": "todo",
+          "status": "done",
           "priority": "low"
         },
         {
           "id": "P3-29",
           "title": "Update admin sidebar",
           "description": "Tambah link ke Donations page",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         }
       ]
@@ -729,62 +729,62 @@
     {
       "id": "P4",
       "name": "Polish & Automation",
-      "status": "todo",
+      "status": "in-progress",
       "tasks": [
         {
           "id": "P4-01",
           "title": "Setup vercel.json cron",
           "description": "Cron job jalan tiap hari jam 8",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P4-02",
           "title": "Buat api/cron/reminder/route.ts",
           "description": "Endpoint untuk cron reminder",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P4-03",
           "title": "Cron: query events H-3",
           "description": "Get events 3 hari lagi",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P4-04",
           "title": "Cron: query events H-1",
           "description": "Get events besok",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P4-05",
           "title": "Cron: send reminder emails",
           "description": "Kirim email ke peserta yang belum dikirim",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P4-06",
           "title": "Cron: update reminder_sent flags",
           "description": "Mark reminder_h3_sent dan reminder_h1_sent",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P4-07",
           "title": "Email: sendEventReminder",
           "description": "Template email reminder H-3 dan H-1",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P4-08",
           "title": "Setup CRON_SECRET env",
           "description": "Secret untuk protect cron endpoint",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
@@ -840,35 +840,35 @@
           "id": "P4-16",
           "title": "E2E: setup Playwright",
           "description": "Install dan config Playwright",
-          "status": "todo",
+          "status": "done",
           "priority": "low"
         },
         {
           "id": "P4-17",
           "title": "E2E: test registration flow",
           "description": "End-to-end test registrasi",
-          "status": "todo",
+          "status": "done",
           "priority": "low"
         },
         {
           "id": "P4-18",
           "title": "E2E: test donation flow",
           "description": "End-to-end test donasi",
-          "status": "todo",
+          "status": "done",
           "priority": "low"
         },
         {
           "id": "P4-19",
           "title": "Documentation: update README",
           "description": "Dokumentasi setup subdomain",
-          "status": "todo",
+          "status": "done",
           "priority": "low"
         },
         {
           "id": "P4-20",
           "title": "Documentation: env vars reference",
           "description": "List semua env vars yang dibutuhkan",
-          "status": "todo",
+          "status": "done",
           "priority": "low"
         }
       ]

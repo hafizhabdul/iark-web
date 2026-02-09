@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   LogOut,
+  Heart,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -24,6 +25,7 @@ const adminNavItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/stories', label: 'Cerita Alumni', icon: FileText },
   { href: '/admin/events', label: 'Events', icon: Calendar },
+  { href: '/admin/donations', label: 'Donasi', icon: Heart },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/hero-slides', label: 'Hero Slides', icon: Image },
   { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },

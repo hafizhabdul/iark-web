@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import Link from 'next/link';
 import {
   Plus,
   Search,
@@ -14,6 +15,7 @@ import {
   Image as ImageIcon,
   X,
   Loader2,
+  Users,
 } from 'lucide-react';
 
 interface Event {
@@ -300,9 +302,17 @@ export default function AdminEventsPage() {
                   <span className="truncate">{event.location}</span>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Link
+                    href={`/admin/events/${event.id}/registrations`}
+                    className="flex items-center justify-center gap-1.5 py-2 px-3 text-iark-red hover:bg-red-50 rounded-lg transition-colors"
+                    title="Lihat Pendaftar"
+                  >
+                    <Users className="w-4 h-4" />
+                    <span className="text-sm">Pendaftar</span>
+                  </Link>
                   <button
                     onClick={() => openModal(event)}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center justify-center gap-1.5 py-2 px-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     <Edit2 className="w-4 h-4" />
                     <span className="text-sm">Edit</span>

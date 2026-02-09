@@ -43,6 +43,11 @@ export interface Database {
         Insert: Partial<DonationRow>;
         Update: Partial<DonationRow>;
       };
+      donation_campaigns: {
+        Row: DonationCampaignRow;
+        Insert: Partial<DonationCampaignRow>;
+        Update: Partial<DonationCampaignRow>;
+      };
       hero_slides: {
         Row: HeroSlide;
         Insert: Partial<HeroSlide>;
@@ -213,6 +218,7 @@ export interface EventRegistrationRow {
 export interface DonationRow {
   id: string;
   user_id: string | null;
+  campaign_id: string | null;
   order_id: string;
   amount: number;
   donor_name: string;
@@ -226,6 +232,38 @@ export interface DonationRow {
   webhook_processed_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface DonationCampaignRow {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  content: string | null;
+  image_url: string | null;
+  target_amount: number;
+  is_active: boolean;
+  is_featured: boolean;
+  starts_at: string | null;
+  ends_at: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DonationCampaignWithProgress extends DonationCampaignRow {
+  paid_amount: number;
+  paid_count: number;
+  progress_pct: number;
+}
+
+export interface CampaignDonorWall {
+  campaign_id: string;
+  donation_id: string;
+  display_name: string;
+  amount: number;
+  message: string | null;
+  paid_at: string | null;
 }
 
 export interface HeroSlide {

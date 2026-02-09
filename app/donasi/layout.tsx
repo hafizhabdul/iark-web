@@ -1,13 +1,15 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Heart, Shield } from 'lucide-react';
+import { DonasiLink } from '@/components/features/donasi/DonasiLink';
+import { CrossDomainLink } from '@/components/features/shared/CrossDomainLink';
 
 function DonasiHeader() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/donasi" className="flex items-center gap-3">
+          <DonasiLink path="/" className="flex items-center gap-3">
             <Image
               src="/logos/iark-logo.png"
               alt="IARK"
@@ -19,23 +21,23 @@ function DonasiHeader() {
               <span className="font-bold text-gray-900">IARK Donasi</span>
               <span className="text-xs text-gray-500">Portal Donasi</span>
             </div>
-          </Link>
+          </DonasiLink>
 
           <nav className="flex items-center gap-4">
-            <Link
-              href="/donasi/donors"
+            <DonasiLink
+              path="/donors"
               className="flex items-center gap-2 text-gray-600 hover:text-iark-red transition-colors"
             >
               <Heart className="w-4 h-4" />
               <span className="hidden sm:inline">Donatur</span>
-            </Link>
-            <Link
-              href="/donasi/checkout"
+            </DonasiLink>
+            <DonasiLink
+              path="/checkout"
               className="flex items-center gap-2 px-4 py-2 bg-iark-red text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               <Heart className="w-4 h-4" />
               <span>Donasi</span>
-            </Link>
+            </DonasiLink>
           </nav>
         </div>
       </div>
@@ -58,22 +60,22 @@ function DonasiFooter() {
             />
             <span className="font-semibold">IARK Donasi</span>
           </div>
-          
+
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <Shield className="w-4 h-4" />
             <span>Pembayaran aman via Pakasir</span>
           </div>
-          
+
           <div className="flex items-center gap-6 text-sm text-gray-400">
-            <Link href="/" className="hover:text-white transition-colors">
+            <CrossDomainLink href="/" className="hover:text-white transition-colors">
               Website Utama
-            </Link>
-            <Link href="/event" className="hover:text-white transition-colors">
+            </CrossDomainLink>
+            <CrossDomainLink href="/" subdomain="event" className="hover:text-white transition-colors">
               Events
-            </Link>
+            </CrossDomainLink>
           </div>
         </div>
-        
+
         <div className="mt-6 pt-6 border-t border-gray-800 text-center text-sm text-gray-400">
           © {new Date().getFullYear()} IARK. All rights reserved.
         </div>

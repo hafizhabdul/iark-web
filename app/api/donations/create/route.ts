@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
       message,
       is_anonymous,
       turnstile_token,
+      campaign_id,
     } = body;
 
     // Validate required fields
@@ -47,12 +48,59 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate unique order ID
-    const order_id = `DON-${Date.now()}-${nanoid(6).toUpperCase()}`;
-
     // Get current user if logged in
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
+
+    // Resolve campaign_id - use provided one or default to "donasi-umum"
+    let resolvedCampaignId: string;
+    
+    if (campaign_id) {
+      // Verify the provided campaign exists and is active
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: campaign, error: campaignError } = await (supabase as any)
+        .from('campaigns')
+        .select('id, status')
+        .eq('id', campaign_id)
+        .single();
+
+      if (campaignError || !campaign) {
+        return NextResponse.json(
+          { error: 'Kampanye tidak ditemukan' },
+          { status: 400 }
+        );
+      }
+
+      if (campaign.status !== 'active') {
+        return NextResponse.json(
+          { error: 'Kampanye tidak aktif' },
+          { status: 400 }
+        );
+      }
+
+      resolvedCampaignId = campaign_id;
+    } else {
+      // Get default "donasi-umum" campaign
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: defaultCampaign, error: defaultError } = await (supabase as any)
+        .from('campaigns')
+        .select('id')
+        .eq('slug', 'donasi-umum')
+        .eq('status', 'active')
+        .single();
+
+      if (defaultError || !defaultCampaign) {
+        return NextResponse.json(
+          { error: 'Kampanye default tidak ditemukan' },
+          { status: 500 }
+        );
+      }
+
+      resolvedCampaignId = defaultCampaign.id;
+    }
+
+    // Generate unique order ID
+    const order_id = `DON-${Date.now()}-${nanoid(6).toUpperCase()}`;
 
     // Create donation record
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,6 +115,7 @@ export async function POST(request: NextRequest) {
         message: message?.trim() || null,
         is_anonymous: is_anonymous || false,
         user_id: user?.id || null,
+        campaign_id: resolvedCampaignId,
         payment_status: 'pending',
       })
       .select('id, order_id')

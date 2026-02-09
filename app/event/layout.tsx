@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Calendar, User, LogIn } from 'lucide-react';
+import { CrossDomainLink } from '@/components/features/shared/CrossDomainLink';
 
 function EventHeader() {
   return (
@@ -65,16 +66,16 @@ function EventFooter() {
             />
             <span className="font-semibold">IARK Events</span>
           </div>
-          
+
           <div className="flex items-center gap-6 text-sm text-gray-400">
-            <Link href="/" className="hover:text-white transition-colors">
+            <CrossDomainLink href="/" className="hover:text-white transition-colors">
               Website Utama
-            </Link>
-            <Link href="/donasi" className="hover:text-white transition-colors">
+            </CrossDomainLink>
+            <CrossDomainLink href="/" subdomain="donasi" className="hover:text-white transition-colors">
               Donasi
-            </Link>
+            </CrossDomainLink>
           </div>
-          
+
           <p className="text-sm text-gray-400">
             © {new Date().getFullYear()} IARK. All rights reserved.
           </p>

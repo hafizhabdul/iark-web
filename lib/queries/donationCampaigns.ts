@@ -1,6 +1,11 @@
 import { createClient } from '@/lib/supabase/client';
 import type { DonationCampaignWithProgress, CampaignDonorWall } from '@/lib/supabase/types';
 
+/** PGRST205 = relation (table/view) does not exist */
+function isViewNotFound(error: { code?: string }): boolean {
+  return error.code === 'PGRST205';
+}
+
 /**
  * Fetch all active campaigns with progress
  */
@@ -13,7 +18,10 @@ export async function fetchActiveCampaigns(): Promise<DonationCampaignWithProgre
     .eq('is_active', true)
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    if (isViewNotFound(error)) return [];
+    throw error;
+  }
   return data ?? [];
 }
 
@@ -31,7 +39,10 @@ export async function fetchFeaturedCampaigns(limit = 3): Promise<DonationCampaig
     .order('created_at', { ascending: false })
     .limit(limit);
 
-  if (error) throw error;
+  if (error) {
+    if (isViewNotFound(error)) return [];
+    throw error;
+  }
   return data ?? [];
 }
 
@@ -48,7 +59,7 @@ export async function fetchCampaignBySlug(slug: string): Promise<DonationCampaig
     .single();
 
   if (error) {
-    if (error.code === 'PGRST116') return null;
+    if (error.code === 'PGRST116' || isViewNotFound(error)) return null;
     throw error;
   }
   return data;
@@ -67,7 +78,7 @@ export async function fetchCampaignById(id: string): Promise<DonationCampaignWit
     .single();
 
   if (error) {
-    if (error.code === 'PGRST116') return null;
+    if (error.code === 'PGRST116' || isViewNotFound(error)) return null;
     throw error;
   }
   return data;
@@ -86,7 +97,10 @@ export async function fetchCampaignDonorWall(campaignId: string, limit = 20): Pr
     .order('paid_at', { ascending: false })
     .limit(limit);
 
-  if (error) throw error;
+  if (error) {
+    if (isViewNotFound(error)) return [];
+    throw error;
+  }
   return data ?? [];
 }
 
@@ -102,7 +116,7 @@ export async function fetchOverallDonationStats(): Promise<{ paid_amount: number
     .single();
 
   if (error) {
-    if (error.code === 'PGRST116') {
+    if (error.code === 'PGRST116' || isViewNotFound(error)) {
       return { paid_amount: 0, paid_count: 0 };
     }
     throw error;
@@ -150,6 +164,9 @@ export async function fetchAllCampaigns(): Promise<DonationCampaignWithProgress[
     .select('*')
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    if (isViewNotFound(error)) return [];
+    throw error;
+  }
   return data ?? [];
 }

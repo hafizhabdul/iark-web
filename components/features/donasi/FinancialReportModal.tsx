@@ -218,8 +218,7 @@ export function FinancialReportModal({ isOpen, onClose }: FinancialReportModalPr
                           cx="50%"
                           cy="50%"
                           labelLine={false}
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          label={({ name, percentage }: any) => `${name} (${percentage}%)`}
+                          label={({ name, percent }: { name?: string; percent?: number }) => `${name || ''} (${((percent || 0) * 100).toFixed(0)}%)`}
                           outerRadius={100}
                           fill="#8884d8"
                           dataKey="value"
@@ -228,8 +227,7 @@ export function FinancialReportModal({ isOpen, onClose }: FinancialReportModalPr
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
-                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        <Tooltip formatter={(value: any) => formatRupiah(value)} />
+                        <Tooltip formatter={(value) => formatRupiah(Number(value ?? 0))} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>

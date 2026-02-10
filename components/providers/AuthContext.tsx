@@ -157,7 +157,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.user) {
         const profileData = await fetchProfile(data.user.id);
         setUserFromSupabase(data.user, profileData);
-        router.push('/dashboard');
+        
+        // Redirect admin to admin panel, others to dashboard
+        const redirectPath = profileData?.role === 'admin' ? '/admin' : '/dashboard';
+        router.push(redirectPath);
       }
 
       return { error: null };

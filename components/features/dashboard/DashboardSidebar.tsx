@@ -104,8 +104,12 @@ export function DashboardSidebar() {
 
         {/* User Profile & Logout */}
         <div className="p-4 border-t border-gray-200">
-          {/* User Info */}
-          <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+          {/* User Info - Clickable to edit profile */}
+          <Link
+            href="/dashboard/profile"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="flex items-center gap-3 mb-4 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group cursor-pointer"
+          >
             <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
               {user?.avatar ? (
                 <Image src={user.avatar} alt={user.name} fill className="object-cover" />
@@ -116,10 +120,13 @@ export function DashboardSidebar() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm text-gray-900 truncate">{user?.name}</p>
+              <p className="font-semibold text-sm text-gray-900 truncate group-hover:text-iark-red transition-colors">{user?.name}</p>
               <p className="text-xs text-gray-600 truncate">{user?.email}</p>
             </div>
-          </div>
+            <svg className="w-4 h-4 text-gray-400 group-hover:text-iark-red transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </Link>
 
           {/* Logout Button */}
           {isAdmin && (

@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { LogoCard } from './LogoCard';
-import { useTransition } from '@/components/providers/TransitionContext';
 import { useAuth } from '@/components/providers/AuthContext';
+import { CrossDomainLink } from '@/components/features/shared/CrossDomainLink';
 
 export interface HeaderProps {
   className?: string;
@@ -26,7 +26,7 @@ export function Header({ className = '' }: HeaderProps) {
     { href: '/kegiatan', label: 'Kegiatan' },
     { href: '/cerita', label: 'Cerita' },
     { href: '/donasi', label: 'Donasi' },
-    ...(isAuthenticated ? [{ href: '/dashboard/profile', label: 'Profil' }] : []),
+    { href: '/', label: 'Event', subdomain: 'event' as const },
   ];
 
   // Scroll detection
@@ -61,14 +61,36 @@ export function Header({ className = '' }: HeaderProps) {
         <nav className={`hidden lg:flex items-center gap-10 absolute left-1/2 -translate-x-1/2 transition-all duration-300 ${isScrolled ? 'gap-8' : 'gap-10'
           }`}>
           {navLinks.map((link) => {
-            const isActive = pathname === link.href;
+            const isActive = pathname === link.href && !link.subdomain;
+            const linkClassName = `${isActive ? 'text-iark-red' : 'text-gray-800 hover:text-iark-red'
+              } font-semibold transition-all duration-200 relative group ${isScrolled ? 'text-base' : 'text-lg'
+              }`;
+
+            // Use CrossDomainLink for subdomain links
+            if (link.subdomain) {
+              return (
+                <CrossDomainLink
+                  key={link.label}
+                  href={link.href}
+                  subdomain={link.subdomain}
+                  className={linkClassName}
+                >
+                  {link.label}
+                  <motion.span
+                    className="absolute bottom-0 left-0 h-0.5 bg-iark-red"
+                    initial={{ width: 0 }}
+                    whileHover={{ width: '100%' }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                  />
+                </CrossDomainLink>
+              );
+            }
+
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`${isActive ? 'text-iark-red' : 'text-gray-800 hover:text-iark-red'
-                  } font-semibold transition-all duration-200 relative group ${isScrolled ? 'text-base' : 'text-lg'
-                  }`}
+                className={linkClassName}
               >
                 {link.label}
                 {/* Active underline - slides between pages */}
@@ -271,26 +293,37 @@ export function Header({ className = '' }: HeaderProps) {
       >
         <nav className="px-4 py-4 space-y-2">
           {navLinks.map((link, index) => {
-            const isActive = pathname === link.href;
+            const isActive = pathname === link.href && !link.subdomain;
+            const mobileLinkClassName = `block py-3 px-4 ${isActive
+              ? 'bg-iark-red/10 text-iark-red border-l-4 border-iark-red'
+              : 'text-gray-800 hover:bg-gray-100 hover:text-iark-red'
+              } font-semibold rounded-lg transition-colors`;
+
             return (
               <motion.div
-                key={link.href}
+                key={link.subdomain ? link.label : link.href}
                 initial={{ opacity: 0, x: -20 }}
                 animate={isMobileMenuOpen ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
               >
-                <Link
-                  href={link.href}
-                  className={`block py-3 px-4 ${isActive
-                    ? 'bg-iark-red/10 text-iark-red border-l-4 border-iark-red'
-                    : 'text-gray-800 hover:bg-gray-100 hover:text-iark-red'
-                    } font-semibold rounded-lg transition-colors`}
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  {link.label}
-                </Link>
+                {link.subdomain ? (
+                  <CrossDomainLink
+                    href={link.href}
+                    subdomain={link.subdomain}
+                    className={mobileLinkClassName}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.label}
+                  </CrossDomainLink>
+                ) : (
+                  <Link
+                    href={link.href}
+                    className={mobileLinkClassName}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                )}
               </motion.div>
             );
           })}

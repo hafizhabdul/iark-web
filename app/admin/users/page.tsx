@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { fetchAllUsers } from '@/lib/queries/dashboard';
 import { queryKeys, staleTime } from '@/lib/queries';
 import type { Profile } from '@/lib/supabase/types';
+import { REGIONAL_OPTIONS, ANGKATAN_OPTIONS } from '@/lib/constants/regional';
 import {
   Search,
   Shield,
@@ -14,11 +15,26 @@ import {
   Mail,
   Calendar,
   GraduationCap,
+  Download,
+  X,
 } from 'lucide-react';
+
+const ASRAMA_OPTIONS = [
+  'Bogor',
+  'Makassar',
+  'Yogyakarta',
+  'Surabaya',
+  'Malang',
+  'Bandung',
+  'Jakarta',
+];
 
 export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'alumni'>('all');
+  const [angkatanFilter, setAngkatanFilter] = useState<string>('');
+  const [regionalFilter, setRegionalFilter] = useState<string>('');
+  const [asramaFilter, setAsramaFilter] = useState<string>('');
   const queryClient = useQueryClient();
 
   const { data: users = [], isLoading } = useQuery<Profile[]>({
@@ -58,47 +74,161 @@ export default function AdminUsersPage() {
     );
   }
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredUsers = useMemo(() => {
+    return users.filter((user) => {
+      const matchesSearch =
+        !searchQuery ||
+        user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.kampus?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesAngkatan =
+        !angkatanFilter || user.angkatan?.toString() === angkatanFilter;
+
+      const matchesRegional =
+        !regionalFilter || user.regional === regionalFilter;
+
+      const matchesAsrama =
+        !asramaFilter || user.asrama === asramaFilter;
+
+      return matchesSearch && matchesAngkatan && matchesRegional && matchesAsrama;
+    });
+  }, [users, searchQuery, angkatanFilter, regionalFilter, asramaFilter]);
+
+  const hasActiveFilters = angkatanFilter || regionalFilter || asramaFilter;
+
+  function clearFilters() {
+    setAngkatanFilter('');
+    setRegionalFilter('');
+    setAsramaFilter('');
+  }
+
+  function exportToCSV() {
+    const headers = ['Nama', 'Email', 'Angkatan', 'Regional', 'Asrama', 'Kampus', 'Phone', 'Role', 'Bergabung'];
+    const rows = filteredUsers.map((user) => [
+      user.name || '',
+      user.email || '',
+      user.angkatan?.toString() || '',
+      REGIONAL_OPTIONS.find((r) => r.value === user.regional)?.label || user.regional || '',
+      user.asrama || '',
+      user.kampus || '',
+      user.phone || '',
+      user.role || '',
+      new Date(user.created_at).toLocaleDateString('id-ID'),
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `users-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-        <p className="text-gray-600">Kelola user dan hak akses</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Users</h1>
+          <p className="text-gray-600">Kelola user dan hak akses</p>
+        </div>
+        <button
+          onClick={exportToCSV}
+          disabled={filteredUsers.length === 0}
+          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Download className="w-4 h-4" />
+          Export CSV
+        </button>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm p-4">
+      <div className="bg-white rounded-xl shadow-sm p-4 space-y-4">
+        {/* Search Row */}
         <div className="flex flex-col md:flex-row gap-4">
-          {/* Search */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Cari nama atau email..."
+              placeholder="Cari nama, email, atau kampus..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent"
             />
           </div>
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value as typeof roleFilter)}
+            className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-iark-red focus:border-transparent"
+          >
+            <option value="all">Semua Role</option>
+            <option value="admin">Admin</option>
+            <option value="alumni">Alumni</option>
+          </select>
+        </div>
 
-          {/* Role Filter */}
-          <div className="flex items-center gap-2">
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value as typeof roleFilter)}
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-iark-red focus:border-transparent"
+        {/* Filter Row */}
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-sm text-gray-500 font-medium">Filter:</span>
+          
+          <select
+            value={angkatanFilter}
+            onChange={(e) => setAngkatanFilter(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-iark-red focus:border-transparent"
+          >
+            <option value="">Semua Angkatan</option>
+            {ANGKATAN_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={regionalFilter}
+            onChange={(e) => setRegionalFilter(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-iark-red focus:border-transparent"
+          >
+            <option value="">Semua Regional</option>
+            {REGIONAL_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={asramaFilter}
+            onChange={(e) => setAsramaFilter(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-iark-red focus:border-transparent"
+          >
+            <option value="">Semua Asrama</option>
+            {ASRAMA_OPTIONS.map((asrama) => (
+              <option key={asrama} value={asrama}>
+                {asrama}
+              </option>
+            ))}
+          </select>
+
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
             >
-              <option value="all">Semua Role</option>
-              <option value="admin">Admin</option>
-              <option value="alumni">Alumni</option>
-            </select>
-          </div>
+              <X className="w-4 h-4" />
+              Reset
+            </button>
+          )}
+        </div>
+
+        {/* Results count */}
+        <div className="text-sm text-gray-500">
+          Menampilkan {filteredUsers.length} dari {users.length} user
         </div>
       </div>
 

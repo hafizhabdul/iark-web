@@ -14,7 +14,9 @@ import {
   Users,
   Mail,
   Phone,
-  Loader2
+  Loader2,
+  CheckSquare,
+  Square,
 } from 'lucide-react';
 
 interface Registration {
@@ -45,6 +47,8 @@ export default function EventRegistrationsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkActionLoading, setBulkActionLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -99,6 +103,53 @@ export default function EventRegistrationsPage() {
         )
       );
     }
+  }
+
+  async function bulkUpdateStatus(newStatus: string) {
+    if (selectedIds.size === 0) return;
+    
+    const action = newStatus === 'confirmed' ? 'konfirmasi' : newStatus === 'cancelled' ? 'batalkan' : 'update';
+    if (!confirm(`Apakah Anda yakin ingin ${action} ${selectedIds.size} pendaftar?`)) return;
+
+    setBulkActionLoading(true);
+    const supabase = createClient();
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
+      .from('event_registrations')
+      .update({ status: newStatus })
+      .in('id', Array.from(selectedIds));
+
+    if (error) {
+      console.error('Error bulk updating:', error);
+      alert('Gagal mengupdate status');
+    } else {
+      setRegistrations(prev =>
+        prev.map(reg =>
+          selectedIds.has(reg.id) ? { ...reg, status: newStatus } : reg
+        )
+      );
+      setSelectedIds(new Set());
+    }
+    setBulkActionLoading(false);
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.size === filteredRegistrations.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredRegistrations.map(r => r.id)));
+    }
+  }
+
+  function toggleSelect(id: string) {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedIds(newSet);
   }
 
   function exportToCSV() {
@@ -242,28 +293,63 @@ export default function EventRegistrationsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm p-4 flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Cari nama atau email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent"
-          />
+      <div className="bg-white rounded-xl shadow-sm p-4 space-y-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Cari nama atau email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent"
+            />
+          </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent"
+          >
+            <option value="">Semua Status</option>
+            <option value="registered">Terdaftar</option>
+            <option value="confirmed">Konfirmasi</option>
+            <option value="attended">Hadir</option>
+            <option value="cancelled">Batal</option>
+          </select>
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent"
-        >
-          <option value="">Semua Status</option>
-          <option value="registered">Terdaftar</option>
-          <option value="confirmed">Konfirmasi</option>
-          <option value="attended">Hadir</option>
-          <option value="cancelled">Batal</option>
-        </select>
+
+        {/* Bulk Actions */}
+        {selectedIds.size > 0 && (
+          <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+            <span className="text-sm font-medium text-blue-700">
+              {selectedIds.size} dipilih
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => bulkUpdateStatus('confirmed')}
+                disabled={bulkActionLoading}
+                className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+              >
+                Konfirmasi
+              </button>
+              <button
+                onClick={() => bulkUpdateStatus('attended')}
+                disabled={bulkActionLoading}
+                className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                Tandai Hadir
+              </button>
+              <button
+                onClick={() => bulkUpdateStatus('cancelled')}
+                disabled={bulkActionLoading}
+                className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+              >
+                Batalkan
+              </button>
+            </div>
+            {bulkActionLoading && <Loader2 className="w-4 h-4 animate-spin text-blue-600" />}
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -272,6 +358,18 @@ export default function EventRegistrationsPage() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-4 py-3 text-left">
+                  <button
+                    onClick={toggleSelectAll}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    {selectedIds.size === filteredRegistrations.length && filteredRegistrations.length > 0 ? (
+                      <CheckSquare className="w-5 h-5" />
+                    ) : (
+                      <Square className="w-5 h-5" />
+                    )}
+                  </button>
+                </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nama</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Kontak</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Info</th>
@@ -282,7 +380,19 @@ export default function EventRegistrationsPage() {
             <tbody className="divide-y divide-gray-100">
               {filteredRegistrations.length > 0 ? (
                 filteredRegistrations.map((reg) => (
-                  <tr key={reg.id} className="hover:bg-gray-50">
+                  <tr key={reg.id} className={`hover:bg-gray-50 ${selectedIds.has(reg.id) ? 'bg-blue-50' : ''}`}>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => toggleSelect(reg.id)}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        {selectedIds.has(reg.id) ? (
+                          <CheckSquare className="w-5 h-5 text-blue-600" />
+                        ) : (
+                          <Square className="w-5 h-5" />
+                        )}
+                      </button>
+                    </td>
                     <td className="px-4 py-3">
                       <p className="font-medium text-gray-900">{reg.full_name}</p>
                       <p className="text-xs text-gray-500">
@@ -327,7 +437,7 @@ export default function EventRegistrationsPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
                     {searchQuery || statusFilter
                       ? 'Tidak ada data yang cocok dengan filter'
                       : 'Belum ada pendaftar'}

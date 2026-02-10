@@ -60,21 +60,24 @@ async function getEventForRegistration(slug: string): Promise<EventForRegistrati
 async function getCurrentUser() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) return null;
 
-  // Get profile for name
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profile } = await (supabase as any)
     .from('profiles')
-    .select('name')
+    .select('name, phone, angkatan, regional, asrama')
     .eq('id', user.id)
     .single();
 
   return {
     id: user.id,
     email: user.email || '',
-    name: (profile as { name?: string })?.name || user.user_metadata?.full_name || '',
+    name: profile?.name || user.user_metadata?.full_name || '',
+    phone: profile?.phone || '',
+    angkatan: profile?.angkatan || null,
+    regional: profile?.regional || '',
+    asrama: profile?.asrama || '',
   };
 }
 
@@ -121,7 +124,7 @@ export default async function EventRegistrationPage({
       <div className="max-w-2xl mx-auto px-4">
         {/* Back Link */}
         <Link
-          href={`/event/${slug}`}
+          href={`/${slug}`}
           className="inline-flex items-center gap-2 text-gray-600 hover:text-iark-red mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -131,7 +134,7 @@ export default async function EventRegistrationPage({
         {/* Event Summary Card */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">{event.title}</h1>
-          
+
           <div className="flex flex-wrap gap-4 text-sm text-gray-600">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-iark-red" />
@@ -160,7 +163,7 @@ export default async function EventRegistrationPage({
         {/* Registration Form */}
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-6">Form Pendaftaran</h2>
-          
+
           {user ? (
             <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
               <p className="text-green-700 text-sm">

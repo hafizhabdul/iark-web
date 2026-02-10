@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { createClient } from '@/lib/supabase/client';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { ANGKATAN_OPTIONS } from '@/lib/constants/regional';
 
 interface RegistrationFormProps {
   eventId: string;
@@ -16,6 +17,10 @@ interface RegistrationFormProps {
     id: string;
     email: string;
     name?: string;
+    phone?: string;
+    angkatan?: number;
+    regional?: string;
+    asrama?: string;
   } | null;
 }
 
@@ -29,9 +34,9 @@ export function RegistrationForm({ eventId, eventSlug, eventTitle, eventDate, ev
   const [formData, setFormData] = useState({
     fullName: user?.name || '',
     email: user?.email || '',
-    phone: '',
-    angkatan: '',
-    asrama: '',
+    phone: user?.phone || '',
+    angkatan: user?.angkatan?.toString() || '',
+    asrama: user?.asrama || '',
     organization: '',
   });
 
@@ -197,17 +202,20 @@ export function RegistrationForm({ eventId, eventSlug, eventTitle, eventDate, ev
           <label htmlFor="angkatan" className="block text-sm font-medium text-gray-700 mb-2">
             Angkatan RK
           </label>
-          <input
-            type="number"
+          <select
             id="angkatan"
             name="angkatan"
             value={formData.angkatan}
             onChange={handleChange}
-            min="2000"
-            max="2030"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent"
-            placeholder="2020"
-          />
+          >
+            <option value="">Pilih Angkatan</option>
+            {ANGKATAN_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>

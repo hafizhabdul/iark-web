@@ -8,7 +8,7 @@ function EventHeader() {
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/event" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <Image
               src="/logos/iark-logo.png"
               alt="IARK"
@@ -21,30 +21,6 @@ function EventHeader() {
               <span className="text-xs text-gray-500">Portal Kegiatan</span>
             </div>
           </Link>
-
-          <nav className="flex items-center gap-4">
-            <Link
-              href="/event"
-              className="flex items-center gap-2 text-gray-600 hover:text-iark-red transition-colors"
-            >
-              <Calendar className="w-4 h-4" />
-              <span className="hidden sm:inline">Events</span>
-            </Link>
-            <Link
-              href="/event/my-events"
-              className="flex items-center gap-2 text-gray-600 hover:text-iark-red transition-colors"
-            >
-              <User className="w-4 h-4" />
-              <span className="hidden sm:inline">Event Saya</span>
-            </Link>
-            <Link
-              href="/"
-              className="flex items-center gap-2 px-4 py-2 bg-iark-red text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              <LogIn className="w-4 h-4" />
-              <span className="hidden sm:inline">Masuk</span>
-            </Link>
-          </nav>
         </div>
       </div>
     </header>

@@ -1,38 +1,30 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { rateLimit } from '../security/rate-limit';
+
+/**
+ * Get the root domain for cookie sharing across subdomains
+ * e.g., "event.ia-rk.com" -> ".ia-rk.com"
+ * For localhost, returns undefined (no domain restriction)
+ */
+function getCookieDomain(host: string): string | undefined {
+  // Don't set domain for localhost (development)
+  if (host.includes('localhost') || host.includes('127.0.0.1')) {
+    return undefined;
+  }
+  
+  // Extract root domain (e.g., "event.ia-rk.com" -> ".ia-rk.com")
+  const parts = host.split('.');
+  if (parts.length >= 2) {
+    // Get last two parts (e.g., "ia-rk.com") and prefix with dot
+    return '.' + parts.slice(-2).join('.');
+  }
+  
+  return undefined;
+}
 
 export async function updateSession(request: NextRequest) {
-  // 1. Rate Limiting Check
-  // Get IP from headers, checking multiple common proxy headers for production (Netlify/Vercel)
-  const ip = request.headers.get('x-nf-client-connection-ip') ||
-    request.headers.get('x-real-ip') ||
-    request.headers.get('x-forwarded-for')?.split(',')[0] ||
-    '127.0.0.1';
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/auth') ||
-    request.nextUrl.pathname.startsWith('/masuk') ||
-    request.nextUrl.pathname.startsWith('/daftar');
-
-  /* 
-  // Temporarily disabling custom rate limit as it's causing 429 in production
-  const rlConfig = isAuthRoute
-    ? { limit: 60, windowMs: 60000 }
-    : { limit: 300, windowMs: 60000 };
-
-  const rlResult = rateLimit(ip, rlConfig);
-
-  if (!rlResult.success) {
-    console.warn(`Rate limit exceeded for IP: ${ip} on path: ${request.nextUrl.pathname}`);
-    return new NextResponse('Too Many Requests', {
-      status: 429,
-      headers: {
-        'X-RateLimit-Limit': rlResult.limit.toString(),
-        'X-RateLimit-Remaining': rlResult.remaining.toString(),
-        'X-RateLimit-Reset': rlResult.reset.toString(),
-      }
-    });
-  }
-  */
+  const host = request.headers.get('host') || '';
+  const cookieDomain = getCookieDomain(host);
 
   let supabaseResponse = NextResponse.next({
     request,
@@ -53,9 +45,14 @@ export async function updateSession(request: NextRequest) {
           supabaseResponse = NextResponse.next({
             request,
           });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
+          cookiesToSet.forEach(({ name, value, options }) => {
+            // Set cookie domain for cross-subdomain sharing
+            const cookieOptions = {
+              ...options,
+              ...(cookieDomain && { domain: cookieDomain }),
+            };
+            supabaseResponse.cookies.set(name, value, cookieOptions);
+          });
         },
       },
     }

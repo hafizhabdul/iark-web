@@ -6,69 +6,70 @@
     {
       "id": "P1",
       "name": "Profile Enhancement",
-      "status": "todo",
+      "status": "done",
+      "completed_at": "2026-02-10",
       "tasks": [
         {
           "id": "P1-01",
           "title": "Migration: Add regional, kampus to profiles",
           "description": "ALTER TABLE profiles ADD COLUMN regional, kampus",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P1-02",
           "title": "Create REGIONAL_OPTIONS constant",
           "description": "lib/constants/regional.ts dengan list provinsi Indonesia",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P1-03",
           "title": "Update profile types in types.ts",
           "description": "Tambah regional, kampus ke Profile interface",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P1-04",
           "title": "Create profile queries",
           "description": "lib/queries/profiles.ts - fetchProfile, updateProfile",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P1-05",
           "title": "Update profile edit page UI",
           "description": "app/dashboard/profile/page.tsx dengan form edit lengkap",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P1-06",
           "title": "Add profile photo upload",
           "description": "Upload foto ke Supabase Storage",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P1-07",
           "title": "Admin: Add search to user list",
           "description": "Search by name, email, kampus",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P1-08",
           "title": "Admin: Add filters to user list",
           "description": "Filter by angkatan, regional, asrama",
-          "status": "todo",
+          "status": "done",
           "priority": "medium"
         },
         {
           "id": "P1-09",
           "title": "Admin: Export users to CSV",
           "description": "Export filtered users ke CSV",
-          "status": "todo",
+          "status": "done",
           "priority": "low"
         }
       ]
@@ -167,91 +168,101 @@
     {
       "id": "P3",
       "name": "Event Registration Enhancement",
-      "status": "todo",
+      "status": "done",
+      "completed_at": "2026-02-10",
       "tasks": [
         {
           "id": "P3-01",
           "title": "Update event listing UI",
           "description": "Upcoming/Past tabs, 2045hz style cards",
-          "status": "todo",
-          "priority": "medium"
+          "status": "done",
+          "priority": "medium",
+          "note": "Already has Upcoming/Past sections"
         },
         {
           "id": "P3-02",
           "title": "Update event detail page",
           "description": "Hero image, better layout, clear CTA",
-          "status": "todo",
-          "priority": "high"
+          "status": "done",
+          "priority": "high",
+          "note": "Already has good layout with hero, countdown, CTA"
         },
         {
           "id": "P3-03",
           "title": "Create EventAuthChoice component",
           "description": "Login vs Daftar sebagai Tamu untuk event",
-          "status": "todo",
-          "priority": "high"
+          "status": "done",
+          "priority": "high",
+          "note": "Created reusable AuthChoice component"
         },
         {
           "id": "P3-04",
           "title": "Update registration: auth check",
           "description": "Check if user logged in",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-05",
           "title": "Update registration: Login option",
           "description": "Add Google login button di registration",
-          "status": "todo",
-          "priority": "high"
+          "status": "done",
+          "priority": "high",
+          "note": "Has link to login page with message"
         },
         {
           "id": "P3-06",
           "title": "Update registration: Guest mode",
           "description": "Manual fill form untuk tamu",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-07",
           "title": "Update registration: Auto-fill logged in",
           "description": "Pre-fill name, email, phone, angkatan dari profile",
-          "status": "todo",
+          "status": "done",
           "priority": "high"
         },
         {
           "id": "P3-08",
           "title": "Add organization field",
           "description": "Optional field 'Asal Organisasi' di registration",
-          "status": "todo",
-          "priority": "medium"
+          "status": "done",
+          "priority": "medium",
+          "note": "Already exists in form"
         },
         {
           "id": "P3-09",
           "title": "Update my-events page",
           "description": "app/event/my-events dengan registration history",
-          "status": "todo",
-          "priority": "medium"
+          "status": "done",
+          "priority": "medium",
+          "note": "Already implemented with upcoming/past separation"
         },
         {
           "id": "P3-10",
           "title": "Admin: Add registration search",
           "description": "Search registrations by name, email",
-          "status": "todo",
-          "priority": "medium"
+          "status": "done",
+          "priority": "medium",
+          "note": "Already exists in registrations page"
         },
         {
           "id": "P3-11",
           "title": "Admin: Add registration filters",
           "description": "Filter by status (registered, confirmed, attended)",
-          "status": "todo",
-          "priority": "medium"
+          "status": "done",
+          "priority": "medium",
+          "note": "Already exists in registrations page"
         },
         {
           "id": "P3-12",
           "title": "Admin: Bulk actions registrations",
           "description": "Confirm selected, export CSV",
-          "status": "todo",
-          "priority": "low"
+          "status": "done",
+          "priority": "low",
+          "note": "Added checkbox selection and bulk status update"
         }
       ]
     },

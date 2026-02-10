@@ -1,18 +1,13 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
-import { CountdownTimer } from '@/components/features/event';
+import { CountdownTimer, BackToEventsLink, RegisterButton } from '@/components/features/event';
 import { 
   Calendar, 
   Clock, 
   MapPin, 
   Users, 
-  Phone, 
-  Video, 
-  ArrowLeft,
-  Share2,
-  CheckCircle
+  Phone
 } from 'lucide-react';
 
 export const revalidate = 60;
@@ -123,13 +118,7 @@ export default async function EventDetailPage({
         
         {/* Back Button */}
         <div className="absolute top-4 left-4">
-          <Link 
-            href="/event"
-            className="flex items-center gap-2 bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-lg hover:bg-white/30 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Kembali</span>
-          </Link>
+          <BackToEventsLink />
         </div>
 
         {/* Countdown */}
@@ -256,13 +245,7 @@ export default async function EventDetailPage({
               </div>
 
               {canRegister ? (
-                <Link
-                  href={`/event/register/${event.slug}`}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-iark-red text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-red-700 transition-colors"
-                >
-                  <CheckCircle className="w-5 h-5" />
-                  Daftar Sekarang
-                </Link>
+                <RegisterButton slug={event.slug} />
               ) : (
                 <button
                   disabled

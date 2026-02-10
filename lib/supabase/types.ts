@@ -100,6 +100,8 @@ export interface Profile {
   photo: string | null;
   angkatan: number | null;
   asrama: string | null;
+  regional: string | null;
+  kampus: string | null;
   bio: string | null;
   phone: string | null;
   location: string | null;

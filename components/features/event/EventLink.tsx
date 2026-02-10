@@ -10,13 +10,20 @@ interface EventLinkProps extends Omit<ComponentProps<typeof Link>, 'href'> {
 }
 
 export function EventLink({ path, children, ...props }: EventLinkProps) {
-  // Default to /event/path for SSR, then compute correct path on client
-  const [href, setHref] = useState(`/event${path.startsWith('/') ? path : `/${path}`}`);
-
+  const [mounted, setMounted] = useState(false);
+  
   useEffect(() => {
-    // Compute correct href after mount (when window is available)
-    setHref(getEventHref(path));
-  }, [path]);
+    setMounted(true);
+  }, []);
 
-  return <Link href={href} {...props}>{children}</Link>;
+  // Compute href - on server/initial render use /event prefix, on client detect subdomain
+  const href = mounted 
+    ? getEventHref(path)
+    : `/event${path.startsWith('/') ? path : `/${path}`}`;
+
+  return (
+    <span suppressHydrationWarning>
+      <Link href={href} {...props}>{children}</Link>
+    </span>
+  );
 }

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, MessageCircle, X } from 'lucide-react';
+import { DonasiLink } from './DonasiLink';
 
 export interface StickyDonationCTAProps {
   className?: string;
@@ -58,13 +58,13 @@ export function StickyDonationCTA({ className = '' }: StickyDonationCTAProps) {
             className={`fixed bottom-0 left-0 right-0 md:hidden bg-white border-t border-gray-200 shadow-2xl z-50 ${className}`}
           >
             <div className="flex items-center justify-between gap-3 p-4">
-              <Link
-                href="/donasi"
+              <DonasiLink
+                path="/"
                 className="flex-1 bg-iark-red hover:bg-red-700 text-white font-bold py-3 px-4 rounded-full text-center flex items-center justify-center gap-2 transition-colors duration-300"
               >
                 <Heart className="w-5 h-5" />
                 Donasi Sekarang
-              </Link>
+              </DonasiLink>
               <a
                 href="https://wa.me/6281234567890?text=Halo%20IARK,%20saya%20ingin%20bertanya%20tentang%20donasi"
                 target="_blank"
@@ -105,13 +105,13 @@ export function StickyDonationCTA({ className = '' }: StickyDonationCTAProps) {
                 Dukung gerakan kepemimpinan berintegritas
               </p>
 
-              <Link
-                href="/donasi"
+              <DonasiLink
+                path="/"
                 className="bg-iark-red hover:bg-red-700 text-white font-bold py-3 px-6 rounded-full text-center flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-lg"
               >
                 <Heart className="w-5 h-5" />
                 Donasi Sekarang
-              </Link>
+              </DonasiLink>
 
               <a
                 href="https://wa.me/6281234567890?text=Halo%20IARK,%20saya%20ingin%20bertanya%20tentang%20donasi"

@@ -19,12 +19,19 @@ export async function middleware(request: NextRequest) {
   const isEventSubdomain = host.startsWith('event.');
   const isDonasiSubdomain = host.startsWith('donasi.');
 
-  // Block admin/dashboard routes from subdomains
+  // Block admin/dashboard routes from subdomains & redirect /masuk to main domain
   if (isEventSubdomain || isDonasiSubdomain) {
     if (url.pathname.startsWith('/admin') || url.pathname.startsWith('/dashboard')) {
       const mainUrl = new URL(url);
       mainUrl.host = host.replace(/^(event\.|donasi\.)/, '');
       mainUrl.pathname = '/';
+      return NextResponse.redirect(mainUrl);
+    }
+    
+    // Redirect /masuk to main domain
+    if (url.pathname === '/masuk' || url.pathname === '/daftar') {
+      const mainUrl = new URL(url);
+      mainUrl.host = host.replace(/^(event\.|donasi\.)/, '');
       return NextResponse.redirect(mainUrl);
     }
   }
@@ -55,6 +62,12 @@ export async function middleware(request: NextRequest) {
     }
     // In development, let next.config.ts rewrites handle it
     return await updateSession(request);
+  }
+
+  // Redirect: /checkout (generic) → /donasi-umum/checkout on donasi subdomain
+  if (isDonasiSubdomain && url.pathname === '/checkout') {
+    url.pathname = '/donasi-umum/checkout';
+    return NextResponse.redirect(url);
   }
 
   // Rewrite: donasi.ia-rk.com/* → /donasi/*

@@ -1,12 +1,11 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Link from 'next/link';
 import Image from 'next/image';
 import { Heart, ArrowRight } from 'lucide-react';
 import { DonationCampaignWithProgress } from '@/lib/supabase/types';
 import { CampaignProgress } from './CampaignProgress';
-import { getDonasiHref } from '@/lib/utils/subdomain';
+import { DonasiLink } from './DonasiLink';
 
 interface CampaignCardProps {
   campaign: DonationCampaignWithProgress;
@@ -20,8 +19,6 @@ export function CampaignCard({ campaign, index = 0 }: CampaignCardProps) {
       : campaign.description
     : '';
 
-  const campaignHref = getDonasiHref(`/${campaign.slug}`);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -29,7 +26,7 @@ export function CampaignCard({ campaign, index = 0 }: CampaignCardProps) {
       transition={{ duration: 0.4, delay: index * 0.1 }}
       className="group"
     >
-      <Link href={campaignHref}>
+      <DonasiLink path={`/${campaign.slug}`}>
         <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-iark-red/20">
           <div className="relative w-full h-48">
             {campaign.image_url ? (
@@ -79,7 +76,7 @@ export function CampaignCard({ campaign, index = 0 }: CampaignCardProps) {
             </div>
           </div>
         </div>
-      </Link>
+      </DonasiLink>
     </motion.div>
   );
 }

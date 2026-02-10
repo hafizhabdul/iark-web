@@ -15,6 +15,12 @@ import {
   X,
 } from 'lucide-react';
 
+interface Campaign {
+  id: string;
+  title: string;
+  slug: string;
+}
+
 interface Donation {
   id: string;
   order_id: string;
@@ -24,38 +30,55 @@ interface Donation {
   donor_phone: string | null;
   message: string | null;
   is_anonymous: boolean;
+  is_guest: boolean;
   payment_status: string;
   payment_method: string | null;
   paid_at: string | null;
   created_at: string;
+  campaign_id: string | null;
 }
 
 export default function AdminDonationsPage() {
   const [donations, setDonations] = useState<Donation[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [campaignFilter, setCampaignFilter] = useState('');
   const [selectedDonation, setSelectedDonation] = useState<Donation | null>(null);
 
   useEffect(() => {
-    fetchDonations();
+    fetchData();
   }, []);
 
-  async function fetchDonations() {
+  async function fetchData() {
     setLoading(true);
     const supabase = createClient();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
-      .from('donations')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Fetch donations and campaigns in parallel
+    const [donationsRes, campaignsRes] = await Promise.all([
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase as any)
+        .from('donations')
+        .select('*')
+        .order('created_at', { ascending: false }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase as any)
+        .from('campaigns')
+        .select('id, title, slug')
+        .order('title', { ascending: true }),
+    ]);
 
-    if (error) {
-      console.error('Error fetching donations:', error);
+    if (donationsRes.error) {
+      console.error('Error fetching donations:', donationsRes.error);
     } else {
-      setDonations(data || []);
+      setDonations(donationsRes.data || []);
     }
+
+    if (!campaignsRes.error) {
+      setCampaigns(campaignsRes.data || []);
+    }
+
     setLoading(false);
   }
 
@@ -87,7 +110,8 @@ export default function AdminDonationsPage() {
       d.donor_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       d.order_id.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = !statusFilter || d.payment_status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesCampaign = !campaignFilter || d.campaign_id === campaignFilter;
+    return matchesSearch && matchesStatus && matchesCampaign;
   });
 
   const stats = {
@@ -200,6 +224,16 @@ export default function AdminDonationsPage() {
           />
         </div>
         <select
+          value={campaignFilter}
+          onChange={(e) => setCampaignFilter(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-iark-red"
+        >
+          <option value="">Semua Kampanye</option>
+          {campaigns.map(c => (
+            <option key={c.id} value={c.id}>{c.title}</option>
+          ))}
+        </select>
+        <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-iark-red"
@@ -303,6 +337,9 @@ export default function AdminDonationsPage() {
                 <p className="text-sm text-gray-500">Donatur</p>
                 <p className="font-medium">
                   {selectedDonation.is_anonymous ? 'Anonim' : selectedDonation.donor_name}
+                  {selectedDonation.is_guest && (
+                    <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">Hamba Allah</span>
+                  )}
                 </p>
               </div>
               <div>

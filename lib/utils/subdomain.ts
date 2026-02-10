@@ -24,8 +24,8 @@ export function isEventSubdomain(): boolean {
  * On main domain: /donasi/slug
  */
 export function getDonasiHref(path: string): string {
-  // Remove leading /donasi if present
-  const cleanPath = path.replace(/^\/donasi/, '');
+  // Remove leading /donasi/ or exact /donasi (but not /donasi-umum etc.)
+  const cleanPath = path.replace(/^\/donasi(?=\/|$)/, '');
 
   if (isDonasiSubdomain()) {
     return cleanPath || '/';
@@ -39,8 +39,8 @@ export function getDonasiHref(path: string): string {
  * On main domain: /event/slug
  */
 export function getEventHref(path: string): string {
-  // Remove leading /event if present
-  const cleanPath = path.replace(/^\/event/, '');
+  // Remove leading /event/ or exact /event (but not /event-name etc.)
+  const cleanPath = path.replace(/^\/event(?=\/|$)/, '');
 
   if (isEventSubdomain()) {
     return cleanPath || '/';

@@ -7,7 +7,8 @@ import {
   Clock, 
   MapPin, 
   Users, 
-  Phone
+  Phone,
+  ExternalLink
 } from 'lucide-react';
 
 export const revalidate = 60;
@@ -102,10 +103,14 @@ export default async function EventDetailPage({
     minute: '2-digit',
   });
 
+  const mapsUrl = event.location 
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`
+    : null;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Image */}
-      <div className="relative h-64 md:h-96 bg-gradient-to-br from-iark-red to-iark-blue">
+      <div className="relative h-56 md:h-80 bg-gradient-to-br from-iark-red to-iark-blue">
         {event.image_url && (
           <Image
             src={event.image_url}
@@ -120,45 +125,29 @@ export default async function EventDetailPage({
         <div className="absolute top-4 left-4">
           <BackToEventsLink />
         </div>
-
-        {/* Countdown */}
-        {!isPast && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white">
-            <CountdownTimer targetDate={event.date} />
-          </div>
-        )}
       </div>
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white rounded-xl shadow-lg -mt-16 relative z-10 p-6 md:p-8">
-          {/* Status Badges */}
+          {/* Countdown - moved inside content card */}
+          {!isPast && (
+            <div className="mb-6 flex justify-center">
+              <CountdownTimer targetDate={event.date} />
+            </div>
+          )}
+
+          {/* Status Badge - simplified */}
           <div className="flex flex-wrap gap-2 mb-4">
-            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-              event.event_type === 'online' 
-                ? 'bg-blue-100 text-blue-700' 
-                : event.event_type === 'hybrid'
-                ? 'bg-purple-100 text-purple-700'
-                : 'bg-orange-100 text-orange-700'
-            }`}>
-              {event.event_type === 'online' ? '🌐 Online' : event.event_type === 'hybrid' ? '🔄 Hybrid' : '📍 Offline'}
-            </span>
-            
-            {isPast && (
+            {isPast ? (
               <span className="bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1 rounded-full">
-                Selesai
+                Event Selesai
               </span>
-            )}
-            {isFull && !isPast && (
+            ) : isFull ? (
               <span className="bg-red-100 text-red-700 text-xs font-semibold px-3 py-1 rounded-full">
                 Kuota Penuh
               </span>
-            )}
-            {event.price === 0 && (
-              <span className="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
-                Gratis
-              </span>
-            )}
+            ) : null}
           </div>
 
           {/* Title */}
@@ -178,10 +167,21 @@ export default async function EventDetailPage({
 
             <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
               <MapPin className="w-5 h-5 text-iark-red mt-0.5" />
-              <div>
+              <div className="flex-1">
                 <p className="font-semibold text-gray-900">{event.location}</p>
                 {event.event_type !== 'offline' && event.meeting_link && (
                   <p className="text-sm text-gray-600">Link akan dikirim via email</p>
+                )}
+                {event.event_type !== 'online' && mapsUrl && (
+                  <a
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-sm text-iark-red hover:underline mt-1"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    Buka di Google Maps
+                  </a>
                 )}
               </div>
             </div>

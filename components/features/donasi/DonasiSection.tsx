@@ -1,5 +1,7 @@
+'use client';
+
 import Image from 'next/image';
-import Link from 'next/link';
+import { DonasiLink } from './DonasiLink';
 
 export interface DonasiSectionProps {
   className?: string;
@@ -74,8 +76,8 @@ export function DonasiSection({ className = '' }: DonasiSectionProps) {
             </p>
 
             {/* CTA Button */}
-            <Link
-              href="/donasi"
+            <DonasiLink
+              path="/"
               className="bg-iark-red hover:bg-red-700 text-white font-bold px-8 py-4 rounded-full text-lg shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center gap-3 w-fit hover:-translate-y-1 mb-8"
             >
               Kontribusi Sekarang
@@ -92,7 +94,7 @@ export function DonasiSection({ className = '' }: DonasiSectionProps) {
                   d="M13 7l5 5m0 0l-5 5m5-5H6"
                 />
               </svg>
-            </Link>
+            </DonasiLink>
 
             {/* Stats - Inline */}
             <div className="flex flex-wrap gap-6 pt-6 border-t border-gray-200">

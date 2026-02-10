@@ -111,9 +111,9 @@ export function RegistrationForm({ eventId, eventSlug, eventTitle, eventDate, ev
         }),
       }).catch(console.error);
 
-      // Redirect after 2 seconds
+      // Redirect after 2 seconds (use relative path, works on subdomain)
       setTimeout(() => {
-        router.push(`/event/${eventSlug}?registered=true`);
+        router.push(`/${eventSlug}?registered=true`);
       }, 2000);
 
     } catch (err) {

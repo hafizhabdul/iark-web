@@ -64,7 +64,7 @@ export default async function DonorsPage() {
       <section className="relative bg-gradient-to-br from-iark-red to-iark-blue text-white py-16 px-4">
         <div className="max-w-4xl mx-auto">
           <Link
-            href="/donasi"
+            href="/"
             className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -127,7 +127,7 @@ export default async function DonorsPage() {
                 Jadilah yang pertama mendukung IARK
               </p>
               <Link
-                href="/donasi"
+                href="/"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-iark-red text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
               >
                 <Heart className="w-5 h-5" />
@@ -149,7 +149,7 @@ export default async function DonorsPage() {
               Kontribusi Anda sangat berarti bagi komunitas alumni RK
             </p>
             <Link
-              href="/donasi"
+              href="/"
               className="inline-flex items-center gap-2 px-8 py-4 bg-iark-red text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
             >
               <Heart className="w-5 h-5" />

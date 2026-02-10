@@ -47,13 +47,13 @@ export function CountdownTimer({ targetDate, className = '' }: CountdownTimerPro
 
   if (!mounted) {
     return (
-      <div className={`flex gap-3 ${className}`}>
+      <div className={`flex gap-2 md:gap-3 ${className}`}>
         {['Hari', 'Jam', 'Menit', 'Detik'].map((label) => (
           <div key={label} className="text-center">
-            <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-2 min-w-[60px]">
-              <span className="text-2xl font-bold">--</span>
+            <div className="bg-iark-red/10 rounded-lg px-2 md:px-3 py-2 min-w-[50px] md:min-w-[60px]">
+              <span className="text-xl md:text-2xl font-bold text-iark-red">--</span>
             </div>
-            <span className="text-xs mt-1 opacity-80">{label}</span>
+            <span className="text-xs mt-1 text-gray-600">{label}</span>
           </div>
         ))}
       </div>
@@ -63,7 +63,7 @@ export function CountdownTimer({ targetDate, className = '' }: CountdownTimerPro
   if (!timeLeft) {
     return (
       <div className={`text-center ${className}`}>
-        <span className="text-xl font-bold">Event Sedang Berlangsung!</span>
+        <span className="text-lg font-bold text-iark-red">Event Sedang Berlangsung!</span>
       </div>
     );
   }
@@ -76,13 +76,13 @@ export function CountdownTimer({ targetDate, className = '' }: CountdownTimerPro
   ];
 
   return (
-    <div className={`flex gap-3 ${className}`}>
+    <div className={`flex gap-2 md:gap-3 ${className}`}>
       {timeUnits.map(({ value, label }) => (
         <div key={label} className="text-center">
-          <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-2 min-w-[60px]">
-            <span className="text-2xl font-bold">{value.toString().padStart(2, '0')}</span>
+          <div className="bg-iark-red/10 rounded-lg px-2 md:px-3 py-2 min-w-[50px] md:min-w-[60px]">
+            <span className="text-xl md:text-2xl font-bold text-iark-red">{value.toString().padStart(2, '0')}</span>
           </div>
-          <span className="text-xs mt-1 opacity-80">{label}</span>
+          <span className="text-xs mt-1 text-gray-600">{label}</span>
         </div>
       ))}
     </div>

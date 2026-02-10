@@ -19,13 +19,20 @@ interface DonasiLinkProps extends Omit<ComponentProps<typeof Link>, 'href'> {
  * - <DonasiLink path="/beasiswa/checkout">Checkout</DonasiLink>
  */
 export function DonasiLink({ path, children, ...props }: DonasiLinkProps) {
-  // Default to /donasi/path for SSR, then compute correct path on client
-  const [href, setHref] = useState(`/donasi${path.startsWith('/') ? path : `/${path}`}`);
-
+  const [mounted, setMounted] = useState(false);
+  
   useEffect(() => {
-    // Compute correct href after mount (when window is available)
-    setHref(getDonasiHref(path));
-  }, [path]);
+    setMounted(true);
+  }, []);
 
-  return <Link href={href} {...props}>{children}</Link>;
+  // Compute href - on server/initial render use /donasi prefix, on client detect subdomain
+  const href = mounted 
+    ? getDonasiHref(path)
+    : `/donasi${path.startsWith('/') ? path : `/${path}`}`;
+
+  return (
+    <span suppressHydrationWarning>
+      <Link href={href} {...props}>{children}</Link>
+    </span>
+  );
 }

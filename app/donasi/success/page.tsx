@@ -2,9 +2,10 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { CheckCircle, Heart, ArrowRight, Loader2, Clock } from 'lucide-react';
+import { CheckCircle, Heart, ArrowRight, Loader2, Clock, Share2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { DonasiLink } from '@/components/features/donasi';
+import { getCrossDomainUrl } from '@/lib/utils/subdomain';
 
 interface DonationInfo {
   order_id: string;
@@ -142,20 +143,33 @@ function SuccessContent() {
           transition={{ delay: 0.4 }}
           className="space-y-4"
         >
-          <Link
-            href="/"
+          <DonasiLink
+            path="/"
             className="inline-flex items-center justify-center gap-2 w-full py-3 bg-iark-red text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
+          >
+            <Heart className="w-4 h-4" />
+            Donasi Lagi
+          </DonasiLink>
+
+          <button
+            onClick={() => {
+              const text = `Saya baru saja berdonasi melalui IARK. Yuk ikut berdonasi! ${window.location.origin}`;
+              const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+              window.open(waUrl, '_blank');
+            }}
+            className="inline-flex items-center justify-center gap-2 w-full py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors"
+          >
+            <Share2 className="w-4 h-4" />
+            Bagikan via WhatsApp
+          </button>
+
+          <a
+            href={getCrossDomainUrl('/')}
+            className="inline-flex items-center justify-center gap-2 w-full py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
           >
             Kembali ke Beranda
             <ArrowRight className="w-4 h-4" />
-          </Link>
-          
-          <Link
-            href="/donasi/donors"
-            className="inline-flex items-center justify-center gap-2 w-full py-3 border-2 border-iark-red text-iark-red rounded-xl font-semibold hover:bg-iark-red/5 transition-colors"
-          >
-            Lihat Wall of Fame
-          </Link>
+          </a>
         </motion.div>
 
         {/* Share Message */}

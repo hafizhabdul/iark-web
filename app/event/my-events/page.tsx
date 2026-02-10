@@ -158,7 +158,7 @@ export default async function MyEventsPage() {
               Anda belum mendaftar ke event apapun.
             </p>
             <Link
-              href="/event"
+              href="/"
               className="inline-flex items-center gap-2 bg-iark-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
             >
               Jelajahi Event

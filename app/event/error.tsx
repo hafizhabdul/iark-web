@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import Link from 'next/link';
 import { AlertTriangle, RefreshCw, Calendar } from 'lucide-react';
+import { EventLink } from '@/components/features/event';
 
 export default function EventError({
   error,
@@ -38,13 +38,13 @@ export default function EventError({
             Coba Lagi
           </button>
           
-          <Link
-            href="/event"
+          <EventLink
+            path="/"
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
           >
             <Calendar className="w-4 h-4" />
             Lihat Semua Event
-          </Link>
+          </EventLink>
         </div>
       </div>
     </div>

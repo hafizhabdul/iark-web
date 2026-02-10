@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import Link from 'next/link';
 import { AlertTriangle, RefreshCw, Heart } from 'lucide-react';
+import { DonasiLink } from '@/components/features/donasi';
 
 export default function DonasiError({
   error,
@@ -38,13 +38,13 @@ export default function DonasiError({
             Coba Lagi
           </button>
           
-          <Link
-            href="/donasi"
+          <DonasiLink
+            path="/"
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
           >
             <Heart className="w-4 h-4" />
             Halaman Donasi
-          </Link>
+          </DonasiLink>
         </div>
       </div>
     </div>

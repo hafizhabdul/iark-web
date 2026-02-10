@@ -1,5 +1,7 @@
-import Link from 'next/link';
+'use client';
+
 import { Calendar, Search } from 'lucide-react';
+import { EventLink } from '@/components/features/event';
 
 export default function EventNotFound() {
   return (
@@ -17,13 +19,13 @@ export default function EventNotFound() {
           Event yang Anda cari tidak dapat ditemukan atau sudah berakhir.
         </p>
         
-        <Link
-          href="/event"
+        <EventLink
+          path="/"
           className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-iark-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
         >
           <Calendar className="w-4 h-4" />
           Lihat Semua Event
-        </Link>
+        </EventLink>
       </div>
     </div>
   );

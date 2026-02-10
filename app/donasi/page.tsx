@@ -50,8 +50,8 @@ async function fetchOverallDonationStatsServer(): Promise<{ paid_amount: number;
       return { paid_amount: 0, paid_count: 0 };
     }
     return {
-      paid_amount: data?.paid_amount ?? 0,
-      paid_count: data?.paid_count ?? 0,
+      paid_amount: data?.total_paid_amount ?? 0,
+      paid_count: data?.total_paid_count ?? 0,
     };
   } catch (e) {
     console.error('Error fetching stats:', e);

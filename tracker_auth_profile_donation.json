@@ -4,6 +4,70 @@
   "reference_plan": "PLAN_AUTH_PROFILE_DONATION.md",
   "phases": [
     {
+      "id": "P0",
+      "name": "Subdomain Infrastructure",
+      "status": "done",
+      "completed_at": "2026-02-10",
+      "tasks": [
+        {
+          "id": "P0-01",
+          "title": "Event subdomain routing",
+          "description": "EventLink, BackToEventsLink, RegisterButton components for event.ia-rk.com",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P0-02",
+          "title": "Donasi subdomain routing",
+          "description": "DonasiLink component fixes for donasi.ia-rk.com",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P0-03",
+          "title": "Fix hydration mismatch",
+          "description": "suppressHydrationWarning on EventLink and DonasiLink",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P0-04",
+          "title": "Middleware: redirect /masuk to main domain",
+          "description": "From subdomain, redirect login/daftar to main domain",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P0-05",
+          "title": "Fix donation stats field names",
+          "description": "total_paid_amount vs paid_amount mismatch",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P0-06",
+          "title": "Update seed_data_events.sql",
+          "description": "Set is_live=true for past events",
+          "status": "done",
+          "priority": "medium"
+        },
+        {
+          "id": "P0-07",
+          "title": "Event card redesign",
+          "description": "Vertical card grid like 2045hz.id",
+          "status": "done",
+          "priority": "medium"
+        },
+        {
+          "id": "P0-08",
+          "title": "Event detail UI improvements",
+          "description": "Countdown inside card, reduced badges, Google Maps link",
+          "status": "done",
+          "priority": "medium"
+        }
+      ]
+    },
+    {
       "id": "P1",
       "name": "Profile Enhancement",
       "status": "done",
@@ -331,17 +395,22 @@
     }
   ],
   "summary": {
-    "total_tasks": 41,
+    "total_tasks": 49,
     "by_phase": {
+      "P0_Subdomain": 8,
       "P1_Profile": 9,
       "P2_Donation": 12,
       "P3_Event": 12,
       "P4_Polish": 8
     },
-    "by_priority": {
-      "high": 22,
-      "medium": 15,
-      "low": 4
+    "completed": {
+      "P0_Subdomain": "done",
+      "P1_Profile": "done",
+      "P3_Event": "done"
+    },
+    "remaining": {
+      "P2_Donation": 12,
+      "P4_Polish": 8
     }
   }
 }

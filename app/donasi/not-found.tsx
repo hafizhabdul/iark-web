@@ -1,5 +1,7 @@
-import Link from 'next/link';
+'use client';
+
 import { Heart, Search } from 'lucide-react';
+import { DonasiLink } from '@/components/features/donasi';
 
 export default function DonasiNotFound() {
   return (
@@ -17,13 +19,13 @@ export default function DonasiNotFound() {
           Halaman yang Anda cari tidak dapat ditemukan.
         </p>
         
-        <Link
-          href="/donasi"
+        <DonasiLink
+          path="/"
           className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-iark-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
         >
           <Heart className="w-4 h-4" />
           Kembali ke Donasi
-        </Link>
+        </DonasiLink>
       </div>
     </div>
   );

@@ -107,7 +107,36 @@ export async function fetchOverallDonationStats(): Promise<{ paid_amount: number
     }
     throw error;
   }
-  return data ?? { paid_amount: 0, paid_count: 0 };
+  return {
+    paid_amount: data?.total_paid_amount ?? 0,
+    paid_count: data?.total_paid_count ?? 0,
+  };
+}
+
+/**
+ * Fetch user's donation history
+ */
+export async function fetchUserDonations(userId: string) {
+  const supabase = createClient();
+
+  const { data, error } = await (supabase as any)
+    .from('donations')
+    .select(`
+      id,
+      order_id,
+      amount,
+      payment_status,
+      created_at,
+      campaigns:campaign_id (title, slug)
+    `)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []).map((d: any) => ({
+    ...d,
+    campaign: d.campaigns || null,
+  }));
 }
 
 /**

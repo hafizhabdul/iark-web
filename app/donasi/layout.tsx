@@ -31,13 +31,6 @@ function DonasiHeader() {
               <Heart className="w-4 h-4" />
               <span className="hidden sm:inline">Donatur</span>
             </DonasiLink>
-            <DonasiLink
-              path="/checkout"
-              className="flex items-center gap-2 px-4 py-2 bg-iark-red text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              <Heart className="w-4 h-4" />
-              <span>Donasi</span>
-            </DonasiLink>
           </nav>
         </div>
       </div>

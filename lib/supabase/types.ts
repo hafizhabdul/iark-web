@@ -228,6 +228,7 @@ export interface DonationRow {
   donor_phone: string | null;
   message: string | null;
   is_anonymous: boolean;
+  is_guest: boolean;
   payment_status: 'pending' | 'paid' | 'expired' | 'failed';
   payment_method: string | null;
   paid_at: string | null;

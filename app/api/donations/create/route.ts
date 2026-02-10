@@ -13,19 +13,20 @@ export async function POST(request: NextRequest) {
       donor_phone,
       message,
       is_anonymous,
+      is_guest,
       turnstile_token,
       campaign_id,
     } = body;
 
     // Validate required fields
-    if (!amount || amount < 10000) {
+    if (!amount || amount < 1000) {
       return NextResponse.json(
-        { error: 'Minimal donasi Rp 10.000' },
+        { error: 'Minimal donasi Rp 1.000' },
         { status: 400 }
       );
     }
 
-    if (!donor_name?.trim()) {
+    if (!is_guest && !donor_name?.trim()) {
       return NextResponse.json(
         { error: 'Nama wajib diisi' },
         { status: 400 }
@@ -109,12 +110,13 @@ export async function POST(request: NextRequest) {
       .insert({
         order_id,
         amount,
-        donor_name: donor_name.trim(),
+        donor_name: is_guest ? (donor_name?.trim() || 'Hamba Allah') : donor_name.trim(),
         donor_email: donor_email.trim().toLowerCase(),
-        donor_phone: donor_phone?.trim() || null,
+        donor_phone: is_guest ? null : (donor_phone?.trim() || null),
         message: message?.trim() || null,
-        is_anonymous: is_anonymous || false,
-        user_id: user?.id || null,
+        is_anonymous: is_guest ? true : (is_anonymous || false),
+        is_guest: is_guest || false,
+        user_id: is_guest ? null : (user?.id || null),
         campaign_id: resolvedCampaignId,
         payment_status: 'pending',
       })

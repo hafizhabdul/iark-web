@@ -1,8 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound, redirect } from 'next/navigation';
-import Link from 'next/link';
-import { RegistrationForm } from '@/components/features/event';
-import { ArrowLeft, Calendar, MapPin, Clock } from 'lucide-react';
+import { RegistrationForm, BackToEventLink, LoginLink } from '@/components/features/event';
+import { Calendar, MapPin, Clock } from 'lucide-react';
 
 interface EventForRegistration {
   id: string;
@@ -123,13 +122,7 @@ export default async function EventRegistrationPage({
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto px-4">
         {/* Back Link */}
-        <Link
-          href={`/${slug}`}
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-iark-red mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Kembali ke Detail Event
-        </Link>
+        <BackToEventLink slug={slug} />
 
         {/* Event Summary Card */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
@@ -173,7 +166,7 @@ export default async function EventRegistrationPage({
           ) : (
             <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-blue-700 text-sm">
-                Anda mendaftar sebagai tamu. <Link href="/masuk" className="font-semibold underline">Login</Link> untuk menyimpan riwayat pendaftaran.
+                Anda mendaftar sebagai tamu. <LoginLink className="font-semibold underline">Login</LoginLink> untuk menyimpan riwayat pendaftaran.
               </p>
             </div>
           )}

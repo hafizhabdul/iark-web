@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { verifyTurnstile } from '@/lib/turnstile';
 import { nanoid } from 'nanoid';
 
@@ -53,13 +53,16 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    // Use admin client for DB operations (bypasses RLS)
+    const adminClient = await createAdminClient();
+
     // Resolve campaign_id - use provided one or default to "donasi-umum"
     let resolvedCampaignId: string;
-    
+
     if (campaign_id) {
       // Verify the provided campaign exists and is active
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: campaign, error: campaignError } = await (supabase as any)
+      const { data: campaign, error: campaignError } = await (adminClient as any)
         .from('donation_campaigns')
         .select('id, is_active')
         .eq('id', campaign_id)
@@ -83,7 +86,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Get default "donasi-umum" campaign
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: defaultCampaign, error: defaultError } = await (supabase as any)
+      const { data: defaultCampaign, error: defaultError } = await (adminClient as any)
         .from('donation_campaigns')
         .select('id')
         .eq('slug', 'donasi-umum')
@@ -105,7 +108,7 @@ export async function POST(request: NextRequest) {
 
     // Create donation record
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: donation, error: insertError } = await (supabase as any)
+    const { data: donation, error: insertError } = await (adminClient as any)
       .from('donations')
       .insert({
         order_id,

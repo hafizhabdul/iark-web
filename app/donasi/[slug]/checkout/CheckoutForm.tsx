@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Turnstile } from '@marsidev/react-turnstile';
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import Image from 'next/image';
 import { ArrowLeft, Heart, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { DonasiLink } from '@/components/features/donasi';
@@ -63,6 +63,7 @@ export function CheckoutForm({ campaign, user }: CheckoutFormProps) {
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const turnstileEnabled = !!turnstileSiteKey && !turnstileSiteKey.includes('your_');
   const [turnstileToken, setTurnstileToken] = useState<string | null>(turnstileEnabled ? null : 'skip');
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   const isGuest = mode === 'guest';
   const isLoggedIn = mode === 'logged_in';
@@ -165,6 +166,9 @@ export function CheckoutForm({ campaign, user }: CheckoutFormProps) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan');
       setIsSubmitting(false);
+      // Reset Turnstile so user can retry
+      turnstileRef.current?.reset();
+      setTurnstileToken(turnstileEnabled ? null : 'skip');
     }
   };
 
@@ -422,9 +426,14 @@ export function CheckoutForm({ campaign, user }: CheckoutFormProps) {
             {turnstileEnabled && (
               <div className="flex justify-center">
                 <Turnstile
+                  ref={turnstileRef}
                   siteKey={turnstileSiteKey!}
                   onSuccess={setTurnstileToken}
                   onError={() => setTurnstileToken(null)}
+                  onExpire={() => {
+                    setTurnstileToken(null);
+                    turnstileRef.current?.reset();
+                  }}
                 />
               </div>
             )}

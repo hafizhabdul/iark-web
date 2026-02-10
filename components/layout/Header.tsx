@@ -25,7 +25,7 @@ export function Header({ className = '' }: HeaderProps) {
     { href: '/bidang', label: 'Bidang' },
     { href: '/kegiatan', label: 'Kegiatan' },
     { href: '/cerita', label: 'Cerita' },
-    { href: '/donasi', label: 'Donasi' },
+    { href: '/', label: 'Donasi', subdomain: 'donasi' as const },
     { href: '/', label: 'Event', subdomain: 'event' as const },
   ];
 

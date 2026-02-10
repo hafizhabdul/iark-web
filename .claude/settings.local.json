@@ -11,7 +11,8 @@
       "WebFetch(domain:www.kalamuna.com)",
       "Bash(ls \"C:\\\\Users\\\\idhar\\\\Documents\\\\KODING HAFIZH\\\\iark-web\\\\app\\\\donasi\\\\checkout\"\" 2>/dev/null || echo \"dir empty or gone \")",
       "Bash(npx tsc:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(pnpm install:*)"
     ]
   }
 }

@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!donor_email?.trim() || !donor_email.includes('@')) {
+    if (!is_guest && (!donor_email?.trim() || !donor_email.includes('@'))) {
       return NextResponse.json(
         { error: 'Email tidak valid' },
         { status: 400 }
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
         order_id,
         amount,
         donor_name: is_guest ? (donor_name?.trim() || 'Hamba Allah') : donor_name.trim(),
-        donor_email: donor_email.trim().toLowerCase(),
+        donor_email: donor_email?.trim()?.toLowerCase() || null,
         donor_phone: is_guest ? null : (donor_phone?.trim() || null),
         message: message?.trim() || null,
         is_anonymous: is_guest ? true : (is_anonymous || false),

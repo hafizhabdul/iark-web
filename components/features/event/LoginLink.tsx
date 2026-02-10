@@ -12,8 +12,8 @@ export function LoginLink({ children, className }: LoginLinkProps) {
   const [href, setHref] = useState('/masuk');
 
   useEffect(() => {
-    // Get URL to main domain's /masuk page
-    const loginUrl = getCrossDomainUrl('/masuk');
+    const currentUrl = window.location.href;
+    const loginUrl = getCrossDomainUrl(`/masuk?redirectTo=${encodeURIComponent(currentUrl)}`);
     setHref(loginUrl);
   }, []);
 

@@ -141,91 +141,128 @@
     {
       "id": "P2",
       "name": "Donation Flow Enhancement",
-      "status": "todo",
+      "status": "done",
+      "completed_at": "2026-02-10",
       "tasks": [
         {
           "id": "P2-01",
           "title": "Migration: Add is_guest to donations",
           "description": "ALTER TABLE donations ADD COLUMN is_guest BOOLEAN",
-          "status": "todo",
-          "priority": "medium"
+          "status": "done",
+          "priority": "medium",
+          "note": "scripts/migration_donation_guest.sql created, run manually in Supabase"
         },
         {
           "id": "P2-02",
           "title": "Create AuthChoice component",
           "description": "components/features/auth/AuthChoice.tsx - Login vs Hamba Allah",
-          "status": "todo",
-          "priority": "high"
+          "status": "done",
+          "priority": "high",
+          "note": "Already existed from P3, reused in checkout"
         },
         {
           "id": "P2-03",
           "title": "Update checkout: auth state check",
           "description": "Check if user logged in, show different UI",
-          "status": "todo",
-          "priority": "high"
+          "status": "done",
+          "priority": "high",
+          "note": "Hybrid server+client: server fetches user, client shows 3 states"
         },
         {
           "id": "P2-04",
           "title": "Update checkout: Login option",
           "description": "Add Google login button di checkout",
-          "status": "todo",
-          "priority": "high"
+          "status": "done",
+          "priority": "high",
+          "note": "AuthChoice redirects to /masuk via getCrossDomainUrl"
         },
         {
           "id": "P2-05",
           "title": "Update checkout: Hamba Allah mode",
           "description": "Guest form dengan email only",
-          "status": "todo",
-          "priority": "high"
+          "status": "done",
+          "priority": "high",
+          "note": "Email required, name optional (default Hamba Allah), auto-anonymous"
         },
         {
           "id": "P2-06",
           "title": "Update checkout: Auto-fill logged in",
           "description": "Pre-fill name, email, phone dari profile",
-          "status": "todo",
-          "priority": "high"
+          "status": "done",
+          "priority": "high",
+          "note": "Server-side getCurrentUser(), email readonly, name editable"
         },
         {
           "id": "P2-07",
           "title": "Update checkout: Free-form amount",
           "description": "Preset buttons + custom amount input bebas",
-          "status": "todo",
-          "priority": "high"
+          "status": "done",
+          "priority": "high",
+          "note": "Added 10k, 25k presets + inputMode=numeric on custom input"
         },
         {
           "id": "P2-08",
           "title": "Update API: Handle guest donations",
           "description": "api/donations/create handle is_guest, is_anonymous",
-          "status": "todo",
-          "priority": "high"
+          "status": "done",
+          "priority": "high",
+          "note": "Guest: user_id=null, is_guest=true, is_anonymous=true, name defaults to Hamba Allah"
         },
         {
           "id": "P2-09",
           "title": "Lower minimum donation",
           "description": "Ubah min dari 10.000 ke 1.000",
-          "status": "todo",
-          "priority": "low"
+          "status": "done",
+          "priority": "low",
+          "note": "Updated in both API and client-side validation"
         },
         {
           "id": "P2-10",
           "title": "Create donation history page",
           "description": "app/dashboard/donations - riwayat donasi user",
-          "status": "todo",
-          "priority": "medium"
+          "status": "done",
+          "priority": "medium",
+          "note": "Protected route, shows user donations with status and campaign link"
         },
         {
           "id": "P2-11",
           "title": "Admin: Add campaign filter",
           "description": "Filter donations by campaign di admin",
-          "status": "todo",
-          "priority": "medium"
+          "status": "done",
+          "priority": "medium",
+          "note": "Dropdown fetched from campaigns table"
         },
         {
           "id": "P2-12",
           "title": "Admin: Add search donations",
           "description": "Search by donor name, email, order_id",
-          "status": "todo",
-          "priority": "medium"
+          "status": "done",
+          "priority": "medium",
+          "note": "Already existed, verified working"
+        },
+        {
+          "id": "P2-13",
+          "title": "Consolidate checkout pages",
+          "description": "Delete /donasi/checkout, redirect to /donasi-umum/checkout via middleware",
+          "status": "done",
+          "priority": "high",
+          "note": "Generic checkout deleted, middleware redirect added"
+        },
+        {
+          "id": "P2-14",
+          "title": "Update success page",
+          "description": "WhatsApp share button, Donasi Lagi button",
+          "status": "done",
+          "priority": "medium",
+          "note": "Added WhatsApp share + Donasi Lagi + restructured buttons"
+        },
+        {
+          "id": "P2-15",
+          "title": "Fix getDonasiHref regex bug",
+          "description": "Regex stripped /donasi from /donasi-umum slug incorrectly",
+          "status": "done",
+          "priority": "high",
+          "note": "Changed to lookahead regex (?=\\/|$) for both donasi and event"
         }
       ]
     },
@@ -395,21 +432,21 @@
     }
   ],
   "summary": {
-    "total_tasks": 49,
+    "total_tasks": 52,
     "by_phase": {
       "P0_Subdomain": 8,
       "P1_Profile": 9,
-      "P2_Donation": 12,
+      "P2_Donation": 15,
       "P3_Event": 12,
       "P4_Polish": 8
     },
     "completed": {
       "P0_Subdomain": "done",
       "P1_Profile": "done",
+      "P2_Donation": "done",
       "P3_Event": "done"
     },
     "remaining": {
-      "P2_Donation": 12,
       "P4_Polish": 8
     }
   }

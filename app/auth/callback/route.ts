@@ -13,7 +13,8 @@ export async function GET(request: Request) {
     if (!error) {
       // If explicit redirect provided, use it
       if (next) {
-        return NextResponse.redirect(`${origin}${next}`);
+        const redirectUrl = next.startsWith('http') ? next : `${origin}${next}`;
+        return NextResponse.redirect(redirectUrl);
       }
 
       // Otherwise, check user role and redirect accordingly

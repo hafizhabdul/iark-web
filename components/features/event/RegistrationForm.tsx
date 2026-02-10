@@ -258,7 +258,7 @@ export function RegistrationForm({ eventId, eventSlug, eventTitle, eventDate, ev
       </div>
 
       {/* Turnstile for guest users */}
-      {!user && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+      {!user && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY.includes('your_') && (
         <div className="flex justify-center">
           <Turnstile
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}

@@ -60,7 +60,9 @@ export function CheckoutForm({ campaign, user }: CheckoutFormProps) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const turnstileEnabled = !!turnstileSiteKey && !turnstileSiteKey.includes('your_');
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(turnstileEnabled ? null : 'skip');
 
   const isGuest = mode === 'guest';
   const isLoggedIn = mode === 'logged_in';
@@ -89,8 +91,8 @@ export function CheckoutForm({ campaign, user }: CheckoutFormProps) {
   const finalAmount = formData.customAmount ? parseInt(formData.customAmount) : formData.amount;
 
   const handleLoginClick = () => {
-    const currentPath = getDonasiHref(`/${campaign.slug}/checkout`);
-    const loginUrl = getCrossDomainUrl(`/masuk?redirectTo=${encodeURIComponent(currentPath)}`);
+    const checkoutUrl = getCrossDomainUrl(`/${campaign.slug}/checkout`, 'donasi');
+    const loginUrl = getCrossDomainUrl(`/masuk?redirectTo=${encodeURIComponent(checkoutUrl)}`);
     window.location.href = loginUrl;
   };
 
@@ -113,7 +115,11 @@ export function CheckoutForm({ campaign, user }: CheckoutFormProps) {
       setError('Nama wajib diisi');
       return;
     }
-    if (!formData.email.trim() || !formData.email.includes('@')) {
+    if (!isGuest && (!formData.email.trim() || !formData.email.includes('@'))) {
+      setError('Email tidak valid');
+      return;
+    }
+    if (isGuest && formData.email.trim() && !formData.email.includes('@')) {
       setError('Email tidak valid');
       return;
     }
@@ -353,7 +359,7 @@ export function CheckoutForm({ campaign, user }: CheckoutFormProps) {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  required
+                  required={!isGuest}
                   readOnly={isLoggedIn}
                   className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-iark-red ${
                     isLoggedIn ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''
@@ -413,13 +419,15 @@ export function CheckoutForm({ campaign, user }: CheckoutFormProps) {
             </div>
 
             {/* Turnstile */}
-            <div className="flex justify-center">
-              <Turnstile
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
-                onSuccess={setTurnstileToken}
-                onError={() => setTurnstileToken(null)}
-              />
-            </div>
+            {turnstileEnabled && (
+              <div className="flex justify-center">
+                <Turnstile
+                  siteKey={turnstileSiteKey!}
+                  onSuccess={setTurnstileToken}
+                  onError={() => setTurnstileToken(null)}
+                />
+              </div>
+            )}
 
             {/* Error */}
             {error && (

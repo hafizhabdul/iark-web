@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { SocialButton } from './SocialButton';
 import { useAuth } from '@/components/providers/AuthContext';
 import { createClient } from '@/lib/supabase/client';
@@ -13,6 +14,7 @@ export function SignInForm() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuth();
+  const searchParams = useSearchParams();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,6 +25,12 @@ export function SignInForm() {
     
     if (result.error) {
       setError(result.error);
+    } else {
+      const redirectTo = searchParams.get('redirectTo');
+      if (redirectTo) {
+        window.location.href = redirectTo;
+        return;
+      }
     }
     
     setIsLoading(false);
@@ -30,10 +38,16 @@ export function SignInForm() {
 
   const handleGoogleSignIn = async () => {
     const supabase = createClient();
+    const params = new URLSearchParams(window.location.search);
+    const redirectTo = params.get('redirectTo');
+    const callbackUrl = new URL('/auth/callback', window.location.origin);
+    if (redirectTo) {
+      callbackUrl.searchParams.set('next', redirectTo);
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl.toString(),
       },
     });
     

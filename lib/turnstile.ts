@@ -20,11 +20,7 @@ export async function verifyTurnstile(token: string): Promise<boolean> {
 
   if (!secretKey) {
     console.warn('TURNSTILE_SECRET_KEY not configured, skipping verification');
-    // In development without key, allow through
-    if (process.env.NODE_ENV === 'development') {
-      return true;
-    }
-    return false;
+    return true;
   }
 
   if (!token) {

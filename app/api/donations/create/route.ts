@@ -60,8 +60,8 @@ export async function POST(request: NextRequest) {
       // Verify the provided campaign exists and is active
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: campaign, error: campaignError } = await (supabase as any)
-        .from('campaigns')
-        .select('id, status')
+        .from('donation_campaigns')
+        .select('id, is_active')
         .eq('id', campaign_id)
         .single();
 
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      if (campaign.status !== 'active') {
+      if (!campaign.is_active) {
         return NextResponse.json(
           { error: 'Kampanye tidak aktif' },
           { status: 400 }
@@ -84,10 +84,10 @@ export async function POST(request: NextRequest) {
       // Get default "donasi-umum" campaign
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: defaultCampaign, error: defaultError } = await (supabase as any)
-        .from('campaigns')
+        .from('donation_campaigns')
         .select('id')
         .eq('slug', 'donasi-umum')
-        .eq('status', 'active')
+        .eq('is_active', true)
         .single();
 
       if (defaultError || !defaultCampaign) {

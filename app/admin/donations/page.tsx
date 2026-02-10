@@ -64,7 +64,7 @@ export default function AdminDonationsPage() {
         .order('created_at', { ascending: false }),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (supabase as any)
-        .from('campaigns')
+        .from('donation_campaigns')
         .select('id, title, slug')
         .order('title', { ascending: true }),
     ]);

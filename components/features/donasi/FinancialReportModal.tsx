@@ -153,8 +153,7 @@ export function FinancialReportModal({ isOpen, onClose }: FinancialReportModalPr
                       <XAxis dataKey="month" stroke="#6B7280" />
                       <YAxis stroke="#6B7280" tickFormatter={formatRupiah} />
                       <Tooltip
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        formatter={(value: any) => formatRupiah(value)}
+                        formatter={(value) => formatRupiah(Number(value ?? 0))}
                         contentStyle={{
                           backgroundColor: 'white',
                           border: '1px solid #E5E7EB',
@@ -185,8 +184,7 @@ export function FinancialReportModal({ isOpen, onClose }: FinancialReportModalPr
                       <XAxis dataKey="month" stroke="#6B7280" />
                       <YAxis stroke="#6B7280" tickFormatter={formatRupiah} />
                       <Tooltip
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        formatter={(value: any) => formatRupiah(value)}
+                        formatter={(value) => formatRupiah(Number(value ?? 0))}
                         contentStyle={{
                           backgroundColor: 'white',
                           border: '1px solid #E5E7EB',
@@ -272,8 +270,7 @@ export function FinancialReportModal({ isOpen, onClose }: FinancialReportModalPr
                       <XAxis dataKey="quarter" stroke="#6B7280" />
                       <YAxis stroke="#6B7280" tickFormatter={formatRupiah} />
                       <Tooltip
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        formatter={(value: any) => formatRupiah(value)}
+                        formatter={(value) => formatRupiah(Number(value ?? 0))}
                         contentStyle={{
                           backgroundColor: 'white',
                           border: '1px solid #E5E7EB',

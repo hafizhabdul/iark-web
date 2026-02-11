@@ -2,9 +2,15 @@ import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const url = new URL(request.url);
+  const searchParams = url.searchParams;
   const code = searchParams.get('code');
   const next = searchParams.get('next');
+
+  // Use forwarded headers from nginx proxy to get the real origin
+  const proto = request.headers.get('x-forwarded-proto') || url.protocol.replace(':', '');
+  const host = request.headers.get('host') || url.host;
+  const origin = `${proto}://${host}`;
 
   if (code) {
     const supabase = await createClient();

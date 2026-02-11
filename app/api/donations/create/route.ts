@@ -134,54 +134,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Integrate with Pakasir payment gateway
-    // For now, return success without actual payment redirect
-    // In production, call Pakasir API and get payment_url
-    
-    const pakasirEnabled = process.env.PAKASIR_API_KEY && process.env.PAKASIR_MERCHANT_ID;
-    
-    if (pakasirEnabled) {
-      // Call Pakasir API to create payment
-      try {
-        const pakasirResponse = await fetch(`${process.env.PAKASIR_API_URL}/transactions`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.PAKASIR_API_KEY}`,
-          },
-          body: JSON.stringify({
-            merchant_id: process.env.PAKASIR_MERCHANT_ID,
-            order_id,
-            amount,
-            customer_name: donor_name,
-            customer_email: donor_email,
-            customer_phone: donor_phone,
-            description: `Donasi IARK - ${order_id}`,
-            callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/pakasir`,
-            return_url: `${process.env.NEXT_PUBLIC_APP_URL}/donasi/success?order_id=${order_id}`,
-          }),
-        });
+    // Pakasir Payment Gateway integration
+    const pakasirSlug = process.env.PAKASIR_PROJECT_SLUG;
+    const pakasirApiKey = process.env.PAKASIR_API_KEY;
 
-        const pakasirData = await pakasirResponse.json();
+    if (pakasirSlug && pakasirApiKey) {
+      // Build redirect URL for after payment
+      const proto = request.headers.get('x-forwarded-proto') || 'https';
+      const host = request.headers.get('host') || 'ia-rk.com';
+      const appOrigin = `${proto}://${host}`;
+      const redirectUrl = `${appOrigin}/donasi/success?order_id=${order_id}`;
 
-        if (pakasirData.payment_url) {
-          return NextResponse.json({
-            success: true,
-            order_id: donation.order_id,
-            payment_url: pakasirData.payment_url,
-          });
-        }
-      } catch (pakasirError) {
-        console.error('Pakasir API error:', pakasirError);
-        // Fall through to return without payment_url
-      }
+      // Use Pakasir Payment URL (simplest integration)
+      const payment_url = `https://app.pakasir.com/pay/${pakasirSlug}/${amount}?order_id=${order_id}&redirect=${encodeURIComponent(redirectUrl)}`;
+
+      return NextResponse.json({
+        success: true,
+        order_id: donation.order_id,
+        payment_url,
+      });
     }
 
-    // Return success without payment URL (for dev/testing)
+    // Fallback: no payment gateway configured (dev/testing)
     return NextResponse.json({
       success: true,
       order_id: donation.order_id,
-      message: 'Donasi berhasil dibuat. Pembayaran dalam mode testing.',
+      message: 'Donasi berhasil dibuat. Payment gateway belum dikonfigurasi.',
     });
   } catch (error) {
     console.error('Donation API error:', error);

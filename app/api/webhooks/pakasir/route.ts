@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import crypto from 'crypto';
 import { sendDonationThankYou } from '@/lib/email/send';
 
@@ -45,11 +45,12 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Only process successful payments
-    if (status !== 'paid' && status !== 'success') {
-      return NextResponse.json({ success: true, message: 'Status not paid, ignoring' });
+    // Pakasir sends status: "completed"
+    if (status !== 'paid' && status !== 'success' && status !== 'completed') {
+      return NextResponse.json({ success: true, message: 'Status not completed, ignoring' });
     }
 
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
 
     // Check if already processed (idempotency)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

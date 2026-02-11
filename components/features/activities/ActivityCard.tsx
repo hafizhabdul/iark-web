@@ -19,7 +19,7 @@ export function ActivityCard({ activity, index = 0 }: ActivityCardProps) {
       transition={{ duration: 0.5, delay: index * 0.1 }}
       viewport={{ once: true }}
     >
-      <Link href={activity.link || '#'}>
+      <Link href={`/kegiatan/${activity.id}`}>
         <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 group">
           <div className="flex flex-col md:flex-row">
             {/* Content */}

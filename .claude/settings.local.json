@@ -14,7 +14,8 @@
       "Bash(npm run build:*)",
       "Bash(pnpm install:*)",
       "Bash(pnpm build:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(ls:*)"
     ]
   }
 }

@@ -86,10 +86,10 @@ export default async function EventListPage() {
 
         <div className="relative max-w-6xl mx-auto text-center text-white">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Event & Kegiatan IARK
+            Event IARK
           </h1>
           <p className="text-xl opacity-90 max-w-2xl mx-auto mb-8">
-            Temukan dan daftar ke berbagai kegiatan yang diselenggarakan oleh IARK
+            Temukan dan daftar ke berbagai event yang diselenggarakan oleh IARK
           </p>
 
           {/* Stats */}

@@ -149,6 +149,7 @@ CREATE OR REPLACE FUNCTION register_for_event(
   p_phone VARCHAR DEFAULT NULL,
   p_angkatan INTEGER DEFAULT NULL,
   p_asrama VARCHAR DEFAULT NULL,
+  p_kampus VARCHAR DEFAULT NULL,
   p_organization VARCHAR DEFAULT NULL
 ) RETURNS UUID AS $$
 DECLARE
@@ -193,10 +194,10 @@ BEGIN
 
   -- Insert registration
   INSERT INTO event_registrations (
-    event_id, user_id, full_name, email, phone, angkatan, asrama, organization
+    event_id, user_id, full_name, email, phone, angkatan, asrama, kampus, organization
   )
   VALUES (
-    p_event_id, p_user_id, p_full_name, p_email, p_phone, p_angkatan, p_asrama, p_organization
+    p_event_id, p_user_id, p_full_name, p_email, p_phone, p_angkatan, p_asrama, p_kampus, p_organization
   )
   RETURNING id INTO v_reg_id;
 

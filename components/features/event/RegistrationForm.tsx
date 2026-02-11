@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { createClient } from '@/lib/supabase/client';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import { ANGKATAN_OPTIONS } from '@/lib/constants/regional';
+import { ANGKATAN_OPTIONS, KAMPUS_OPTIONS } from '@/lib/constants/regional';
+import { SearchableDropdown } from '@/components/ui/SearchableDropdown';
 
 interface RegistrationFormProps {
   eventId: string;
@@ -37,6 +38,8 @@ export function RegistrationForm({ eventId, eventSlug, eventTitle, eventDate, ev
     phone: user?.phone || '',
     angkatan: user?.angkatan?.toString() || '',
     asrama: user?.asrama || '',
+    kampus: '',
+    kampusCustom: '',
     organization: '',
   });
 
@@ -75,6 +78,11 @@ export function RegistrationForm({ eventId, eventSlug, eventTitle, eventDate, ev
         p_phone: formData.phone || null,
         p_angkatan: formData.angkatan ? parseInt(formData.angkatan) : null,
         p_asrama: formData.asrama || null,
+        p_kampus: formData.kampus === 'lainnya'
+          ? formData.kampusCustom || null
+          : formData.kampus
+            ? KAMPUS_OPTIONS.find(o => o.value === formData.kampus)?.label || null
+            : null,
         p_organization: formData.organization || null,
       });
 
@@ -240,6 +248,30 @@ export function RegistrationForm({ eventId, eventSlug, eventTitle, eventDate, ev
             <option value="Lainnya">Lainnya</option>
           </select>
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Asal Kampus
+        </label>
+        <SearchableDropdown
+          options={KAMPUS_OPTIONS}
+          value={formData.kampus}
+          onChange={(val) => setFormData(prev => ({ ...prev, kampus: val, kampusCustom: val !== 'lainnya' ? '' : prev.kampusCustom }))}
+          placeholder="Pilih Kampus"
+          searchPlaceholder="Cari nama kampus..."
+        />
+        {formData.kampus === 'lainnya' && (
+          <input
+            type="text"
+            id="kampusCustom"
+            name="kampusCustom"
+            value={formData.kampusCustom}
+            onChange={handleChange}
+            className="w-full mt-2 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent"
+            placeholder="Ketik nama kampus"
+          />
+        )}
       </div>
 
       <div>

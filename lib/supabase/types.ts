@@ -84,6 +84,7 @@ export interface Database {
           p_phone?: string | null;
           p_angkatan?: number | null;
           p_asrama?: string | null;
+          p_kampus?: string | null;
           p_organization?: string | null;
         };
         Returns: string;

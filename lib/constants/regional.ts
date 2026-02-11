@@ -39,10 +39,61 @@ export const REGIONAL_OPTIONS = [
   { value: 'yogyakarta', label: 'DI Yogyakarta' },
 ];
 
+export const KAMPUS_OPTIONS = [
+  { value: 'ipb', label: 'Institut Pertanian Bogor (IPB)' },
+  { value: 'itb', label: 'Institut Teknologi Bandung (ITB)' },
+  { value: 'its', label: 'Institut Teknologi Sepuluh Nopember (ITS)' },
+  { value: 'pnj', label: 'Politeknik Negeri Jakarta' },
+  { value: 'polines', label: 'Politeknik Negeri Semarang' },
+  { value: 'telkom-u', label: 'Telkom University' },
+  { value: 'unair', label: 'Universitas Airlangga (UNAIR)' },
+  { value: 'unand', label: 'Universitas Andalas (UNAND)' },
+  { value: 'uaj', label: 'Universitas Atma Jaya' },
+  { value: 'binus', label: 'Universitas Bina Nusantara (BINUS)' },
+  { value: 'ub', label: 'Universitas Brawijaya (UB)' },
+  { value: 'undip', label: 'Universitas Diponegoro (UNDIP)' },
+  { value: 'ugm', label: 'Universitas Gadjah Mada (UGM)' },
+  { value: 'gunadarma', label: 'Universitas Gunadarma' },
+  { value: 'unhas', label: 'Universitas Hasanuddin (UNHAS)' },
+  { value: 'ui', label: 'Universitas Indonesia (UI)' },
+  { value: 'uii', label: 'Universitas Islam Indonesia (UII)' },
+  { value: 'uin-jakarta', label: 'Universitas Islam Negeri (UIN) Jakarta' },
+  { value: 'uin-yogyakarta', label: 'Universitas Islam Negeri (UIN) Yogyakarta' },
+  { value: 'unej', label: 'Universitas Jember (UNEJ)' },
+  { value: 'unpar', label: 'Universitas Katolik Parahyangan (UNPAR)' },
+  { value: 'unila', label: 'Universitas Lampung (UNILA)' },
+  { value: 'unram', label: 'Universitas Mataram (UNRAM)' },
+  { value: 'umj', label: 'Universitas Muhammadiyah Jakarta' },
+  { value: 'umm', label: 'Universitas Muhammadiyah Malang' },
+  { value: 'ums', label: 'Universitas Muhammadiyah Surakarta' },
+  { value: 'umy', label: 'Universitas Muhammadiyah Yogyakarta' },
+  { value: 'unmul', label: 'Universitas Mulawarman (UNMUL)' },
+  { value: 'unj', label: 'Universitas Negeri Jakarta (UNJ)' },
+  { value: 'um', label: 'Universitas Negeri Malang (UM)' },
+  { value: 'unnes', label: 'Universitas Negeri Semarang (UNNES)' },
+  { value: 'unesa', label: 'Universitas Negeri Surabaya (UNESA)' },
+  { value: 'uny', label: 'Universitas Negeri Yogyakarta (UNY)' },
+  { value: 'unpad', label: 'Universitas Padjadjaran (UNPAD)' },
+  { value: 'uph', label: 'Universitas Pelita Harapan (UPH)' },
+  { value: 'upi', label: 'Universitas Pendidikan Indonesia (UPI)' },
+  { value: 'prasetiya-mulya', label: 'Universitas Prasetiya Mulya' },
+  { value: 'unri', label: 'Universitas Riau (UNRI)' },
+  { value: 'unsrat', label: 'Universitas Sam Ratulangi (UNSRAT)' },
+  { value: 'uns', label: 'Universitas Sebelas Maret (UNS)' },
+  { value: 'unsri', label: 'Universitas Sriwijaya (UNSRI)' },
+  { value: 'usu', label: 'Universitas Sumatera Utara (USU)' },
+  { value: 'usk', label: 'Universitas Syiah Kuala (USK)' },
+  { value: 'untar', label: 'Universitas Tarumanagara (UNTAR)' },
+  { value: 'telkom', label: 'Universitas Telkom' },
+  { value: 'trisakti', label: 'Universitas Trisakti' },
+  { value: 'unud', label: 'Universitas Udayana (UNUD)' },
+  { value: 'lainnya', label: 'Lainnya (Ketik Manual)' },
+];
+
 export const ANGKATAN_OPTIONS = Array.from(
-  { length: new Date().getFullYear() - 2009 },
+  { length: 11 },
   (_, i) => {
-    const year = 2010 + i;
-    return { value: year, label: `Angkatan ${year}` };
+    const num = i + 1;
+    return { value: num, label: `Angkatan ${num}` };
   }
 );

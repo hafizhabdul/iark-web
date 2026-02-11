@@ -1,20 +1,20 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { LogoCard } from './LogoCard';
-import { useTransition } from '@/components/providers/TransitionContext';
+import { useAuth } from '@/components/providers/AuthContext';
+import { CrossDomainLink } from '@/components/features/shared/CrossDomainLink';
 
 export interface HeaderProps {
   className?: string;
 }
 
 export function Header({ className = '' }: HeaderProps) {
-  const router = useRouter();
   const pathname = usePathname();
-  const { startTransition, completeTransition } = useTransition();
+  const { user, isAuthenticated } = useAuth();
   const [isHovering, setIsHovering] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -23,8 +23,10 @@ export function Header({ className = '' }: HeaderProps) {
     { href: '/', label: 'Home' },
     { href: '/tentang', label: 'Tentang' },
     { href: '/bidang', label: 'Bidang' },
+    { href: '/kegiatan', label: 'Kegiatan' },
     { href: '/cerita', label: 'Cerita' },
-    { href: '/donasi', label: 'Donasi' },
+    { href: '/', label: 'Donasi', subdomain: 'donasi' as const },
+    { href: '/', label: 'Event', subdomain: 'event' as const },
   ];
 
   // Scroll detection
@@ -38,57 +40,57 @@ export function Header({ className = '' }: HeaderProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Smooth scroll to top then navigate with transition
-  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-
-    // Start smooth scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    // Start transition overlay after scroll begins (300ms delay)
-    setTimeout(() => {
-      startTransition();
-    }, 300);
-
-    // Navigate after scroll + header transition complete (800ms)
-    setTimeout(() => {
-      router.push(href);
-
-      // Complete transition (fade out overlay) after navigation
-      setTimeout(() => {
-        completeTransition();
-      }, 100);
-    }, 800);
+  const getTargetLink = () => {
+    if (!isAuthenticated) return '/masuk';
+    return user?.role === 'admin' ? '/admin' : '/dashboard';
   };
+
+  const targetLink = getTargetLink();
 
   return (
     <header
-      className={`sticky top-0 z-[10000] w-full bg-white border-b border-gray-200 transition-all duration-300 ${
-        isScrolled ? 'shadow-xl' : 'shadow-md'
-      } ${className}`}
+      className={`sticky top-0 z-[10000] w-full bg-white border-b border-gray-200 transition-all duration-300 ${isScrolled ? 'shadow-xl' : 'shadow-md'
+        } ${className}`}
     >
-      <div className={`relative px-4 md:px-8 flex items-center justify-between gap-2 md:gap-8 lg:gap-12 transition-all duration-300 ${
-        isScrolled ? 'py-2 md:py-2.5' : 'py-3 md:py-4'
-      }`}>
+      <div className={`relative px-4 md:px-8 flex items-center justify-between gap-2 md:gap-8 lg:gap-12 transition-all duration-300 ${isScrolled ? 'py-2 md:py-2.5' : 'py-3 md:py-4'
+        }`}>
         {/* Left: Logo Card */}
         <LogoCard isScrolled={isScrolled} />
 
         {/* Middle: Navigation Links - Centered absolutely */}
-        <nav className={`hidden lg:flex items-center gap-10 absolute left-1/2 -translate-x-1/2 transition-all duration-300 ${
-          isScrolled ? 'gap-8' : 'gap-10'
-        }`}>
+        <nav className={`hidden lg:flex items-center gap-10 absolute left-1/2 -translate-x-1/2 transition-all duration-300 ${isScrolled ? 'gap-8' : 'gap-10'
+          }`}>
           {navLinks.map((link) => {
-            const isActive = pathname === link.href;
+            const isActive = pathname === link.href && !link.subdomain;
+            const linkClassName = `${isActive ? 'text-iark-red' : 'text-gray-800 hover:text-iark-red'
+              } font-semibold transition-all duration-200 relative group ${isScrolled ? 'text-base' : 'text-lg'
+              }`;
+
+            // Use CrossDomainLink for subdomain links
+            if (link.subdomain) {
+              return (
+                <CrossDomainLink
+                  key={link.label}
+                  href={link.href}
+                  subdomain={link.subdomain}
+                  className={linkClassName}
+                >
+                  {link.label}
+                  <motion.span
+                    className="absolute bottom-0 left-0 h-0.5 bg-iark-red"
+                    initial={{ width: 0 }}
+                    whileHover={{ width: '100%' }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                  />
+                </CrossDomainLink>
+              );
+            }
+
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={(e) => handleNavigation(e, link.href)}
-                className={`${
-                  isActive ? 'text-iark-red' : 'text-gray-800 hover:text-iark-red'
-                } font-semibold transition-all duration-200 relative group ${
-                  isScrolled ? 'text-base' : 'text-lg'
-                }`}
+                className={linkClassName}
               >
                 {link.label}
                 {/* Active underline - slides between pages */}
@@ -114,13 +116,12 @@ export function Header({ className = '' }: HeaderProps) {
         </nav>
 
         {/* Right: Interactive #RayakanKontribusi Sign-in Link */}
-        <Link href="/masuk" className="relative ml-auto hidden lg:block" onClick={(e) => handleNavigation(e, '/masuk')}>
+        <Link href={targetLink} className="relative ml-auto hidden lg:block">
           <motion.div
-            className={`text-iark-red font-bold italic flex items-center cursor-pointer rounded-full border md:border-2 border-iark-red transition-all duration-300 ${
-              isScrolled
-                ? 'text-base md:text-lg lg:text-xl py-1 md:py-1.5 px-3 md:px-4 lg:px-6'
-                : 'text-base md:text-xl lg:text-2xl py-1.5 md:py-2 px-4 md:px-6 lg:px-8'
-            }`}
+            className={`text-iark-red font-bold italic flex items-center cursor-pointer rounded-full border md:border-2 border-iark-red transition-all duration-300 ${isScrolled
+              ? 'text-base md:text-lg lg:text-xl py-1 md:py-1.5 px-3 md:px-4 lg:px-6'
+              : 'text-base md:text-xl lg:text-2xl py-1.5 md:py-2 px-4 md:px-6 lg:px-8'
+              }`}
             onHoverStart={() => setIsHovering(true)}
             onHoverEnd={() => setIsHovering(false)}
             whileHover={{
@@ -245,7 +246,7 @@ export function Header({ className = '' }: HeaderProps) {
               delay: 0.25,
             }}
           >
-            Klik untuk masuk
+            {isAuthenticated ? 'Buka Dashboard' : 'Klik untuk masuk'}
           </motion.div>
         </Link>
 
@@ -292,28 +293,37 @@ export function Header({ className = '' }: HeaderProps) {
       >
         <nav className="px-4 py-4 space-y-2">
           {navLinks.map((link, index) => {
-            const isActive = pathname === link.href;
+            const isActive = pathname === link.href && !link.subdomain;
+            const mobileLinkClassName = `block py-3 px-4 ${isActive
+              ? 'bg-iark-red/10 text-iark-red border-l-4 border-iark-red'
+              : 'text-gray-800 hover:bg-gray-100 hover:text-iark-red'
+              } font-semibold rounded-lg transition-colors`;
+
             return (
               <motion.div
-                key={link.href}
+                key={link.subdomain ? link.label : link.href}
                 initial={{ opacity: 0, x: -20 }}
                 animate={isMobileMenuOpen ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
               >
-                <Link
-                  href={link.href}
-                  className={`block py-3 px-4 ${
-                    isActive
-                      ? 'bg-iark-red/10 text-iark-red border-l-4 border-iark-red'
-                      : 'text-gray-800 hover:bg-gray-100 hover:text-iark-red'
-                  } font-semibold rounded-lg transition-colors`}
-                  onClick={(e) => {
-                    setIsMobileMenuOpen(false);
-                    handleNavigation(e, link.href);
-                  }}
-                >
-                  {link.label}
-                </Link>
+                {link.subdomain ? (
+                  <CrossDomainLink
+                    href={link.href}
+                    subdomain={link.subdomain}
+                    className={mobileLinkClassName}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.label}
+                  </CrossDomainLink>
+                ) : (
+                  <Link
+                    href={link.href}
+                    className={mobileLinkClassName}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                )}
               </motion.div>
             );
           })}
@@ -325,11 +335,10 @@ export function Header({ className = '' }: HeaderProps) {
             transition={{ duration: 0.3, delay: navLinks.length * 0.05 }}
           >
             <Link
-              href="/masuk"
+              href={targetLink}
               className="block mt-4 py-3 px-4 bg-iark-red text-white text-center font-bold rounded-lg hover:bg-red-700 transition-colors"
-              onClick={(e) => {
+              onClick={() => {
                 setIsMobileMenuOpen(false);
-                handleNavigation(e, '/masuk');
               }}
             >
               #RayakanKontribusi

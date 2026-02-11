@@ -5,33 +5,88 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { SocialButton } from './SocialButton';
 import { useAuth } from '@/components/providers/AuthContext';
+import { createClient } from '@/lib/supabase/client';
 
 export function SignUpForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const { login } = useAuth();
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { signUp } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
 
     // Basic validation
     if (password !== confirmPassword) {
-      alert('Password tidak cocok!');
+      setError('Password tidak cocok!');
       return;
     }
 
-    // Simple validation: all fields must not be empty
-    if (name.trim() && email.trim() && password.trim()) {
-      login(email, name);
+    if (password.length < 8) {
+      setError('Password minimal 8 karakter');
+      return;
+    }
+
+    setIsLoading(true);
+
+    const result = await signUp(email, password, name);
+    
+    if (result.error) {
+      setError(result.error);
+    } else {
+      setSuccess(true);
+    }
+    
+    setIsLoading(false);
+  };
+
+  const handleGoogleSignUp = async () => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    
+    if (error) {
+      setError(error.message);
     }
   };
 
-  const handleGoogleSignUp = () => {
-    // Mock Google sign up - using a default email
-    login('user@google.com', 'Google User');
-  };
+  if (success) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className="w-full max-w-md mx-auto"
+      >
+        <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-10 text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Pendaftaran Berhasil!</h2>
+          <p className="text-gray-600 mb-6">
+            Silakan cek email Anda untuk verifikasi akun. Setelah verifikasi, Anda dapat masuk ke dashboard.
+          </p>
+          <Link
+            href="/masuk"
+            className="inline-block bg-iark-red text-white font-bold py-3 px-8 rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Ke Halaman Masuk
+          </Link>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -50,6 +105,13 @@ export function SignUpForm() {
             Mulai perjalanan kontribusi Anda hari ini
           </p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            {error}
+          </div>
+        )}
 
         {/* Social Login */}
         <div className="mb-6">
@@ -81,6 +143,7 @@ export function SignUpForm() {
               placeholder="John Doe"
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-iark-red focus:outline-none transition-colors text-gray-900 placeholder:text-gray-400"
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -97,6 +160,7 @@ export function SignUpForm() {
               placeholder="nama@email.com"
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-iark-red focus:outline-none transition-colors text-gray-900 placeholder:text-gray-400"
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -114,6 +178,7 @@ export function SignUpForm() {
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-iark-red focus:outline-none transition-colors text-gray-900 placeholder:text-gray-400"
               required
               minLength={8}
+              disabled={isLoading}
             />
           </div>
 
@@ -131,18 +196,20 @@ export function SignUpForm() {
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-iark-red focus:outline-none transition-colors text-gray-900 placeholder:text-gray-400"
               required
               minLength={8}
+              disabled={isLoading}
             />
           </div>
 
           {/* Submit Button */}
           <motion.button
             type="submit"
-            className="w-full bg-iark-red text-white font-bold py-3 rounded-lg hover:bg-red-700 transition-colors shadow-lg"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            className="w-full bg-iark-red text-white font-bold py-3 rounded-lg hover:bg-red-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            whileHover={{ scale: isLoading ? 1 : 1.02 }}
+            whileTap={{ scale: isLoading ? 1 : 0.98 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
+            disabled={isLoading}
           >
-            Daftar
+            {isLoading ? 'Memproses...' : 'Daftar'}
           </motion.button>
         </form>
 

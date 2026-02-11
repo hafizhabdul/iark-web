@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "WebSearch",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:kitabisa.zendesk.com)",
+      "WebFetch(domain:this.isfluent.com)",
+      "WebFetch(domain:bootcamp.uxdesign.cc)",
+      "WebFetch(domain:suitmedia.com)",
+      "WebFetch(domain:www.kalamuna.com)",
+      "Bash(ls \"C:\\\\Users\\\\idhar\\\\Documents\\\\KODING HAFIZH\\\\iark-web\\\\app\\\\donasi\\\\checkout\"\" 2>/dev/null || echo \"dir empty or gone \")",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm build:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}

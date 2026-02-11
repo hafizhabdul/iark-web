@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { MapPin, Users } from 'lucide-react';
-import type { Dormitory } from '@/lib/data/dormitoryData';
+import type { Dormitory } from './AsramaGallerySection';
 
 export interface DormCardProps {
   dormitory: Dormitory;
@@ -11,7 +11,9 @@ export interface DormCardProps {
 }
 
 export function DormCard({ dormitory, index = 0 }: DormCardProps) {
-  const occupancyPercentage = Math.round((dormitory.occupiedRooms / dormitory.totalRooms) * 100);
+  const occupied = dormitory.occupied_rooms || 0;
+  const total = dormitory.total_rooms || 0;
+  const occupancyPercentage = total > 0 ? Math.round((occupied / total) * 100) : 0;
 
   return (
     <motion.div
@@ -24,8 +26,8 @@ export function DormCard({ dormitory, index = 0 }: DormCardProps) {
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
         <Image
-          src={dormitory.imageUrl}
-          alt={dormitory.name}
+          src={dormitory.image_url || '/placeholder.jpg'}
+          alt={dormitory.name || 'Asrama'}
           fill
           className="object-cover group-hover:scale-110 transition-transform duration-500"
           unoptimized
@@ -33,9 +35,11 @@ export function DormCard({ dormitory, index = 0 }: DormCardProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
         {/* Province Badge */}
-        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium px-3 py-1 rounded-full">
-          {dormitory.province}
-        </div>
+        {dormitory.province && (
+          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium px-3 py-1 rounded-full">
+            {dormitory.province}
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -50,7 +54,9 @@ export function DormCard({ dormitory, index = 0 }: DormCardProps) {
         </div>
 
         {/* Description */}
-        <p className="text-gray-600 text-sm mb-4">{dormitory.description}</p>
+        {dormitory.description && (
+          <p className="text-gray-600 text-sm mb-4 line-clamp-2">{dormitory.description}</p>
+        )}
 
         {/* Occupancy Stats */}
         <div className="pt-4 border-t border-gray-100">
@@ -60,7 +66,7 @@ export function DormCard({ dormitory, index = 0 }: DormCardProps) {
               <span>Hunian</span>
             </div>
             <span className="text-sm font-medium text-gray-900">
-              {dormitory.occupiedRooms}/{dormitory.totalRooms} kamar
+              {occupied}/{total} kamar
             </span>
           </div>
 

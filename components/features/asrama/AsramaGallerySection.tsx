@@ -1,15 +1,39 @@
 'use client';
 
 import { DormCard } from './DormCard';
-import { dormitoryData } from '@/lib/data/dormitoryData';
+import { useQuery } from '@tanstack/react-query';
+import { fetchDormitories } from '@/lib/queries/homepage';
+import { queryKeys, staleTime } from '@/lib/queries';
+
+export interface Dormitory {
+  id: string;
+  name: string;
+  city: string;
+  province: string | null;
+  image_url: string | null;
+  total_rooms: number | null;
+  occupied_rooms: number | null;
+  description: string | null;
+}
 
 export interface AsramaGallerySectionProps {
   className?: string;
+  initialData?: Dormitory[];
 }
 
-export function AsramaGallerySection({ className = '' }: AsramaGallerySectionProps) {
+export function AsramaGallerySection({
+  className = '',
+  initialData
+}: AsramaGallerySectionProps) {
+  const { data: dormitories = [], isLoading } = useQuery({
+    queryKey: queryKeys.dormitories,
+    queryFn: fetchDormitories,
+    initialData: initialData,
+    staleTime: staleTime.static,
+  });
+
   return (
-    <section className={`relative py-24 px-8 bg-white overflow-hidden ${className}`}>
+    <section id="asrama" className={`relative py-24 px-8 bg-white overflow-hidden ${className}`}>
       {/* Subtle gradient orbs background */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-iark-red/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-iark-yellow/5 rounded-full blur-3xl" />
@@ -38,11 +62,23 @@ export function AsramaGallerySection({ className = '' }: AsramaGallerySectionPro
         </p>
 
         {/* Dorm Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {dormitoryData.map((dorm, index) => (
-            <DormCard key={dorm.id} dormitory={dorm} index={index} />
-          ))}
-        </div>
+        {isLoading && !dormitories.length ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="w-8 h-8 border-4 border-iark-red border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {dormitories.map((dorm, index) => (
+              <DormCard key={dorm.id} dormitory={dorm as any} index={index} />
+            ))}
+          </div>
+        )}
+
+        {!isLoading && dormitories.length === 0 && (
+          <div className="text-center py-12 text-gray-500">
+            Belum ada data asrama tersedia.
+          </div>
+        )}
       </div>
     </section>
   );

@@ -4,7 +4,14 @@ import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
-import type { Testimonial } from '@/lib/data/testimonialData';
+export interface Testimonial {
+  id: string;
+  name: string;
+  title: string;
+  angkatan: string | null;
+  photo: string | null;
+  quote: string;
+}
 
 export interface TestimoniSliderProps {
   testimonials: Testimonial[];
@@ -123,7 +130,7 @@ export function TestimoniSlider({
                     {/* Photo */}
                     <div className="relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
                       <Image
-                        src={testimonial.photo}
+                        src={testimonial.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.name)}&background=C41E3A&color=fff`}
                         alt={testimonial.name}
                         fill
                         className="object-cover"

@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Instagram, Linkedin } from 'lucide-react';
-import type { ManagementMember } from '@/lib/data/managementData';
+import type { ManagementMember } from './ManagementGrid';
 
 export interface ManagementCardProps {
   member: ManagementMember;
@@ -22,7 +22,7 @@ export function ManagementCard({ member, index = 0 }: ManagementCardProps) {
       {/* Photo Container */}
       <div className="relative aspect-[4/5] overflow-hidden">
         <Image
-          src={member.photo}
+          src={member.photo || '/images/placeholder-avatar.png'}
           alt={member.name}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -34,9 +34,9 @@ export function ManagementCard({ member, index = 0 }: ManagementCardProps) {
 
         {/* Hover Overlay with Social Icons */}
         <div className="absolute inset-0 bg-iark-red/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4">
-          {member.socials.instagram && (
+          {member.instagram && (
             <a
-              href={member.socials.instagram}
+              href={member.instagram}
               target="_blank"
               rel="noopener noreferrer"
               className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-iark-red hover:scale-110 transition-transform duration-200"
@@ -45,9 +45,9 @@ export function ManagementCard({ member, index = 0 }: ManagementCardProps) {
               <Instagram className="w-6 h-6" />
             </a>
           )}
-          {member.socials.linkedin && (
+          {member.linkedin && (
             <a
-              href={member.socials.linkedin}
+              href={member.linkedin}
               target="_blank"
               rel="noopener noreferrer"
               className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-iark-blue hover:scale-110 transition-transform duration-200"

@@ -4,19 +4,41 @@ import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { heroSlides, EventSlide } from '@/lib/data/heroSlides';
+import { createClient } from '@/lib/supabase/client';
+
+import { useQuery } from '@tanstack/react-query';
+import { fetchHeroSlides } from '@/lib/queries/homepage';
+import { queryKeys, staleTime } from '@/lib/queries';
+
+export interface HeroSlide {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  image_url: string;
+  link_url: string | null;
+  order_index: number | null;
+  is_active: boolean;
+  created_at: string;
+}
 
 export interface EventCarouselProps {
   className?: string;
   autoPlayInterval?: number;
-  slides?: EventSlide[];
+  initialData?: HeroSlide[];
 }
 
 export function EventCarousel({
   className = '',
   autoPlayInterval = 5000,
-  slides = heroSlides,
+  initialData,
 }: EventCarouselProps) {
+  const { data: slides = [], isLoading } = useQuery({
+    queryKey: queryKeys.heroSlides,
+    queryFn: fetchHeroSlides,
+    initialData: initialData as any,
+    staleTime: staleTime.static,
+  });
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -84,14 +106,26 @@ export function EventCarousel({
     return Math.abs(offset) * velocity;
   };
 
+  if (isLoading) {
+    return (
+      <div className={`relative w-full max-w-6xl mx-auto ${className}`}>
+        <div className="relative aspect-[21/9] rounded-2xl overflow-hidden shadow-2xl bg-gray-100 animate-pulse" />
+      </div>
+    );
+  }
+
+  if (displaySlides.length === 0) {
+    return null;
+  }
+
   return (
     <div
-      className={`relative w-full max-w-4xl mx-auto ${className}`}
+      className={`relative w-full max-w-6xl mx-auto ${className}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* Main Carousel Container */}
-      <div className="relative aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl bg-gray-100">
+      <div className="relative aspect-[21/9] rounded-2xl overflow-hidden shadow-2xl bg-gray-100">
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={currentIndex}
@@ -120,7 +154,7 @@ export function EventCarousel({
           >
             {/* Image */}
             <Image
-              src={displaySlides[currentIndex].imageUrl}
+              src={displaySlides[currentIndex].image_url}
               alt={displaySlides[currentIndex].title}
               fill
               className="object-cover"
@@ -174,15 +208,14 @@ export function EventCarousel({
 
       {/* Navigation Dots */}
       <div className="flex justify-center gap-2 mt-4">
-        {displaySlides.map((_, index) => (
+        {displaySlides.map((_: any, index: number) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-              index === currentIndex
-                ? 'bg-iark-red w-8'
-                : 'bg-gray-300 hover:bg-gray-400'
-            }`}
+            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentIndex
+              ? 'bg-iark-red w-8'
+              : 'bg-gray-300 hover:bg-gray-400'
+              }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}

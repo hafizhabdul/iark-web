@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 export function DashboardSidebar() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -28,6 +28,15 @@ export function DashboardSidebar() {
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
+    },
+    {
+      href: '/dashboard/stories',
+      label: 'Cerita Saya',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
         </svg>
       ),
     },
@@ -95,8 +104,12 @@ export function DashboardSidebar() {
 
         {/* User Profile & Logout */}
         <div className="p-4 border-t border-gray-200">
-          {/* User Info */}
-          <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+          {/* User Info - Clickable to edit profile */}
+          <Link
+            href="/dashboard/profile"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="flex items-center gap-3 mb-4 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group cursor-pointer"
+          >
             <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
               {user?.avatar ? (
                 <Image src={user.avatar} alt={user.name} fill className="object-cover" />
@@ -107,14 +120,28 @@ export function DashboardSidebar() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm text-gray-900 truncate">{user?.name}</p>
+              <p className="font-semibold text-sm text-gray-900 truncate group-hover:text-iark-red transition-colors">{user?.name}</p>
               <p className="text-xs text-gray-600 truncate">{user?.email}</p>
             </div>
-          </div>
+            <svg className="w-4 h-4 text-gray-400 group-hover:text-iark-red transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </Link>
 
           {/* Logout Button */}
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 mb-2 bg-purple-100 hover:bg-purple-200 text-purple-700 font-semibold rounded-lg transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              <span>Admin Panel</span>
+            </Link>
+          )}
           <motion.button
-            onClick={logout}
+            onClick={signOut}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

@@ -20,6 +20,18 @@ export function PageTransitionProvider({ children }: PageTransitionProviderProps
   const [displayChildren, setDisplayChildren] = useState(children);
 
   useEffect(() => {
+    // Force scroll to top when pathname changes
+    window.scrollTo(0, 0);
+
+    // Safety timeout for dynamic content hydration
+    const timer = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [pathname]);
+
+  useEffect(() => {
     setDisplayChildren(children);
   }, [children]);
 
@@ -35,7 +47,6 @@ export function PageTransitionProvider({ children }: PageTransitionProviderProps
           duration: 0.5,
           ease: [0.22, 1, 0.36, 1],
         }}
-        onAnimationComplete={() => setDisplayChildren(children)}
       >
         {displayChildren}
       </motion.div>

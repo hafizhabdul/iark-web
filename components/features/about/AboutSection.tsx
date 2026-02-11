@@ -1,13 +1,53 @@
+import { createPublicClient } from '@/lib/supabase/public';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
+import { unstable_cache } from 'next/cache';
+
 export interface AboutSectionProps {
   className?: string;
+  showSeeMore?: boolean;
 }
 
-export function AboutSection({ className = '' }: AboutSectionProps) {
-  const stats = [
-    { value: '500+', label: 'Alumni' },
-    { value: '23', label: 'Chapters of Impact' },
-    { value: '15+', label: 'Tahun Berdampak' },
+const getStats = unstable_cache(
+  async () => {
+    const supabase = createPublicClient();
+
+    // Fetch real counts from DB
+    const { count: alumniCount } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true });
+
+    const { count: batchCount } = await supabase
+      .from('batches')
+      .select('*', { count: 'exact', head: true });
+
+    // For years, we can calculate from the first batch or hardcode the start year
+    const startYear = 2005; // Example start year
+    const currentYear = new Date().getFullYear();
+    const yearsActive = currentYear - startYear;
+
+    return [
+      { value: `${alumniCount || 0}+`, label: 'Alumni' },
+      { value: `${batchCount || 0}`, label: 'Angkatan' }, // Changed 'Chapters' to 'Angkatan' as per schema
+      { value: `${yearsActive}+`, label: 'Tahun Berdampak' },
+    ];
+  },
+  ['about-stats'],
+  { revalidate: 86400, tags: ['stats'] } // Cache for 24 hours
+);
+
+export async function AboutSection({ className = '', showSeeMore = true }: AboutSectionProps) {
+  let stats = [
+    { value: '...', label: 'Alumni' },
+    { value: '...', label: 'Angkatan' },
+    { value: '...', label: 'Tahun Berdampak' },
   ];
+
+  try {
+    stats = await getStats();
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+  }
 
   return (
     <section className={`relative py-24 px-8 bg-white overflow-hidden ${className}`}>
@@ -35,11 +75,27 @@ export function AboutSection({ className = '' }: AboutSectionProps) {
         </h2>
 
         {/* Description */}
-        <p className="text-lg md:text-xl text-center text-gray-700 leading-relaxed mb-16 max-w-3xl mx-auto">
+        <p className="text-lg md:text-xl text-center text-gray-700 leading-relaxed mb-8 max-w-3xl mx-auto">
           IARK adalah <span className="font-semibold text-iark-red">Ikatan Alumni Rumah Kepemimpinan</span>,
           wadah kolaborasi lintas angkatan yang menjadi tempat berbagi, berkontribusi,
           dan menumbuhkan semangat kepemimpinan berintegritas untuk Indonesia.
         </p>
+
+        {/* See More Button - Only show when showSeeMore is true */}
+        {showSeeMore && (
+          <div className="flex justify-center mb-16">
+            <Link
+              href="/tentang"
+              className="inline-flex items-center gap-2 text-iark-red hover:text-red-700 font-semibold transition-all duration-300 group"
+            >
+              Lihat Selengkapnya
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+            </Link>
+          </div>
+        )}
+
+        {/* Add spacing when button is hidden */}
+        {!showSeeMore && <div className="mb-16" />}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

@@ -3,17 +3,19 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { EventCarousel } from './EventCarousel';
+import { EventCarousel, type HeroSlide } from './EventCarousel';
 
 export interface HeroSectionProps {
   className?: string;
+  initialData?: HeroSlide[];
 }
 
-export function HeroSection({ className = '' }: HeroSectionProps) {
+export function HeroSection({ className = '', initialData }: HeroSectionProps) {
   const [isButtonHovered, setIsButtonHovered] = useState(false);
 
   return (
     <section className={`relative min-h-screen bg-white overflow-hidden ${className}`}>
+
       {/* Subtle gradient orbs background */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-iark-red/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-iark-blue/5 rounded-full blur-3xl" />
@@ -33,9 +35,9 @@ export function HeroSection({ className = '' }: HeroSectionProps) {
 
         {/* Headline */}
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-center text-gray-900 mb-6 max-w-5xl leading-tight"
-            style={{
-              textShadow: '2px 2px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white, 0 2px 0 white, 0 -2px 0 white, 2px 0 0 white, -2px 0 0 white'
-            }}>
+          style={{
+            textShadow: '2px 2px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white, 0 2px 0 white, 0 -2px 0 white, 2px 0 0 white, -2px 0 0 white'
+          }}>
           Menginspirasi Kepemimpinan
           <br />
           <span className="text-iark-red">Berintegritas</span> untuk
@@ -88,7 +90,7 @@ export function HeroSection({ className = '' }: HeroSectionProps) {
 
         {/* Event Carousel */}
         <div className="mt-16 w-full">
-          <EventCarousel />
+          <EventCarousel initialData={initialData} />
         </div>
       </div>
     </section>

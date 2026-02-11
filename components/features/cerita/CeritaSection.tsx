@@ -4,19 +4,25 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import { fetchPublishedStories, type Story as APIStory } from '@/lib/queries/stories';
+import { queryKeys, staleTime } from '@/lib/queries';
+import type { StoryCategory } from '@/lib/supabase/types';
 
 export interface CeritaSectionProps {
   className?: string;
+  initialData?: APIStory[];
 }
 
 interface Story {
   id: string;
+  slug: string;
   name: string;
   batch: string;
   title: string;
   excerpt: string;
   photo: string;
-  category: 'karir' | 'pengabdian' | 'akademik' | 'kepemimpinan';
+  category: StoryCategory;
   featured?: boolean;
   quote?: string;
 }
@@ -29,67 +35,34 @@ const categories = [
   { id: 'kepemimpinan', label: 'Kepemimpinan', color: 'red' },
 ];
 
-const stories: Story[] = [
-  {
-    id: '1',
-    name: 'Dr. Sarah Wijaya',
-    batch: 'RK Angkatan 15',
-    title: 'Dari Rumah Kepemimpinan ke Harvard Medical School',
-    excerpt: 'Perjalanan dari mahasiswa RK hingga menjadi peneliti kesehatan global di salah satu universitas terbaik dunia.',
-    photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
-    category: 'akademik',
-    featured: true,
-    quote: 'RK mengajarkan saya bahwa kepemimpinan bukan tentang posisi, tapi tentang memberi dampak positif bagi orang lain.',
-  },
-  {
-    id: '2',
-    name: 'Ahmad Fauzi',
-    batch: 'RK Angkatan 12',
-    title: 'Membangun Startup Edukasi untuk Daerah Terpencil',
-    excerpt: 'Kisah mendirikan platform edukasi online yang telah menjangkau ribuan siswa di pelosok Indonesia.',
-    photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
-    category: 'karir',
-  },
-  {
-    id: '3',
-    name: 'Dewi Lestari',
-    batch: 'RK Angkatan 14',
-    title: 'Mengabdi sebagai Guru di Papua Selama 5 Tahun',
-    excerpt: 'Pengalaman menjadi pengajar muda dan membawa perubahan untuk pendidikan anak-anak Papua.',
-    photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80',
-    category: 'pengabdian',
-  },
-  {
-    id: '4',
-    name: 'Budi Santoso',
-    batch: 'RK Angkatan 13',
-    title: 'Dari Aktivis Kampus ke Anggota DPR Termuda',
-    excerpt: 'Perjalanan politik yang dimulai dari kepemimpinan di RK hingga kursi parlemen.',
-    photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80',
-    category: 'kepemimpinan',
-  },
-  {
-    id: '5',
-    name: 'Siti Nurhaliza',
-    batch: 'RK Angkatan 16',
-    title: 'Merintis Bisnis Sosial Fashion Berkelanjutan',
-    excerpt: 'Membangun brand fashion yang memberdayakan pengrajin lokal dan ramah lingkungan.',
-    photo: 'https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&q=80',
-    category: 'karir',
-  },
-  {
-    id: '6',
-    name: 'Rizki Pratama',
-    batch: 'RK Angkatan 11',
-    title: 'Raih Beasiswa S3 di MIT untuk Riset AI',
-    excerpt: 'Kisah sukses mendapatkan beasiswa penuh untuk program doktoral di Massachusetts Institute of Technology.',
-    photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80',
-    category: 'akademik',
-  },
-];
+function mapStory(story: APIStory): Story {
+  return {
+    id: story.id,
+    slug: story.slug,
+    name: story.author_name,
+    batch: story.author_angkatan ? `RK Angkatan ${story.author_angkatan}` : '',
+    title: story.title,
+    excerpt: story.excerpt || '',
+    photo: story.hero_image || story.author_photo || '/images/placeholder.jpg',
+    category: story.category as StoryCategory,
+    featured: story.featured,
+  };
+}
 
-export function CeritaSection({ className = '' }: CeritaSectionProps) {
+export function CeritaSection({
+  className = '',
+  initialData
+}: CeritaSectionProps) {
   const [activeCategory, setActiveCategory] = useState('semua');
+
+  const { data: apiStories = [], isLoading } = useQuery({
+    queryKey: queryKeys.storiesPublished(activeCategory === 'semua' ? undefined : activeCategory),
+    queryFn: () => fetchPublishedStories(20, 0, activeCategory === 'semua' ? undefined : activeCategory as StoryCategory),
+    initialData: activeCategory === 'semua' ? initialData : undefined,
+    staleTime: staleTime.static,
+  });
+
+  const stories = apiStories.map(mapStory);
 
   const featuredStory = stories.find((story) => story.featured);
   const regularStories = stories.filter((story) => !story.featured);
@@ -111,6 +84,18 @@ export function CeritaSection({ className = '' }: CeritaSectionProps) {
     if (category === 'kepemimpinan') return 'Kepemimpinan';
     return category;
   };
+
+  if (isLoading) {
+    return (
+      <section className={`relative py-16 px-8 bg-white overflow-hidden ${className}`}>
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-iark-red"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className={`relative py-16 px-8 bg-white overflow-hidden ${className}`}>
@@ -193,7 +178,7 @@ export function CeritaSection({ className = '' }: CeritaSectionProps) {
                     {featuredStory.excerpt}
                   </p>
 
-                  <Link href={`/cerita/${featuredStory.id}`}>
+                  <Link href={`/cerita/${featuredStory.slug}`}>
                     <button className="bg-iark-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors duration-200 self-start">
                       Baca Cerita Lengkap →
                     </button>
@@ -211,13 +196,12 @@ export function CeritaSection({ className = '' }: CeritaSectionProps) {
               <button
                 key={category.id}
                 onClick={() => setActiveCategory(category.id)}
-                className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
-                  activeCategory === category.id
-                    ? category.color === 'gray'
-                      ? 'bg-gray-800 text-white shadow-lg scale-105'
-                      : `bg-iark-${category.color} text-white shadow-lg scale-105`
-                    : 'bg-white text-gray-700 hover:shadow-md hover:scale-102'
-                }`}
+                className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${activeCategory === category.id
+                  ? category.color === 'gray'
+                    ? 'bg-gray-800 text-white shadow-lg scale-105'
+                    : `bg-iark-${category.color} text-white shadow-lg scale-105`
+                  : 'bg-white text-gray-700 hover:shadow-md hover:scale-102'
+                  }`}
               >
                 {category.label}
               </button>
@@ -228,63 +212,63 @@ export function CeritaSection({ className = '' }: CeritaSectionProps) {
         {/* Story Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {filteredStories.map((story, index) => (
-            <Link href={`/cerita/${story.id}`} key={story.id}>
+            <Link href={`/cerita/${story.slug}`} key={story.id}>
               <motion.div
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
               >
-              {/* Photo */}
-              <div className="relative h-48 bg-gray-200">
-                <Image
-                  src={story.photo}
-                  alt={story.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  unoptimized
-                />
-                <div className="absolute top-4 right-4">
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-white bg-iark-${getCategoryColor(
-                      story.category
-                    )}`}
-                  >
-                    {getCategoryLabel(story.category)}
+                {/* Photo */}
+                <div className="relative h-48 bg-gray-200">
+                  <Image
+                    src={story.photo}
+                    alt={story.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    unoptimized
+                  />
+                  <div className="absolute top-4 right-4">
+                    <span
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-white bg-iark-${getCategoryColor(
+                        story.category
+                      )}`}
+                    >
+                      {getCategoryLabel(story.category)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-gray-200">
+                      <Image
+                        src={story.photo}
+                        alt={story.name}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-900 text-sm">{story.name}</p>
+                      <p className="text-xs text-gray-600">{story.batch}</p>
+                    </div>
+                  </div>
+
+                  <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-iark-red transition-colors">
+                    {story.title}
+                  </h3>
+
+                  <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3">
+                    {story.excerpt}
+                  </p>
+
+                  <span className="text-iark-red font-semibold text-sm group-hover:underline">
+                    Baca Selengkapnya →
                   </span>
                 </div>
-              </div>
-
-              {/* Content */}
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-gray-200">
-                    <Image
-                      src={story.photo}
-                      alt={story.name}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900 text-sm">{story.name}</p>
-                    <p className="text-xs text-gray-600">{story.batch}</p>
-                  </div>
-                </div>
-
-                <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-iark-red transition-colors">
-                  {story.title}
-                </h3>
-
-                <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3">
-                  {story.excerpt}
-                </p>
-
-                <span className="text-iark-red font-semibold text-sm group-hover:underline">
-                  Baca Selengkapnya →
-                </span>
-              </div>
               </motion.div>
             </Link>
           ))}

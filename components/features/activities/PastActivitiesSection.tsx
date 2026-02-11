@@ -1,15 +1,31 @@
-'use client';
-
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { ActivityCard } from './ActivityCard';
-import { activitiesData } from '@/lib/data/activitiesData';
+
+export interface Activity {
+  id: string;
+  category: string;
+  author: string | null;
+  title: string;
+  subtitle: string | null;
+  date: string | null;
+  read_time: string | null;
+  likes: number;
+  comments: number;
+  image_url: string | null;
+  link: string | null;
+  is_active: boolean;
+  created_at: string;
+}
 
 export interface PastActivitiesSectionProps {
   className?: string;
+  initialData?: Activity[];
 }
 
-export function PastActivitiesSection({ className = '' }: PastActivitiesSectionProps) {
+export function PastActivitiesSection({ className = '', initialData }: PastActivitiesSectionProps) {
+  const activities = initialData || [];
+
   return (
     <section className={`relative py-24 px-8 bg-gray-50 overflow-hidden ${className}`}>
       {/* Subtle gradient orbs background */}
@@ -31,7 +47,7 @@ export function PastActivitiesSection({ className = '' }: PastActivitiesSectionP
 
         {/* Title */}
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 text-iark-black">
-          Kebanggaan Komunitas
+          Jejak Kegiatan Kami
         </h2>
 
         {/* Subtitle */}
@@ -41,18 +57,22 @@ export function PastActivitiesSection({ className = '' }: PastActivitiesSectionP
 
         {/* Activity Cards */}
         <div className="space-y-6 mb-12">
-          {activitiesData.map((activity, index) => (
-            <ActivityCard key={activity.id} activity={activity} index={index} />
-          ))}
+          {activities.length > 0 ? (
+            activities.map((activity, index) => (
+              <ActivityCard key={activity.id} activity={activity} index={index} />
+            ))
+          ) : (
+            <p className="text-center text-gray-500">Belum ada kegiatan.</p>
+          )}
         </div>
 
         {/* Read More Link */}
         <div className="text-center">
           <Link
-            href="/cerita"
+            href="/kegiatan"
             className="inline-flex items-center gap-2 text-iark-red font-semibold hover:text-red-700 transition-colors duration-300 group"
           >
-            Lihat Semua Cerita
+            Lihat Semua Kegiatan
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
           </Link>
         </div>

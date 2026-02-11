@@ -1,0 +1,453 @@
+{
+  "project": "IARK Auth, Profile & Donation Enhancement",
+  "created": "2026-02-10",
+  "reference_plan": "PLAN_AUTH_PROFILE_DONATION.md",
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Subdomain Infrastructure",
+      "status": "done",
+      "completed_at": "2026-02-10",
+      "tasks": [
+        {
+          "id": "P0-01",
+          "title": "Event subdomain routing",
+          "description": "EventLink, BackToEventsLink, RegisterButton components for event.ia-rk.com",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P0-02",
+          "title": "Donasi subdomain routing",
+          "description": "DonasiLink component fixes for donasi.ia-rk.com",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P0-03",
+          "title": "Fix hydration mismatch",
+          "description": "suppressHydrationWarning on EventLink and DonasiLink",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P0-04",
+          "title": "Middleware: redirect /masuk to main domain",
+          "description": "From subdomain, redirect login/daftar to main domain",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P0-05",
+          "title": "Fix donation stats field names",
+          "description": "total_paid_amount vs paid_amount mismatch",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P0-06",
+          "title": "Update seed_data_events.sql",
+          "description": "Set is_live=true for past events",
+          "status": "done",
+          "priority": "medium"
+        },
+        {
+          "id": "P0-07",
+          "title": "Event card redesign",
+          "description": "Vertical card grid like 2045hz.id",
+          "status": "done",
+          "priority": "medium"
+        },
+        {
+          "id": "P0-08",
+          "title": "Event detail UI improvements",
+          "description": "Countdown inside card, reduced badges, Google Maps link",
+          "status": "done",
+          "priority": "medium"
+        }
+      ]
+    },
+    {
+      "id": "P1",
+      "name": "Profile Enhancement",
+      "status": "done",
+      "completed_at": "2026-02-10",
+      "tasks": [
+        {
+          "id": "P1-01",
+          "title": "Migration: Add regional, kampus to profiles",
+          "description": "ALTER TABLE profiles ADD COLUMN regional, kampus",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P1-02",
+          "title": "Create REGIONAL_OPTIONS constant",
+          "description": "lib/constants/regional.ts dengan list provinsi Indonesia",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P1-03",
+          "title": "Update profile types in types.ts",
+          "description": "Tambah regional, kampus ke Profile interface",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P1-04",
+          "title": "Create profile queries",
+          "description": "lib/queries/profiles.ts - fetchProfile, updateProfile",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P1-05",
+          "title": "Update profile edit page UI",
+          "description": "app/dashboard/profile/page.tsx dengan form edit lengkap",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P1-06",
+          "title": "Add profile photo upload",
+          "description": "Upload foto ke Supabase Storage",
+          "status": "done",
+          "priority": "medium"
+        },
+        {
+          "id": "P1-07",
+          "title": "Admin: Add search to user list",
+          "description": "Search by name, email, kampus",
+          "status": "done",
+          "priority": "medium"
+        },
+        {
+          "id": "P1-08",
+          "title": "Admin: Add filters to user list",
+          "description": "Filter by angkatan, regional, asrama",
+          "status": "done",
+          "priority": "medium"
+        },
+        {
+          "id": "P1-09",
+          "title": "Admin: Export users to CSV",
+          "description": "Export filtered users ke CSV",
+          "status": "done",
+          "priority": "low"
+        }
+      ]
+    },
+    {
+      "id": "P2",
+      "name": "Donation Flow Enhancement",
+      "status": "done",
+      "completed_at": "2026-02-10",
+      "tasks": [
+        {
+          "id": "P2-01",
+          "title": "Migration: Add is_guest to donations",
+          "description": "ALTER TABLE donations ADD COLUMN is_guest BOOLEAN",
+          "status": "done",
+          "priority": "medium",
+          "note": "scripts/migration_donation_guest.sql created, run manually in Supabase"
+        },
+        {
+          "id": "P2-02",
+          "title": "Create AuthChoice component",
+          "description": "components/features/auth/AuthChoice.tsx - Login vs Hamba Allah",
+          "status": "done",
+          "priority": "high",
+          "note": "Already existed from P3, reused in checkout"
+        },
+        {
+          "id": "P2-03",
+          "title": "Update checkout: auth state check",
+          "description": "Check if user logged in, show different UI",
+          "status": "done",
+          "priority": "high",
+          "note": "Hybrid server+client: server fetches user, client shows 3 states"
+        },
+        {
+          "id": "P2-04",
+          "title": "Update checkout: Login option",
+          "description": "Add Google login button di checkout",
+          "status": "done",
+          "priority": "high",
+          "note": "AuthChoice redirects to /masuk via getCrossDomainUrl"
+        },
+        {
+          "id": "P2-05",
+          "title": "Update checkout: Hamba Allah mode",
+          "description": "Guest form dengan email only",
+          "status": "done",
+          "priority": "high",
+          "note": "Email required, name optional (default Hamba Allah), auto-anonymous"
+        },
+        {
+          "id": "P2-06",
+          "title": "Update checkout: Auto-fill logged in",
+          "description": "Pre-fill name, email, phone dari profile",
+          "status": "done",
+          "priority": "high",
+          "note": "Server-side getCurrentUser(), email readonly, name editable"
+        },
+        {
+          "id": "P2-07",
+          "title": "Update checkout: Free-form amount",
+          "description": "Preset buttons + custom amount input bebas",
+          "status": "done",
+          "priority": "high",
+          "note": "Added 10k, 25k presets + inputMode=numeric on custom input"
+        },
+        {
+          "id": "P2-08",
+          "title": "Update API: Handle guest donations",
+          "description": "api/donations/create handle is_guest, is_anonymous",
+          "status": "done",
+          "priority": "high",
+          "note": "Guest: user_id=null, is_guest=true, is_anonymous=true, name defaults to Hamba Allah"
+        },
+        {
+          "id": "P2-09",
+          "title": "Lower minimum donation",
+          "description": "Ubah min dari 10.000 ke 1.000",
+          "status": "done",
+          "priority": "low",
+          "note": "Updated in both API and client-side validation"
+        },
+        {
+          "id": "P2-10",
+          "title": "Create donation history page",
+          "description": "app/dashboard/donations - riwayat donasi user",
+          "status": "done",
+          "priority": "medium",
+          "note": "Protected route, shows user donations with status and campaign link"
+        },
+        {
+          "id": "P2-11",
+          "title": "Admin: Add campaign filter",
+          "description": "Filter donations by campaign di admin",
+          "status": "done",
+          "priority": "medium",
+          "note": "Dropdown fetched from campaigns table"
+        },
+        {
+          "id": "P2-12",
+          "title": "Admin: Add search donations",
+          "description": "Search by donor name, email, order_id",
+          "status": "done",
+          "priority": "medium",
+          "note": "Already existed, verified working"
+        },
+        {
+          "id": "P2-13",
+          "title": "Consolidate checkout pages",
+          "description": "Delete /donasi/checkout, redirect to /donasi-umum/checkout via middleware",
+          "status": "done",
+          "priority": "high",
+          "note": "Generic checkout deleted, middleware redirect added"
+        },
+        {
+          "id": "P2-14",
+          "title": "Update success page",
+          "description": "WhatsApp share button, Donasi Lagi button",
+          "status": "done",
+          "priority": "medium",
+          "note": "Added WhatsApp share + Donasi Lagi + restructured buttons"
+        },
+        {
+          "id": "P2-15",
+          "title": "Fix getDonasiHref regex bug",
+          "description": "Regex stripped /donasi from /donasi-umum slug incorrectly",
+          "status": "done",
+          "priority": "high",
+          "note": "Changed to lookahead regex (?=\\/|$) for both donasi and event"
+        }
+      ]
+    },
+    {
+      "id": "P3",
+      "name": "Event Registration Enhancement",
+      "status": "done",
+      "completed_at": "2026-02-10",
+      "tasks": [
+        {
+          "id": "P3-01",
+          "title": "Update event listing UI",
+          "description": "Upcoming/Past tabs, 2045hz style cards",
+          "status": "done",
+          "priority": "medium",
+          "note": "Already has Upcoming/Past sections"
+        },
+        {
+          "id": "P3-02",
+          "title": "Update event detail page",
+          "description": "Hero image, better layout, clear CTA",
+          "status": "done",
+          "priority": "high",
+          "note": "Already has good layout with hero, countdown, CTA"
+        },
+        {
+          "id": "P3-03",
+          "title": "Create EventAuthChoice component",
+          "description": "Login vs Daftar sebagai Tamu untuk event",
+          "status": "done",
+          "priority": "high",
+          "note": "Created reusable AuthChoice component"
+        },
+        {
+          "id": "P3-04",
+          "title": "Update registration: auth check",
+          "description": "Check if user logged in",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P3-05",
+          "title": "Update registration: Login option",
+          "description": "Add Google login button di registration",
+          "status": "done",
+          "priority": "high",
+          "note": "Has link to login page with message"
+        },
+        {
+          "id": "P3-06",
+          "title": "Update registration: Guest mode",
+          "description": "Manual fill form untuk tamu",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P3-07",
+          "title": "Update registration: Auto-fill logged in",
+          "description": "Pre-fill name, email, phone, angkatan dari profile",
+          "status": "done",
+          "priority": "high"
+        },
+        {
+          "id": "P3-08",
+          "title": "Add organization field",
+          "description": "Optional field 'Asal Organisasi' di registration",
+          "status": "done",
+          "priority": "medium",
+          "note": "Already exists in form"
+        },
+        {
+          "id": "P3-09",
+          "title": "Update my-events page",
+          "description": "app/event/my-events dengan registration history",
+          "status": "done",
+          "priority": "medium",
+          "note": "Already implemented with upcoming/past separation"
+        },
+        {
+          "id": "P3-10",
+          "title": "Admin: Add registration search",
+          "description": "Search registrations by name, email",
+          "status": "done",
+          "priority": "medium",
+          "note": "Already exists in registrations page"
+        },
+        {
+          "id": "P3-11",
+          "title": "Admin: Add registration filters",
+          "description": "Filter by status (registered, confirmed, attended)",
+          "status": "done",
+          "priority": "medium",
+          "note": "Already exists in registrations page"
+        },
+        {
+          "id": "P3-12",
+          "title": "Admin: Bulk actions registrations",
+          "description": "Confirm selected, export CSV",
+          "status": "done",
+          "priority": "low",
+          "note": "Added checkbox selection and bulk status update"
+        }
+      ]
+    },
+    {
+      "id": "P4",
+      "name": "Polish & Testing",
+      "status": "todo",
+      "tasks": [
+        {
+          "id": "P4-01",
+          "title": "Test auth flow across subdomains",
+          "description": "Login di main, verify session di event/donasi",
+          "status": "todo",
+          "priority": "high"
+        },
+        {
+          "id": "P4-02",
+          "title": "Test donation flow: logged in",
+          "description": "E2E test donasi dengan login",
+          "status": "todo",
+          "priority": "high"
+        },
+        {
+          "id": "P4-03",
+          "title": "Test donation flow: Hamba Allah",
+          "description": "E2E test donasi tanpa login",
+          "status": "todo",
+          "priority": "high"
+        },
+        {
+          "id": "P4-04",
+          "title": "Test event registration: logged in",
+          "description": "E2E test registrasi dengan login",
+          "status": "todo",
+          "priority": "high"
+        },
+        {
+          "id": "P4-05",
+          "title": "Test event registration: guest",
+          "description": "E2E test registrasi tanpa login",
+          "status": "todo",
+          "priority": "high"
+        },
+        {
+          "id": "P4-06",
+          "title": "Mobile responsive check",
+          "description": "Test semua form di mobile",
+          "status": "todo",
+          "priority": "medium"
+        },
+        {
+          "id": "P4-07",
+          "title": "Update unit tests",
+          "description": "Add tests for new validation logic",
+          "status": "todo",
+          "priority": "medium"
+        },
+        {
+          "id": "P4-08",
+          "title": "Update E2E tests",
+          "description": "Add tests for new flows",
+          "status": "todo",
+          "priority": "medium"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_tasks": 52,
+    "by_phase": {
+      "P0_Subdomain": 8,
+      "P1_Profile": 9,
+      "P2_Donation": 15,
+      "P3_Event": 12,
+      "P4_Polish": 8
+    },
+    "completed": {
+      "P0_Subdomain": "done",
+      "P1_Profile": "done",
+      "P2_Donation": "done",
+      "P3_Event": "done"
+    },
+    "remaining": {
+      "P4_Polish": 8
+    }
+  }
+}

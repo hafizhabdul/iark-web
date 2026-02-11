@@ -3,26 +3,57 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { SocialButton } from './SocialButton';
 import { useAuth } from '@/components/providers/AuthContext';
+import { createClient } from '@/lib/supabase/client';
 
 export function SignInForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { signIn } = useAuth();
+  const searchParams = useSearchParams();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setIsLoading(true);
 
-    // Simple validation: email and password must not be empty
-    if (email.trim() && password.trim()) {
-      login(email);
+    const result = await signIn(email, password);
+    
+    if (result.error) {
+      setError(result.error);
+    } else {
+      const redirectTo = searchParams.get('redirectTo');
+      if (redirectTo) {
+        window.location.href = redirectTo;
+        return;
+      }
     }
+    
+    setIsLoading(false);
   };
 
-  const handleGoogleSignIn = () => {
-    // Mock Google sign in - using a default email
-    login('user@google.com', 'Google User');
+  const handleGoogleSignIn = async () => {
+    const supabase = createClient();
+    const params = new URLSearchParams(window.location.search);
+    const redirectTo = params.get('redirectTo');
+    const callbackUrl = new URL('/auth/callback', window.location.origin);
+    if (redirectTo) {
+      callbackUrl.searchParams.set('next', redirectTo);
+    }
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: callbackUrl.toString(),
+      },
+    });
+    
+    if (error) {
+      setError(error.message);
+    }
   };
 
   return (
@@ -42,6 +73,13 @@ export function SignInForm() {
             Masuk untuk melanjutkan kontribusi Anda
           </p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            {error}
+          </div>
+        )}
 
         {/* Social Login */}
         <div className="mb-6">
@@ -73,6 +111,7 @@ export function SignInForm() {
               placeholder="nama@email.com"
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-iark-red focus:outline-none transition-colors text-gray-900 placeholder:text-gray-400"
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -89,6 +128,7 @@ export function SignInForm() {
               placeholder="••••••••"
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-iark-red focus:outline-none transition-colors text-gray-900 placeholder:text-gray-400"
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -105,12 +145,13 @@ export function SignInForm() {
           {/* Submit Button */}
           <motion.button
             type="submit"
-            className="w-full bg-iark-red text-white font-bold py-3 rounded-lg hover:bg-red-700 transition-colors shadow-lg"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            className="w-full bg-iark-red text-white font-bold py-3 rounded-lg hover:bg-red-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            whileHover={{ scale: isLoading ? 1 : 1.02 }}
+            whileTap={{ scale: isLoading ? 1 : 0.98 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
+            disabled={isLoading}
           >
-            Masuk
+            {isLoading ? 'Memproses...' : 'Masuk'}
           </motion.button>
         </form>
 

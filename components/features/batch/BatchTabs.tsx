@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 
 export interface BatchTabsProps {
   activeAngkatan: number;
@@ -11,15 +11,19 @@ export interface BatchTabsProps {
 export function BatchTabs({ activeAngkatan, onSelect, totalAngkatan }: BatchTabsProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to active tab
-  useEffect(() => {
-    if (scrollRef.current) {
-      const activeButton = scrollRef.current.querySelector(`[data-angkatan="${activeAngkatan}"]`);
-      if (activeButton) {
-        activeButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  const handleSelect = (angkatan: number) => {
+    onSelect(angkatan);
+    
+    // Scroll tab into view after selection
+    setTimeout(() => {
+      if (scrollRef.current) {
+        const activeButton = scrollRef.current.querySelector(`[data-angkatan="${angkatan}"]`);
+        if (activeButton) {
+          activeButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
       }
-    }
-  }, [activeAngkatan]);
+    }, 50);
+  };
 
   return (
     <div
@@ -31,7 +35,7 @@ export function BatchTabs({ activeAngkatan, onSelect, totalAngkatan }: BatchTabs
         <button
           key={angkatan}
           data-angkatan={angkatan}
-          onClick={() => onSelect(angkatan)}
+          onClick={() => handleSelect(angkatan)}
           className={`flex-shrink-0 px-5 py-2.5 rounded-full font-medium transition-all duration-300 ${
             activeAngkatan === angkatan
               ? 'bg-iark-red text-white shadow-lg scale-105'

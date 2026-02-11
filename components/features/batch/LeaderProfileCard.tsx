@@ -3,7 +3,12 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Quote } from 'lucide-react';
-import type { BatchLeader } from '@/lib/data/batchData';
+export interface BatchLeader {
+  name: string;
+  photo: string | null;
+  quote: string | null;
+  job_title: string | null;
+}
 
 export interface LeaderProfileCardProps {
   leader: BatchLeader;
@@ -22,7 +27,7 @@ export function LeaderProfileCard({ leader, angkatan }: LeaderProfileCardProps) 
         {/* Photo */}
         <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden flex-shrink-0 mx-auto md:mx-0">
           <Image
-            src={leader.photo}
+            src={leader.photo || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(leader.name) + '&background=C41E3A&color=fff'}
             alt={leader.name}
             fill
             className="object-cover"
@@ -36,7 +41,7 @@ export function LeaderProfileCard({ leader, angkatan }: LeaderProfileCardProps) 
           <p className="text-sm text-iark-red font-medium mb-1">
             Ketua Angkatan {angkatan}
           </p>
-          <p className="text-sm text-gray-500 mb-4">{leader.currentRole}</p>
+          <p className="text-sm text-gray-500 mb-4">{leader.job_title}</p>
 
           {/* Quote */}
           <div className="relative">

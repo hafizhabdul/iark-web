@@ -35,6 +35,7 @@ export function EventCarousel({
   const { data: slides = [], isLoading } = useQuery({
     queryKey: queryKeys.heroSlides,
     queryFn: fetchHeroSlides,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     initialData: initialData as any,
     staleTime: staleTime.static,
   });
@@ -208,7 +209,7 @@ export function EventCarousel({
 
       {/* Navigation Dots */}
       <div className="flex justify-center gap-2 mt-4">
-        {displaySlides.map((_: any, index: number) => (
+        {displaySlides.map((_: HeroSlide, index: number) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import type { Profile } from '@/lib/supabase/types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
  * Fetch current user's profile

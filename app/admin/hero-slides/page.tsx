@@ -219,12 +219,13 @@ export default function AdminHeroSlidesPage() {
     const supabase = createClient();
 
     // Swap display orders
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await Promise.all([
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (supabase as any)
         .from('hero_slides')
         .update({ order_index: otherSlide.order_index })
         .eq('id', currentSlide.id),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (supabase as any)
         .from('hero_slides')
         .update({ order_index: currentSlide.order_index })

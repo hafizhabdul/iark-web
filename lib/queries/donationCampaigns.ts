@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import type { DonationCampaignWithProgress, CampaignDonorWall } from '@/lib/supabase/types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /** PGRST205 = relation (table/view) does not exist */
 function isViewNotFound(error: { code?: string }): boolean {

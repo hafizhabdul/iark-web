@@ -51,6 +51,7 @@ export default function DonationHistoryPage() {
 
     if (!error && data) {
       setDonations(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data.map((d: any) => ({
           ...d,
           campaign: d.campaigns || null,

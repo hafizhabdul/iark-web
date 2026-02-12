@@ -36,7 +36,7 @@ export function BatchTabs({ activeAngkatan, onSelect, totalAngkatan }: BatchTabs
           key={angkatan}
           data-angkatan={angkatan}
           onClick={() => handleSelect(angkatan)}
-          className={`flex-shrink-0 px-5 py-2.5 rounded-full font-medium transition-all duration-300 ${
+          className={`flex-shrink-0 px-3.5 py-2 text-sm md:px-5 md:py-2.5 md:text-base rounded-full font-medium transition-all duration-300 ${
             activeAngkatan === angkatan
               ? 'bg-iark-red text-white shadow-lg scale-105'
               : 'bg-white text-gray-600 hover:bg-gray-100 shadow border border-gray-200'

@@ -57,7 +57,7 @@ export function StickyDonationCTA({ className = '' }: StickyDonationCTAProps) {
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             className={`fixed bottom-0 left-0 right-0 md:hidden bg-white border-t border-gray-200 shadow-2xl z-50 ${className}`}
           >
-            <div className="flex items-center justify-between gap-3 p-4">
+            <div className="flex items-center justify-between gap-2 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
               <DonasiLink
                 path="/"
                 className="flex-1 bg-iark-red hover:bg-red-700 text-white font-bold py-3 px-4 rounded-full text-center flex items-center justify-center gap-2 transition-colors duration-300"
@@ -76,7 +76,7 @@ export function StickyDonationCTA({ className = '' }: StickyDonationCTAProps) {
               </a>
               <button
                 onClick={handleDismiss}
-                className="w-10 h-10 text-gray-400 hover:text-gray-600 flex items-center justify-center transition-colors duration-300"
+                className="w-11 h-11 text-gray-400 hover:text-gray-600 flex items-center justify-center transition-colors duration-300"
                 aria-label="Dismiss"
               >
                 <X className="w-5 h-5" />

@@ -50,16 +50,16 @@ export async function AboutSection({ className = '', showSeeMore = true }: About
   }
 
   return (
-    <section className={`relative py-24 px-8 bg-white overflow-hidden ${className}`}>
+    <section className={`relative py-12 px-5 md:py-24 md:px-8 bg-white overflow-hidden ${className}`}>
       {/* Subtle gradient orbs background - matching hero section */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-iark-blue/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-iark-red/5 rounded-full blur-3xl" />
+      <div className="absolute top-0 left-0 w-48 h-48 md:w-96 md:h-96 bg-iark-blue/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-48 h-48 md:w-96 md:h-96 bg-iark-red/5 rounded-full blur-3xl" />
 
       {/* Decorative small elements with animations - matching hero section */}
-      <div className="absolute top-20 right-1/4 w-10 h-10 bg-iark-blue rounded-full opacity-20 animate-pulse-slow" />
-      <div className="absolute top-1/2 left-16 w-8 h-8 bg-iark-red rounded-full opacity-20 animate-drift" />
-      <div className="absolute bottom-1/4 right-20 w-12 h-12 bg-iark-yellow rounded-full opacity-30 animate-pulse-slow" />
-      <div className="absolute top-1/3 right-12 w-6 h-6 bg-iark-red/30 rounded-lg rotate-12 animate-drift" />
+      <div className="hidden md:block absolute top-20 right-1/4 w-10 h-10 bg-iark-blue rounded-full opacity-20 animate-pulse-slow" />
+      <div className="hidden md:block absolute top-1/2 left-16 w-8 h-8 bg-iark-red rounded-full opacity-20 animate-drift" />
+      <div className="hidden md:block absolute bottom-1/4 right-20 w-12 h-12 bg-iark-yellow rounded-full opacity-30 animate-pulse-slow" />
+      <div className="hidden md:block absolute top-1/3 right-12 w-6 h-6 bg-iark-red/30 rounded-lg rotate-12 animate-drift" />
 
       <div className="relative z-10 max-w-6xl mx-auto">
         {/* Decorative element */}
@@ -70,12 +70,12 @@ export async function AboutSection({ className = '', showSeeMore = true }: About
         </div>
 
         {/* Title */}
-        <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 text-iark-black">
+        <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-center mb-6 text-iark-black">
           Apa itu IARK?
         </h2>
 
         {/* Description */}
-        <p className="text-lg md:text-xl text-center text-gray-700 leading-relaxed mb-8 max-w-3xl mx-auto">
+        <p className="text-base md:text-xl text-center text-gray-700 leading-relaxed mb-6 md:mb-8 max-w-3xl mx-auto">
           IARK adalah <span className="font-semibold text-iark-red">Ikatan Alumni Rumah Kepemimpinan</span>,
           wadah kolaborasi lintas angkatan yang menjadi tempat berbagi, berkontribusi,
           dan menumbuhkan semangat kepemimpinan berintegritas untuk Indonesia.
@@ -83,7 +83,7 @@ export async function AboutSection({ className = '', showSeeMore = true }: About
 
         {/* See More Button - Only show when showSeeMore is true */}
         {showSeeMore && (
-          <div className="flex justify-center mb-16">
+          <div className="flex justify-center mb-10 md:mb-16">
             <Link
               href="/tentang"
               className="inline-flex items-center gap-2 text-iark-red hover:text-red-700 font-semibold transition-all duration-300 group"
@@ -95,16 +95,16 @@ export async function AboutSection({ className = '', showSeeMore = true }: About
         )}
 
         {/* Add spacing when button is hidden */}
-        {!showSeeMore && <div className="mb-16" />}
+        {!showSeeMore && <div className="mb-10 md:mb-16" />}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {stats.map((stat, index) => (
             <div
               key={index}
-              className="text-center p-8 rounded-2xl bg-white shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              className="text-center p-5 md:p-8 rounded-2xl bg-white shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="text-5xl md:text-6xl font-bold text-iark-red mb-2">
+              <div className="text-3xl sm:text-4xl md:text-6xl font-bold text-iark-red mb-2">
                 {stat.value}
               </div>
               <div className="text-gray-600 font-medium text-lg">

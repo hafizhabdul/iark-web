@@ -20,7 +20,7 @@ export function ManagementCard({ member, index = 0 }: ManagementCardProps) {
       className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
     >
       {/* Photo Container */}
-      <div className="relative aspect-[4/5] overflow-hidden">
+      <div className="relative aspect-[3/4] md:aspect-[4/5] overflow-hidden">
         <Image
           src={member.photo || '/images/placeholder-avatar.png'}
           alt={member.name}

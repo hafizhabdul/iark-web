@@ -113,13 +113,13 @@ export function BidangPreviewSection({
   });
 
   return (
-    <section className={`relative py-24 px-8 bg-gray-50 overflow-hidden ${className}`}>
-      <div className="absolute top-0 right-0 w-96 h-96 bg-iark-yellow/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-iark-blue/5 rounded-full blur-3xl" />
+    <section className={`relative py-12 px-5 md:py-24 md:px-8 bg-gray-50 overflow-hidden ${className}`}>
+      <div className="absolute top-0 right-0 w-48 h-48 md:w-96 md:h-96 bg-iark-yellow/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-48 h-48 md:w-96 md:h-96 bg-iark-blue/5 rounded-full blur-3xl" />
 
-      <div className="absolute top-32 left-1/4 w-10 h-10 bg-iark-red rounded-full opacity-20 animate-pulse-slow" />
-      <div className="absolute top-1/2 right-16 w-8 h-8 bg-iark-blue rounded-full opacity-20 animate-drift" />
-      <div className="absolute bottom-1/3 left-20 w-12 h-12 bg-iark-yellow rounded-full opacity-30 animate-pulse-slow" />
+      <div className="hidden md:block absolute top-32 left-1/4 w-10 h-10 bg-iark-red rounded-full opacity-20 animate-pulse-slow" />
+      <div className="hidden md:block absolute top-1/2 right-16 w-8 h-8 bg-iark-blue rounded-full opacity-20 animate-drift" />
+      <div className="hidden md:block absolute bottom-1/3 left-20 w-12 h-12 bg-iark-yellow rounded-full opacity-30 animate-pulse-slow" />
 
       <div className="relative z-10 max-w-6xl mx-auto">
         <div className="flex justify-center mb-6">
@@ -128,11 +128,11 @@ export function BidangPreviewSection({
           </div>
         </div>
 
-        <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 text-iark-black">
+        <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-center mb-6 text-iark-black">
           12 Cluster IARK
         </h2>
 
-        <p className="text-lg md:text-xl text-center text-gray-600 mb-12 max-w-3xl mx-auto">
+        <p className="text-base md:text-xl text-center text-gray-600 mb-6 md:mb-12 max-w-3xl mx-auto">
           Cluster-cluster yang berdedikasi melayani alumni dan mengembangkan kepemimpinan berintegritas
         </p>
 
@@ -151,7 +151,7 @@ export function BidangPreviewSection({
         <div className="text-center">
           <Link
             href="/bidang"
-            className="inline-flex items-center gap-2 bg-iark-blue hover:bg-blue-800 text-white font-semibold px-8 py-4 rounded-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
+            className="inline-flex items-center gap-2 bg-iark-blue hover:bg-blue-800 text-white font-semibold px-6 py-3 md:px-8 md:py-4 rounded-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
           >
             Lihat Struktur Lengkap
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />

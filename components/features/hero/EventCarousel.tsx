@@ -166,12 +166,12 @@ export function EventCarousel({
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
             {/* Content Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
+            <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 text-white">
               <motion.h3
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="text-xl md:text-2xl lg:text-3xl font-bold mb-2"
+                className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold mb-2"
               >
                 {displaySlides[currentIndex].title}
               </motion.h3>
@@ -180,7 +180,7 @@ export function EventCarousel({
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
-                  className="text-sm md:text-base text-white/90"
+                  className="text-xs sm:text-sm md:text-base text-white/90"
                 >
                   {displaySlides[currentIndex].subtitle}
                 </motion.p>

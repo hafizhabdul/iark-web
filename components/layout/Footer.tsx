@@ -9,12 +9,12 @@ export function Footer({ className = '' }: FooterProps) {
       <div className="h-1 bg-iark-red" />
 
       {/* Main footer content */}
-      <div className="py-12 px-8">
+      <div className="py-8 px-5 md:py-12 md:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             {/* Left Side - Tagline */}
             <div className="text-center md:text-left">
-              <div className="text-3xl md:text-4xl font-bold italic text-iark-red" style={{ transform: 'skewX(-12deg)' }}>
+              <div className="text-2xl md:text-4xl font-bold italic text-iark-red" style={{ transform: 'skewX(-12deg)' }}>
                 <span className="mr-0.5">#</span>
                 <span className="bg-iark-red text-white px-1 rounded">
                   Rayakan

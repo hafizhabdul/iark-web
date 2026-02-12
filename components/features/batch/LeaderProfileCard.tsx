@@ -23,9 +23,9 @@ export function LeaderProfileCard({ leader, angkatan }: LeaderProfileCardProps) 
       transition={{ duration: 0.5, delay: 0.1 }}
       className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-100"
     >
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
         {/* Photo */}
-        <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden flex-shrink-0 mx-auto md:mx-0">
+        <div className="relative w-20 h-20 md:w-32 md:h-32 rounded-xl overflow-hidden flex-shrink-0 mx-auto md:mx-0">
           <Image
             src={leader.photo || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(leader.name) + '&background=C41E3A&color=fff'}
             alt={leader.name}
@@ -37,7 +37,7 @@ export function LeaderProfileCard({ leader, angkatan }: LeaderProfileCardProps) 
 
         {/* Info */}
         <div className="flex-1 text-center md:text-left">
-          <h4 className="font-bold text-xl text-gray-900 mb-1">{leader.name}</h4>
+          <h4 className="font-bold text-lg md:text-xl text-gray-900 mb-1">{leader.name}</h4>
           <p className="text-sm text-iark-red font-medium mb-1">
             Ketua Angkatan {angkatan}
           </p>
@@ -46,7 +46,7 @@ export function LeaderProfileCard({ leader, angkatan }: LeaderProfileCardProps) 
           {/* Quote */}
           <div className="relative">
             <Quote className="absolute -top-2 -left-2 w-8 h-8 text-iark-red/20" />
-            <p className="text-gray-600 italic pl-6 leading-relaxed">
+            <p className="text-sm md:text-base text-gray-600 italic pl-6 leading-relaxed">
               &ldquo;{leader.quote}&rdquo;
             </p>
           </div>

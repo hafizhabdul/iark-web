@@ -85,6 +85,61 @@ export async function sendRegistrationConfirmation(
   });
 }
 
+// Admin notification for new registration
+export async function sendAdminRegistrationNotification(
+  registrantEmail: string,
+  eventName: string,
+  eventDate: string,
+  eventLocation: string
+): Promise<boolean> {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) {
+    console.warn('ADMIN_EMAIL not configured, skipping admin notification');
+    return false;
+  }
+
+  return sendEmail({
+    to: adminEmail,
+    subject: `📋 Pendaftaran Baru - ${eventName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #1E40AF; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { background: #f9f9f9; padding: 24px; border-radius: 0 0 8px 8px; }
+          .detail { background: white; padding: 16px; border-radius: 8px; margin: 16px 0; }
+          .footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h2 style="margin: 0;">Pendaftaran Baru</h2>
+          </div>
+          <div class="content">
+            <p>Ada pendaftar baru untuk event:</p>
+            <div class="detail">
+              <p style="margin: 5px 0;"><strong>Event:</strong> ${eventName}</p>
+              <p style="margin: 5px 0;"><strong>📅 Tanggal:</strong> ${eventDate}</p>
+              <p style="margin: 5px 0;"><strong>📍 Lokasi:</strong> ${eventLocation}</p>
+              <p style="margin: 5px 0;"><strong>📧 Email Pendaftar:</strong> ${registrantEmail}</p>
+            </div>
+            <p style="font-size: 13px; color: #666;">Cek dashboard admin untuk detail lengkap.</p>
+          </div>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} IARK Admin</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  });
+}
+
 // Event reminder email
 export async function sendEventReminder(
   email: string,

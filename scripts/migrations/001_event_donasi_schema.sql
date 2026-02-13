@@ -203,7 +203,7 @@ BEGIN
 
   RETURN v_reg_id;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================================
 -- 6. ROW LEVEL SECURITY (RLS)

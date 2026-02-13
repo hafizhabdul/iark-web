@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendRegistrationConfirmation } from '@/lib/email/send';
+import { sendRegistrationConfirmation, sendAdminRegistrationNotification } from '@/lib/email/send';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,17 +13,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send email (graceful failure - don't fail the request if email fails)
-    const emailSent = await sendRegistrationConfirmation(
-      email,
-      eventName,
-      eventDate,
-      eventLocation || 'TBD'
-    );
+    // Send confirmation to user + notify admin (parallel, fire-and-forget)
+    const [emailSent, adminNotified] = await Promise.all([
+      sendRegistrationConfirmation(email, eventName, eventDate, eventLocation || 'TBD'),
+      sendAdminRegistrationNotification(email, eventName, eventDate, eventLocation || 'TBD'),
+    ]);
 
     return NextResponse.json({ 
       success: true, 
-      emailSent 
+      emailSent,
+      adminNotified,
     });
   } catch (error) {
     console.error('Email API error:', error);

@@ -39,9 +39,11 @@ interface Donation {
 }
 
 export default function AdminDonationsPage() {
+  const supabase = createClient();
   const [donations, setDonations] = useState<Donation[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [campaignFilter, setCampaignFilter] = useState('');
@@ -52,8 +54,8 @@ export default function AdminDonationsPage() {
   }, []);
 
   async function fetchData() {
+    setError(false);
     setLoading(true);
-    const supabase = createClient();
 
     // Fetch donations and campaigns in parallel
     const [donationsRes, campaignsRes] = await Promise.all([
@@ -71,6 +73,7 @@ export default function AdminDonationsPage() {
 
     if (donationsRes.error) {
       console.error('Error fetching donations:', donationsRes.error);
+      setError(true);
     } else {
       setDonations(donationsRes.data || []);
     }
@@ -150,6 +153,20 @@ export default function AdminDonationsPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-8 h-8 text-iark-red animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <p className="text-red-500">Gagal memuat data donasi</p>
+        <button
+          onClick={() => { setLoading(true); fetchData(); }}
+          className="px-4 py-2 bg-iark-red text-white rounded-lg hover:bg-red-700 transition-colors"
+        >
+          Coba Lagi
+        </button>
       </div>
     );
   }

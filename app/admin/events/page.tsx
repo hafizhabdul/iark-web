@@ -30,8 +30,10 @@ interface Event {
 }
 
 export default function AdminEventsPage() {
+  const supabase = createClient();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
@@ -51,14 +53,15 @@ export default function AdminEventsPage() {
   }, []);
 
   async function fetchEvents() {
-    const supabase = createClient();
-    const { data, error } = await supabase
+    setError(false);
+    const { data, error: fetchError } = await supabase
       .from('events')
       .select('*')
       .order('date', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching events:', error);
+    if (fetchError) {
+      console.error('Error fetching events:', fetchError);
+      setError(true);
     } else {
       setEvents(data || []);
     }
@@ -106,7 +109,6 @@ export default function AdminEventsPage() {
     }
 
     setUploading(true);
-    const supabase = createClient();
 
     const fileExt = file.name.split('.').pop();
     const fileName = `event-${Date.now()}.${fileExt}`;
@@ -134,7 +136,6 @@ export default function AdminEventsPage() {
     }
 
     setSaving(true);
-    const supabase = createClient();
 
     const slug = title.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     
@@ -186,7 +187,6 @@ export default function AdminEventsPage() {
   async function deleteEvent(id: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus event ini?')) return;
 
-    const supabase = createClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any).from('events').delete().eq('id', id);
 
@@ -199,7 +199,6 @@ export default function AdminEventsPage() {
   }
 
   async function toggleEventStatus(id: string, currentStatus: boolean) {
-    const supabase = createClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any)
       .from('events')
@@ -253,6 +252,16 @@ export default function AdminEventsPage() {
         {loading ? (
           <div className="col-span-full flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-iark-red" />
+          </div>
+        ) : error ? (
+          <div className="col-span-full bg-white rounded-xl shadow-sm p-12 text-center">
+            <p className="text-red-500 mb-4">Gagal memuat data events</p>
+            <button
+              onClick={() => { setLoading(true); fetchEvents(); }}
+              className="px-4 py-2 bg-iark-red text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Coba Lagi
+            </button>
           </div>
         ) : filteredEvents.length > 0 ? (
           filteredEvents.map((event) => (

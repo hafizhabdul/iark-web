@@ -44,20 +44,24 @@ export default function AdminDormitoriesPage() {
   const [occupiedRooms, setOccupiedRooms] = useState('');
   const [description, setDescription] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState(false);
+
+  const supabase = createClient();
 
   useEffect(() => {
     fetchDormitories();
   }, []);
 
   async function fetchDormitories() {
-    const supabase = createClient();
-    const { data, error } = await supabase
+    setError(false);
+    const { data, error: fetchError } = await supabase
       .from('dormitories')
       .select('*')
       .order('name', { ascending: true });
 
-    if (error) {
-      console.error('Error fetching dormitories:', error);
+    if (fetchError) {
+      console.error('Error fetching dormitories:', fetchError);
+      setError(true);
     } else {
       setDormitories(data || []);
     }
@@ -107,7 +111,6 @@ export default function AdminDormitoriesPage() {
     }
 
     setUploading(true);
-    const supabase = createClient();
 
     const fileExt = file.name.split('.').pop();
     const fileName = `dormitory-${Date.now()}.${fileExt}`;
@@ -135,7 +138,6 @@ export default function AdminDormitoriesPage() {
     }
 
     setSaving(true);
-    const supabase = createClient();
 
     const dormitoryData = {
       name: name.trim(),
@@ -180,7 +182,6 @@ export default function AdminDormitoriesPage() {
   async function deleteDormitory(id: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus asrama ini?')) return;
 
-    const supabase = createClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any).from('dormitories').delete().eq('id', id);
 
@@ -239,6 +240,16 @@ export default function AdminDormitoriesPage() {
         {loading ? (
           <div className="col-span-full flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-iark-red" />
+          </div>
+        ) : error ? (
+          <div className="col-span-full bg-white rounded-xl shadow-sm p-12 text-center">
+            <p className="text-red-500 mb-4">Gagal memuat data asrama</p>
+            <button
+              onClick={() => { setLoading(true); fetchDormitories(); }}
+              className="px-4 py-2 bg-iark-red text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Coba Lagi
+            </button>
           </div>
         ) : filteredDormitories.length > 0 ? (
           filteredDormitories.map((dormitory) => {

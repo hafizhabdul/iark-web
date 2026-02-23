@@ -60,12 +60,20 @@ export default function AdminLayout({
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
           <p className="text-gray-600 mb-6">Anda tidak memiliki akses ke halaman admin.</p>
-          <Link
-            href="/dashboard"
-            className="bg-iark-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
-          >
-            Kembali ke Dashboard
-          </Link>
+          <div className="flex items-center justify-center gap-4">
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+            >
+              Coba Lagi
+            </button>
+            <Link
+              href="/dashboard"
+              className="bg-iark-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
+            >
+              Kembali ke Dashboard
+            </Link>
+          </div>
         </div>
       </div>
     );

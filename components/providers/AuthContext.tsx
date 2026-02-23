@@ -100,9 +100,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
-    const initAuth = async () => {
+    const initAuth = async (attempt = 1) => {
       try {
-        const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+        // Add timeout to prevent infinite loading on rate limit / network issues
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Auth init timeout')), 10000)
+        );
+
+        const { data: { user: supabaseUser } } = await Promise.race([
+          supabase.auth.getUser(),
+          timeoutPromise,
+        ]);
 
         if (supabaseUser && isMounted) {
           const profileData = await fetchProfile(supabaseUser.id);
@@ -111,12 +119,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
       } catch (error: any) {
-        // Silently ignore abort errors
         const errMsg = error?.message?.toLowerCase() || '';
         const isAbort = errMsg.includes('abort') || error?.name === 'AbortError';
 
         if (!isAbort) {
           console.error('Error initializing auth:', error);
+        }
+
+        // Retry up to 2 times with backoff for transient errors (429, network)
+        if (attempt < 3 && isMounted && !isAbort) {
+          const delay = attempt * 2000;
+          await new Promise((r) => setTimeout(r, delay));
+          if (isMounted) return initAuth(attempt + 1);
         }
       } finally {
         if (isMounted) {

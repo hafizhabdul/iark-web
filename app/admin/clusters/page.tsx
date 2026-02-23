@@ -45,20 +45,24 @@ export default function AdminClustersPage() {
   const [description, setDescription] = useState('');
   const [icon, setIcon] = useState('');
   const [color, setColor] = useState<'red' | 'blue' | 'yellow' | ''>('');
+  const [error, setError] = useState(false);
+
+  const supabase = createClient();
 
   useEffect(() => {
     fetchClusters();
   }, []);
 
   async function fetchClusters() {
-    const supabase = createClient();
-    const { data, error } = await supabase
+    setError(false);
+    const { data, error: fetchError } = await supabase
       .from('clusters')
       .select('*')
       .order('order_index', { ascending: true, nullsFirst: false });
 
-    if (error) {
-      console.error('Error fetching clusters:', error);
+    if (fetchError) {
+      console.error('Error fetching clusters:', fetchError);
+      setError(true);
     } else {
       setClusters(data || []);
     }
@@ -96,7 +100,6 @@ export default function AdminClustersPage() {
     }
 
     setSaving(true);
-    const supabase = createClient();
 
     if (editingCluster) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -145,7 +148,6 @@ export default function AdminClustersPage() {
   async function deleteCluster(id: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus cluster ini?')) return;
 
-    const supabase = createClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any).from('clusters').delete().eq('id', id);
 
@@ -166,8 +168,6 @@ export default function AdminClustersPage() {
 
     const currentCluster = clusters[currentIndex];
     const targetCluster = clusters[targetIndex];
-
-    const supabase = createClient();
 
     // Swap order_index values
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -229,6 +229,16 @@ export default function AdminClustersPage() {
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-iark-red" />
+          </div>
+        ) : error ? (
+          <div className="p-12 text-center">
+            <p className="text-red-500 mb-4">Gagal memuat data clusters</p>
+            <button
+              onClick={() => { setLoading(true); fetchClusters(); }}
+              className="px-4 py-2 bg-iark-red text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Coba Lagi
+            </button>
           </div>
         ) : filteredClusters.length > 0 ? (
           <table className="w-full">

@@ -32,6 +32,7 @@ export default function AdminHeroSlidesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(false);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -41,12 +42,14 @@ export default function AdminHeroSlidesPage() {
   const [isActive, setIsActive] = useState(true);
   const [uploading, setUploading] = useState(false);
 
+  const supabase = createClient();
+
   useEffect(() => {
     fetchSlides();
   }, []);
 
   async function fetchSlides() {
-    const supabase = createClient();
+    setError(false);
     const { data, error } = await supabase
       .from('hero_slides')
       .select('*')
@@ -54,6 +57,7 @@ export default function AdminHeroSlidesPage() {
 
     if (error) {
       console.error('Error fetching slides:', error);
+      setError(true);
     } else {
       setSlides(data || []);
     }
@@ -99,7 +103,6 @@ export default function AdminHeroSlidesPage() {
     }
 
     setUploading(true);
-    const supabase = createClient();
 
     const fileExt = file.name.split('.').pop();
     const fileName = `hero-${Date.now()}.${fileExt}`;
@@ -127,7 +130,6 @@ export default function AdminHeroSlidesPage() {
     }
 
     setSaving(true);
-    const supabase = createClient();
 
     const slideData = {
       title: title.trim(),
@@ -176,7 +178,6 @@ export default function AdminHeroSlidesPage() {
   async function deleteSlide(id: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus slide ini?')) return;
 
-    const supabase = createClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any).from('hero_slides').delete().eq('id', id);
 
@@ -189,7 +190,6 @@ export default function AdminHeroSlidesPage() {
   }
 
   async function toggleSlideStatus(id: string, currentStatus: boolean) {
-    const supabase = createClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any)
       .from('hero_slides')
@@ -215,8 +215,6 @@ export default function AdminHeroSlidesPage() {
     const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     const otherSlide = slides[newIndex];
     const currentSlide = slides[currentIndex];
-
-    const supabase = createClient();
 
     // Swap display orders
     await Promise.all([
@@ -257,6 +255,16 @@ export default function AdminHeroSlidesPage() {
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-iark-red" />
+          </div>
+        ) : error ? (
+          <div className="py-12 text-center">
+            <p className="text-red-500 mb-4">Gagal memuat data slides</p>
+            <button
+              onClick={() => { setLoading(true); fetchSlides(); }}
+              className="px-4 py-2 bg-iark-red text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Coba Lagi
+            </button>
           </div>
         ) : slides.length > 0 ? (
           <div className="divide-y">

@@ -46,8 +46,7 @@ export default function AdminUsersPage() {
   const updateRoleMutation = useMutation({
     mutationFn: async ({ userId, newRole }: { userId: string; newRole: string }) => {
       const supabase = createClient();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('profiles')
         .update({ role: newRole })
         .eq('id', userId);

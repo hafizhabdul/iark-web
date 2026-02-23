@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
@@ -43,12 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const supabase = createClient();
+  const signOutFlagRef = useRef<(value: boolean) => void>(() => { });
 
   // Fetch profile data
   const fetchProfile = async (userId: string): Promise<Profile | null> => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
@@ -96,67 +96,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const profileRef = useRef<Profile | null>(null);
+
+  // Keep profileRef in sync with profile state
+  useEffect(() => {
+    profileRef.current = profile;
+  }, [profile]);
+
   // Initialize auth state
   useEffect(() => {
     let isMounted = true;
-
-    const initAuth = async (attempt = 1) => {
-      try {
-        // Add timeout to prevent infinite loading on rate limit / network issues
-        const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Auth init timeout')), 10000)
-        );
-
-        const { data: { user: supabaseUser } } = await Promise.race([
-          supabase.auth.getUser(),
-          timeoutPromise,
-        ]);
-
-        if (supabaseUser && isMounted) {
-          const profileData = await fetchProfile(supabaseUser.id);
-          if (isMounted) {
-            setUserFromSupabase(supabaseUser, profileData);
-          }
-        }
-      } catch (error: any) {
-        const errMsg = error?.message?.toLowerCase() || '';
-        const isAbort = errMsg.includes('abort') || error?.name === 'AbortError';
-
-        if (!isAbort) {
-          console.error('Error initializing auth:', error);
-        }
-
-        // Retry up to 2 times with backoff for transient errors (429, network)
-        if (attempt < 3 && isMounted && !isAbort) {
-          const delay = attempt * 2000;
-          await new Promise((r) => setTimeout(r, delay));
-          if (isMounted) return initAuth(attempt + 1);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    initAuth();
+    let isSigningOut = false;
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (!isMounted) return;
+        if (!isMounted || isSigningOut) return;
 
-        if (event === 'SIGNED_IN' && session?.user) {
-          const profileData = await fetchProfile(session.user.id);
-          if (isMounted) {
-            setUserFromSupabase(session.user, profileData);
+        if (session?.user) {
+          // Only fetch profile if we don't have it for this user yet
+          if (profileRef.current?.id !== session.user.id) {
+            try {
+              const profileData = await fetchProfile(session.user.id);
+              if (isMounted) {
+                setUserFromSupabase(session.user, profileData);
+              }
+            } catch (error) {
+              console.error('Error in auth state change:', error);
+            }
           }
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setProfile(null);
+        } else {
+          if (isMounted) {
+            setUser(null);
+            setProfile(null);
+          }
+        }
+
+        if (isMounted) {
+          setIsLoading(false);
         }
       }
     );
+
+    // Expose signout flag setter
+    signOutFlagRef.current = (value: boolean) => { isSigningOut = value; };
 
     return () => {
       isMounted = false;
@@ -214,9 +197,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Prevent onAuthStateChange from racing with manual state clear
+    signOutFlagRef.current(true);
     setUser(null);
     setProfile(null);
+    await supabase.auth.signOut();
     router.push('/');
   };
 
@@ -224,10 +209,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return { error: 'Not authenticated' };
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('profiles')
-        .update(data)
+        .update(data as any)
         .eq('id', user.id);
 
       if (error) {

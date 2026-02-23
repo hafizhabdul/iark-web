@@ -1,19 +1,18 @@
 import { createClient } from '@/lib/supabase/client';
 import type { Profile } from '@/lib/supabase/types';
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
  * Fetch current user's profile
  */
 export async function fetchCurrentUserProfile(): Promise<Profile | null> {
   const supabase = createClient();
-  
+
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
     return null;
   }
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user.id)
@@ -33,7 +32,7 @@ export async function fetchCurrentUserProfile(): Promise<Profile | null> {
 export async function fetchProfileById(userId: string): Promise<Profile | null> {
   const supabase = createClient();
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', userId)
@@ -56,7 +55,7 @@ export async function updateProfile(
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('profiles')
     .update({
       ...updates,
@@ -78,7 +77,7 @@ export async function updateProfile(
 export async function fetchAllProfiles(): Promise<Profile[]> {
   const supabase = createClient();
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('profiles')
     .select('*')
     .order('created_at', { ascending: false });
@@ -103,7 +102,7 @@ export async function searchProfiles(params: {
   const supabase = createClient();
   const { search, angkatan, regional, asrama } = params;
 
-  let query = (supabase as any)
+  let query = supabase
     .from('profiles')
     .select('*');
 

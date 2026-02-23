@@ -47,7 +47,7 @@ export default function AdminClustersPage() {
   const [color, setColor] = useState<'red' | 'blue' | 'yellow' | ''>('');
   const [error, setError] = useState(false);
 
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   useEffect(() => {
     fetchClusters();
@@ -102,8 +102,7 @@ export default function AdminClustersPage() {
     setSaving(true);
 
     if (editingCluster) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('clusters')
         .update({
           name: name.trim(),
@@ -123,8 +122,7 @@ export default function AdminClustersPage() {
       }
     } else {
       const maxOrder = clusters.reduce((max, c) => Math.max(max, c.order_index || 0), 0);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from('clusters').insert({
+      const { error } = await supabase.from('clusters').insert({
         name: name.trim(),
         short_name: shortName.trim(),
         description: description.trim() || null,
@@ -148,8 +146,7 @@ export default function AdminClustersPage() {
   async function deleteCluster(id: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus cluster ini?')) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).from('clusters').delete().eq('id', id);
+    const { error } = await supabase.from('clusters').delete().eq('id', id);
 
     if (error) {
       console.error('Error deleting cluster:', error);
@@ -170,14 +167,12 @@ export default function AdminClustersPage() {
     const targetCluster = clusters[targetIndex];
 
     // Swap order_index values
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: error1 } = await (supabase as any)
+    const { error: error1 } = await supabase
       .from('clusters')
       .update({ order_index: targetCluster.order_index })
       .eq('id', currentCluster.id);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: error2 } = await (supabase as any)
+    const { error: error2 } = await supabase
       .from('clusters')
       .update({ order_index: currentCluster.order_index })
       .eq('id', targetCluster.id);

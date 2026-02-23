@@ -28,8 +28,7 @@ export interface DonationStats {
 export async function fetchAllDonations(): Promise<Donation[]> {
   const supabase = createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('donations')
     .select('*')
     .order('created_at', { ascending: false });
@@ -50,8 +49,7 @@ export async function fetchDonationsByStatus(
 ): Promise<Donation[]> {
   const supabase = createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('donations')
     .select('*')
     .eq('payment_status', status)
@@ -71,8 +69,7 @@ export async function fetchDonationsByStatus(
 export async function fetchPaidDonations(limit = 100): Promise<Donation[]> {
   const supabase = createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('donations')
     .select('id, donor_name, amount, message, is_anonymous, paid_at')
     .eq('payment_status', 'paid')
@@ -84,7 +81,7 @@ export async function fetchPaidDonations(limit = 100): Promise<Donation[]> {
     return [];
   }
 
-  return data || [];
+  return data as Donation[] || [];
 }
 
 /**
@@ -93,8 +90,7 @@ export async function fetchPaidDonations(limit = 100): Promise<Donation[]> {
 export async function fetchDonationByOrderId(orderId: string): Promise<Donation | null> {
   const supabase = createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('donations')
     .select('*')
     .eq('order_id', orderId)
@@ -114,8 +110,7 @@ export async function fetchDonationByOrderId(orderId: string): Promise<Donation 
 export async function getDonationStats(): Promise<DonationStats> {
   const supabase = createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('donations')
     .select('amount, payment_status');
 

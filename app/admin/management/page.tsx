@@ -179,8 +179,7 @@ export default function AdminManagementPage() {
     setSaving(true);
     try {
       if (editingMember) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error } = await (supabase as any)
+          const { error } = await supabase
           .from('management')
           .update({
             name: name.trim(),
@@ -207,8 +206,7 @@ export default function AdminManagementPage() {
           ? Math.max(...members.map(m => m.order_index || 0)) + 1
           : 0;
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error } = await (supabase as any).from('management').insert({
+        const { error } = await supabase.from('management').insert({
           name: name.trim(),
           position: position.trim(),
           angkatan: angkatan.trim() || null,
@@ -241,8 +239,7 @@ export default function AdminManagementPage() {
     if (!confirm('Apakah Anda yakin ingin menghapus anggota ini?')) return;
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from('management').delete().eq('id', id);
+      const { error } = await supabase.from('management').delete().eq('id', id);
 
       if (error) {
         console.error('Error deleting member:', error);
@@ -267,16 +264,12 @@ export default function AdminManagementPage() {
     const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     const swapMember = filteredByRole[swapIndex];
 
-    const supabase = createClient();
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: error1 } = await (supabase as any)
+    const { error: error1 } = await supabase
       .from('management')
       .update({ order_index: swapMember.order_index })
       .eq('id', member.id);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: error2 } = await (supabase as any)
+    const { error: error2 } = await supabase
       .from('management')
       .update({ order_index: member.order_index })
       .eq('id', swapMember.id);

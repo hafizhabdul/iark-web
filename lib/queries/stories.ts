@@ -30,9 +30,7 @@ export async function fetchPublishedStories(
 ): Promise<Story[]> {
   const supabase = createClient();
 
-  // Try RPC first - cast to any since RPC types aren't defined
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any).rpc('get_published_stories', {
+  const { data, error } = await supabase.rpc('get_published_stories', {
     p_limit: limit,
     p_offset: offset,
     p_category: category || null,
@@ -87,7 +85,7 @@ async function fetchPublishedStoriesFallback(
     } | null;
   }
 
-  return ((data || []) as StoryWithAuthor[]).map((s) => ({
+  return ((data || []) as unknown as StoryWithAuthor[]).map((s) => ({
     id: s.id,
     title: s.title,
     slug: s.slug,
@@ -109,7 +107,7 @@ export async function fetchStoryBySlug(slug: string): Promise<StoryDetail | null
   const { data, error } = await supabase
     .from('stories')
     .select(`
-      id, title, slug, excerpt, content, hero_image, category, 
+      id, title, slug, excerpt, content, hero_image, category,
       featured, published_at, tags, read_time, views,
       author:profiles!author_id (name, angkatan, photo)
     `)
@@ -140,7 +138,7 @@ export async function fetchStoryBySlug(slug: string): Promise<StoryDetail | null
     } | null;
   }
 
-  const story = data as StoryResponse;
+  const story = data as unknown as StoryResponse;
 
   return {
     id: story.id,

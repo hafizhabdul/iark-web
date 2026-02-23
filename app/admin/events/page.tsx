@@ -30,7 +30,7 @@ interface Event {
 }
 
 export default function AdminEventsPage() {
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -140,8 +140,7 @@ export default function AdminEventsPage() {
     const slug = title.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     
     if (editingEvent) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('events')
         .update({
           title: title.trim(),
@@ -161,8 +160,7 @@ export default function AdminEventsPage() {
         closeModal();
       }
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from('events').insert({
+      const { error } = await supabase.from('events').insert({
         title: title.trim(),
         slug: `${slug}-${Date.now()}`,
         description: description.trim(),
@@ -187,8 +185,7 @@ export default function AdminEventsPage() {
   async function deleteEvent(id: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus event ini?')) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).from('events').delete().eq('id', id);
+    const { error } = await supabase.from('events').delete().eq('id', id);
 
     if (error) {
       console.error('Error deleting event:', error);
@@ -199,8 +196,7 @@ export default function AdminEventsPage() {
   }
 
   async function toggleEventStatus(id: string, currentStatus: boolean) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('events')
       .update({ is_active: !currentStatus })
       .eq('id', id);

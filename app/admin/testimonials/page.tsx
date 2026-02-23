@@ -79,15 +79,13 @@ export default function AdminTestimonialsPage() {
     }) => {
       const supabase = createClient();
       if (data.isEditing && data.id) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error } = await (supabase as any)
+        const { error } = await supabase
           .from('testimonials')
           .update(data.payload)
           .eq('id', data.id);
         if (error) throw error;
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error } = await (supabase as any).from('testimonials').insert(data.payload);
+        const { error } = await supabase.from('testimonials').insert(data.payload);
         if (error) throw error;
       }
     },
@@ -104,8 +102,7 @@ export default function AdminTestimonialsPage() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const supabase = createClient();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from('testimonials').delete().eq('id', id);
+      const { error } = await supabase.from('testimonials').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -120,8 +117,7 @@ export default function AdminTestimonialsPage() {
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ id, currentStatus }: { id: string; currentStatus: boolean }) => {
       const supabase = createClient();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('testimonials')
         .update({ is_active: !currentStatus })
         .eq('id', id);
@@ -148,13 +144,11 @@ export default function AdminTestimonialsPage() {
       swapOrderIndex: number | null;
     }) => {
       const supabase = createClient();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: error1 } = await (supabase as any)
+      const { error: error1 } = await supabase
         .from('testimonials')
         .update({ order_index: swapOrderIndex })
         .eq('id', currentId);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: error2 } = await (supabase as any)
+      const { error: error2 } = await supabase
         .from('testimonials')
         .update({ order_index: currentOrderIndex })
         .eq('id', swapId);

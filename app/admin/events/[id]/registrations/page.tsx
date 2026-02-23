@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import type { EventRegistrationRow } from '@/lib/supabase/types';
 import { 
   ArrowLeft, 
   Search, 
@@ -86,11 +87,10 @@ export default function EventRegistrationsPage() {
 
   async function updateStatus(regId: string, newStatus: string) {
     const supabase = createClient();
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+
+    const { error } = await supabase
       .from('event_registrations')
-      .update({ status: newStatus })
+      .update({ status: newStatus as EventRegistrationRow['status'] })
       .eq('id', regId);
 
     if (error) {
@@ -113,11 +113,10 @@ export default function EventRegistrationsPage() {
 
     setBulkActionLoading(true);
     const supabase = createClient();
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+
+    const { error } = await supabase
       .from('event_registrations')
-      .update({ status: newStatus })
+      .update({ status: newStatus as EventRegistrationRow['status'] })
       .in('id', Array.from(selectedIds));
 
     if (error) {

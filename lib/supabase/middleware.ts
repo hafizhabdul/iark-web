@@ -11,14 +11,14 @@ function getCookieDomain(host: string): string | undefined {
   if (host.includes('localhost') || host.includes('127.0.0.1')) {
     return undefined;
   }
-  
+
   // Extract root domain (e.g., "event.ia-rk.com" -> ".ia-rk.com")
   const parts = host.split('.');
   if (parts.length >= 2) {
     // Get last two parts (e.g., "ia-rk.com") and prefix with dot
     return '.' + parts.slice(-2).join('.');
   }
-  
+
   return undefined;
 }
 
@@ -59,11 +59,19 @@ export async function updateSession(request: NextRequest) {
   );
 
   // IMPORTANT: DO NOT REMOVE - refreshes the auth token
+  // Skip session refresh for prefetch requests to avoid 429 rate limit errors
+  const isPrefetch = request.headers.get('x-nextjs-prefetch') ||
+    request.headers.get('Purpose') === 'prefetch';
+
+  if (isPrefetch) {
+    return supabaseResponse;
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protected routes
+  // Protected routes - redirect unauthenticated users to login
   const protectedPaths = ['/dashboard', '/admin'];
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
@@ -76,20 +84,8 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Admin-only routes
-  if (request.nextUrl.pathname.startsWith('/admin') && user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (profile?.role !== 'admin') {
-      const url = request.nextUrl.clone();
-      url.pathname = '/dashboard';
-      return NextResponse.redirect(url);
-    }
-  }
+  // NOTE: Admin role check is handled client-side by AdminLayout (useAuth().isAdmin)
+  // to avoid an extra DB query on every request which causes 429 rate limit errors.
 
   return supabaseResponse;
 }

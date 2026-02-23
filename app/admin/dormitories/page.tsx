@@ -46,7 +46,7 @@ export default function AdminDormitoriesPage() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(false);
 
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   useEffect(() => {
     fetchDormitories();
@@ -150,8 +150,7 @@ export default function AdminDormitoriesPage() {
     };
 
     if (editingDormitory) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('dormitories')
         .update(dormitoryData)
         .eq('id', editingDormitory.id);
@@ -164,8 +163,7 @@ export default function AdminDormitoriesPage() {
         closeModal();
       }
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from('dormitories').insert(dormitoryData);
+      const { error } = await supabase.from('dormitories').insert(dormitoryData);
 
       if (error) {
         console.error('Error creating dormitory:', error);
@@ -182,8 +180,7 @@ export default function AdminDormitoriesPage() {
   async function deleteDormitory(id: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus asrama ini?')) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).from('dormitories').delete().eq('id', id);
+    const { error } = await supabase.from('dormitories').delete().eq('id', id);
 
     if (error) {
       console.error('Error deleting dormitory:', error);

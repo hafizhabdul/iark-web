@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
 import type { DonationCampaignWithProgress, CampaignDonorWall } from '@/lib/supabase/types';
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /** PGRST205 = relation (table/view) does not exist */
 function isViewNotFound(error: { code?: string }): boolean {
@@ -12,8 +11,8 @@ function isViewNotFound(error: { code?: string }): boolean {
  */
 export async function fetchActiveCampaigns(): Promise<DonationCampaignWithProgress[]> {
   const supabase = createClient();
-  
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('vw_donation_campaign_progress')
     .select('*')
     .eq('is_active', true)
@@ -23,7 +22,7 @@ export async function fetchActiveCampaigns(): Promise<DonationCampaignWithProgre
     if (isViewNotFound(error)) return [];
     throw error;
   }
-  return data ?? [];
+  return (data ?? []) as DonationCampaignWithProgress[];
 }
 
 /**
@@ -31,8 +30,8 @@ export async function fetchActiveCampaigns(): Promise<DonationCampaignWithProgre
  */
 export async function fetchFeaturedCampaigns(limit = 3): Promise<DonationCampaignWithProgress[]> {
   const supabase = createClient();
-  
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('vw_donation_campaign_progress')
     .select('*')
     .eq('is_active', true)
@@ -44,7 +43,7 @@ export async function fetchFeaturedCampaigns(limit = 3): Promise<DonationCampaig
     if (isViewNotFound(error)) return [];
     throw error;
   }
-  return data ?? [];
+  return (data ?? []) as DonationCampaignWithProgress[];
 }
 
 /**
@@ -52,8 +51,8 @@ export async function fetchFeaturedCampaigns(limit = 3): Promise<DonationCampaig
  */
 export async function fetchCampaignBySlug(slug: string): Promise<DonationCampaignWithProgress | null> {
   const supabase = createClient();
-  
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('vw_donation_campaign_progress')
     .select('*')
     .eq('slug', slug)
@@ -63,7 +62,7 @@ export async function fetchCampaignBySlug(slug: string): Promise<DonationCampaig
     if (error.code === 'PGRST116' || isViewNotFound(error)) return null;
     throw error;
   }
-  return data;
+  return data as DonationCampaignWithProgress;
 }
 
 /**
@@ -71,8 +70,8 @@ export async function fetchCampaignBySlug(slug: string): Promise<DonationCampaig
  */
 export async function fetchCampaignById(id: string): Promise<DonationCampaignWithProgress | null> {
   const supabase = createClient();
-  
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('vw_donation_campaign_progress')
     .select('*')
     .eq('id', id)
@@ -82,7 +81,7 @@ export async function fetchCampaignById(id: string): Promise<DonationCampaignWit
     if (error.code === 'PGRST116' || isViewNotFound(error)) return null;
     throw error;
   }
-  return data;
+  return data as DonationCampaignWithProgress;
 }
 
 /**
@@ -90,8 +89,8 @@ export async function fetchCampaignById(id: string): Promise<DonationCampaignWit
  */
 export async function fetchCampaignDonorWall(campaignId: string, limit = 20): Promise<CampaignDonorWall[]> {
   const supabase = createClient();
-  
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('vw_campaign_donor_wall')
     .select('*')
     .eq('campaign_id', campaignId)
@@ -102,7 +101,7 @@ export async function fetchCampaignDonorWall(campaignId: string, limit = 20): Pr
     if (isViewNotFound(error)) return [];
     throw error;
   }
-  return data ?? [];
+  return (data ?? []) as CampaignDonorWall[];
 }
 
 /**
@@ -110,8 +109,8 @@ export async function fetchCampaignDonorWall(campaignId: string, limit = 20): Pr
  */
 export async function fetchOverallDonationStats(): Promise<{ paid_amount: number; paid_count: number }> {
   const supabase = createClient();
-  
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('vw_donation_overall_stats')
     .select('*')
     .single();
@@ -134,7 +133,7 @@ export async function fetchOverallDonationStats(): Promise<{ paid_amount: number
 export async function fetchUserDonations(userId: string) {
   const supabase = createClient();
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('donations')
     .select(`
       id,
@@ -148,7 +147,7 @@ export async function fetchUserDonations(userId: string) {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return (data ?? []).map((d: any) => ({
+  return (data ?? []).map((d: { campaigns?: { title: string; slug: string } | null } & Record<string, unknown>) => ({
     ...d,
     campaign: d.campaigns || null,
   }));
@@ -159,8 +158,8 @@ export async function fetchUserDonations(userId: string) {
  */
 export async function fetchAllCampaigns(): Promise<DonationCampaignWithProgress[]> {
   const supabase = createClient();
-  
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('vw_donation_campaign_progress')
     .select('*')
     .order('created_at', { ascending: false });
@@ -169,5 +168,5 @@ export async function fetchAllCampaigns(): Promise<DonationCampaignWithProgress[
     if (isViewNotFound(error)) return [];
     throw error;
   }
-  return data ?? [];
+  return (data ?? []) as DonationCampaignWithProgress[];
 }

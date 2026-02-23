@@ -10,11 +10,25 @@ export interface EventWithRegistrations {
   location: string | null;
   category: string | null;
   image_url: string | null;
-  is_live: boolean;
+  is_active: boolean;
   capacity: number | null;
   registration_count: number;
   content?: string | null;
   registration_url?: string | null;
+}
+
+interface EventWithRegJoin {
+  id: string;
+  title: string;
+  description: string | null;
+  date: string;
+  location: string | null;
+  image_url: string | null;
+  is_active: boolean;
+  max_participants: number | null;
+  content?: string | null;
+  registration_url?: string | null;
+  event_registrations: { count: number }[];
 }
 
 /**
@@ -22,9 +36,8 @@ export interface EventWithRegistrations {
  */
 export async function fetchEventsWithRegistrations(): Promise<EventWithRegistrations[]> {
   const supabase = createClient();
-  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('events')
     .select(`
       id,
@@ -33,7 +46,7 @@ export async function fetchEventsWithRegistrations(): Promise<EventWithRegistrat
       date,
       location,
       image_url,
-      is_live,
+      is_active,
       max_participants,
       event_registrations(count)
     `)
@@ -44,8 +57,7 @@ export async function fetchEventsWithRegistrations(): Promise<EventWithRegistrat
     return [];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data || []).map((event: any) => ({
+  return ((data || []) as unknown as EventWithRegJoin[]).map((event) => ({
     id: event.id,
     title: event.title,
     description: event.description,
@@ -54,7 +66,7 @@ export async function fetchEventsWithRegistrations(): Promise<EventWithRegistrat
     location: event.location,
     category: null,
     image_url: event.image_url,
-    is_live: event.is_live,
+    is_active: event.is_active,
     capacity: event.max_participants,
     registration_count: event.event_registrations?.[0]?.count || 0,
   }));
@@ -68,7 +80,7 @@ export interface EventData {
   date: string;
   location: string;
   image_url: string | null;
-  is_live: boolean;
+  is_active: boolean;
   registration_enabled: boolean;
   max_participants: number | null;
   registration_deadline: string | null;
@@ -84,20 +96,23 @@ export interface EventWithRegistrationCount extends EventData {
   registration_count: number;
 }
 
+interface EventDataWithRegJoin extends EventData {
+  event_registrations: { count: number }[];
+}
+
 /**
  * Fetch all upcoming events (for event portal)
  */
 export async function fetchUpcomingEvents(): Promise<EventWithRegistrationCount[]> {
   const supabase = createClient();
-  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('events')
     .select(`
       *,
       event_registrations(count)
     `)
-    .eq('is_live', true)
+    .eq('is_active', true)
     .eq('registration_enabled', true)
     .gte('date', new Date().toISOString())
     .order('date', { ascending: true });
@@ -107,8 +122,7 @@ export async function fetchUpcomingEvents(): Promise<EventWithRegistrationCount[
     return [];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data || []).map((event: any) => ({
+  return ((data || []) as unknown as EventDataWithRegJoin[]).map((event) => ({
     ...event,
     registration_count: event.event_registrations?.[0]?.count || 0,
   }));
@@ -119,15 +133,14 @@ export async function fetchUpcomingEvents(): Promise<EventWithRegistrationCount[
  */
 export async function fetchAllEvents(): Promise<EventWithRegistrationCount[]> {
   const supabase = createClient();
-  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('events')
     .select(`
       *,
       event_registrations(count)
     `)
-    .eq('is_live', true)
+    .eq('is_active', true)
     .order('date', { ascending: false });
 
   if (error) {
@@ -135,8 +148,7 @@ export async function fetchAllEvents(): Promise<EventWithRegistrationCount[]> {
     return [];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data || []).map((event: any) => ({
+  return ((data || []) as unknown as EventDataWithRegJoin[]).map((event) => ({
     ...event,
     registration_count: event.event_registrations?.[0]?.count || 0,
   }));
@@ -147,9 +159,8 @@ export async function fetchAllEvents(): Promise<EventWithRegistrationCount[]> {
  */
 export async function fetchEventById(id: string): Promise<EventWithRegistrations | null> {
   const supabase = createClient();
-  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('events')
     .select(`
       id,
@@ -158,7 +169,7 @@ export async function fetchEventById(id: string): Promise<EventWithRegistrations
       date,
       location,
       image_url,
-      is_live,
+      is_active,
       max_participants,
       content,
       registration_url,
@@ -172,20 +183,22 @@ export async function fetchEventById(id: string): Promise<EventWithRegistrations
     return null;
   }
 
+  const event = data as unknown as EventWithRegJoin;
+
   return {
-    id: data.id,
-    title: data.title,
-    description: data.description,
-    date: data.date,
+    id: event.id,
+    title: event.title,
+    description: event.description,
+    date: event.date,
     time: null,
-    location: data.location,
+    location: event.location,
     category: null,
-    image_url: data.image_url,
-    is_live: data.is_live,
-    capacity: data.max_participants,
-    registration_count: data.event_registrations?.[0]?.count || 0,
-    content: data.content,
-    registration_url: data.registration_url,
+    image_url: event.image_url,
+    is_active: event.is_active,
+    capacity: event.max_participants,
+    registration_count: event.event_registrations?.[0]?.count || 0,
+    content: event.content,
+    registration_url: event.registration_url,
   };
 }
 
@@ -194,16 +207,15 @@ export async function fetchEventById(id: string): Promise<EventWithRegistrations
  */
 export async function fetchEventBySlug(slug: string): Promise<EventWithRegistrationCount | null> {
   const supabase = createClient();
-  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('events')
     .select(`
       *,
       event_registrations(count)
     `)
     .eq('slug', slug)
-    .eq('is_live', true)
+    .eq('is_active', true)
     .single();
 
   if (error) {
@@ -211,9 +223,11 @@ export async function fetchEventBySlug(slug: string): Promise<EventWithRegistrat
     return null;
   }
 
+  const event = data as unknown as EventDataWithRegJoin;
+
   return {
-    ...data,
-    registration_count: data.event_registrations?.[0]?.count || 0,
+    ...event,
+    registration_count: event.event_registrations?.[0]?.count || 0,
   };
 }
 
@@ -222,7 +236,7 @@ export async function fetchEventBySlug(slug: string): Promise<EventWithRegistrat
  */
 export async function checkUserRegistration(eventId: string, email: string): Promise<boolean> {
   const supabase = createClient();
-  
+
   const { data, error } = await supabase
     .from('event_registrations')
     .select('id')
@@ -243,9 +257,8 @@ export async function checkUserRegistration(eventId: string, email: string): Pro
  */
 export async function fetchUserRegisteredEvents(userId: string): Promise<EventData[]> {
   const supabase = createClient();
-  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('event_registrations')
     .select(`
       event:events(*)
@@ -260,7 +273,6 @@ export async function fetchUserRegisteredEvents(userId: string): Promise<EventDa
   }
 
   return (data || [])
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .map((reg: any) => reg.event)
-    .filter((event: EventData | null): event is EventData => event !== null);
+    .map((reg: { event: EventData | null }) => reg.event)
+    .filter((event): event is EventData => event !== null);
 }

@@ -42,8 +42,7 @@ export async function checkExistingRegistration(
 ): Promise<boolean> {
   const supabase = createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('event_registrations')
     .select('id')
     .eq('event_id', eventId)
@@ -65,8 +64,7 @@ export async function checkExistingRegistration(
 export async function fetchRegistrationById(id: string): Promise<Registration | null> {
   const supabase = createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('event_registrations')
     .select(`
       *,
@@ -80,7 +78,7 @@ export async function fetchRegistrationById(id: string): Promise<Registration | 
     return null;
   }
 
-  return data;
+  return data as unknown as Registration;
 }
 
 /**
@@ -89,8 +87,7 @@ export async function fetchRegistrationById(id: string): Promise<Registration | 
 export async function fetchEventRegistrations(eventId: string): Promise<Registration[]> {
   const supabase = createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('event_registrations')
     .select('*')
     .eq('event_id', eventId)
@@ -110,8 +107,7 @@ export async function fetchEventRegistrations(eventId: string): Promise<Registra
 export async function fetchUserRegistrations(userId: string): Promise<RegistrationWithEvent[]> {
   const supabase = createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('event_registrations')
     .select(`
       *,
@@ -126,8 +122,9 @@ export async function fetchUserRegistrations(userId: string): Promise<Registrati
     return [];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data || []).filter((reg: any) => reg.event !== null);
+  return ((data || []) as unknown as RegistrationWithEvent[]).filter(
+    (reg) => reg.event !== null
+  );
 }
 
 /**
@@ -136,11 +133,10 @@ export async function fetchUserRegistrations(userId: string): Promise<Registrati
 export async function cancelRegistration(registrationId: string): Promise<boolean> {
   const supabase = createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('event_registrations')
     .update({
-      status: 'cancelled',
+      status: 'cancelled' as const,
       cancelled_at: new Date().toISOString(),
     })
     .eq('id', registrationId);
@@ -170,10 +166,9 @@ export async function updateRegistrationStatus(
     updates.cancelled_at = new Date().toISOString();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('event_registrations')
-    .update(updates)
+    .update(updates as { status: typeof status; confirmed_at?: string; cancelled_at?: string })
     .eq('id', registrationId);
 
   if (error) {
@@ -190,8 +185,7 @@ export async function updateRegistrationStatus(
 export async function getEventRegistrationCount(eventId: string): Promise<number> {
   const supabase = createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { count, error } = await (supabase as any)
+  const { count, error } = await supabase
     .from('event_registrations')
     .select('*', { count: 'exact', head: true })
     .eq('event_id', eventId)

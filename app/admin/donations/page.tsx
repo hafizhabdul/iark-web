@@ -39,7 +39,7 @@ interface Donation {
 }
 
 export default function AdminDonationsPage() {
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
   const [donations, setDonations] = useState<Donation[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,13 +59,11 @@ export default function AdminDonationsPage() {
 
     // Fetch donations and campaigns in parallel
     const [donationsRes, campaignsRes] = await Promise.all([
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (supabase as any)
+      supabase
         .from('donations')
         .select('*')
         .order('created_at', { ascending: false }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (supabase as any)
+      supabase
         .from('donation_campaigns')
         .select('id, title, slug')
         .order('title', { ascending: true }),
@@ -98,7 +96,11 @@ export default function AdminDonationsPage() {
       new Date(d.created_at).toLocaleDateString('id-ID'),
     ]);
 
-    const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+    const escapeCell = (cell: string) => `"${cell.replace(/"/g, '""')}"`;
+    const csvContent = [
+      headers.map(escapeCell).join(','),
+      ...rows.map(row => row.map(escapeCell).join(',')),
+    ].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

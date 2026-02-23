@@ -71,8 +71,7 @@ export default function AdminStoriesPage() {
       if (newStatus === 'published') {
         updateData.published_at = new Date().toISOString();
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('stories')
         .update(updateData)
         .eq('id', storyId);
@@ -89,8 +88,7 @@ export default function AdminStoriesPage() {
   const deleteMutation = useMutation({
     mutationFn: async (storyId: string) => {
       const supabase = createClient();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from('stories').delete().eq('id', storyId);
+      const { error } = await supabase.from('stories').delete().eq('id', storyId);
       if (error) throw error;
     },
     onSuccess: () => {

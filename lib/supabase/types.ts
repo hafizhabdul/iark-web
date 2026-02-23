@@ -1,77 +1,141 @@
 // Database types for Supabase
+//
+// Insert/Update use Record<string, unknown> because Supabase v2.94's type
+// inference resolves Partial<Interface> to `never` when used as GenericTable
+// constraints. Row types remain fully typed for read queries.
+// If you need write type safety, use the row interfaces directly at call sites.
 
 export interface Database {
   public: {
     Tables: {
       profiles: {
         Row: Profile;
-        Insert: Partial<Profile> & { id: string };
-        Update: Partial<Profile>;
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
       };
       batches: {
         Row: Batch;
-        Insert: Partial<Batch>;
-        Update: Partial<Batch>;
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
       };
       batch_leaders: {
         Row: BatchLeader;
-        Insert: Partial<BatchLeader>;
-        Update: Partial<BatchLeader>;
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [
+          {
+            foreignKeyName: 'batch_leaders_batch_id_fkey';
+            columns: ['batch_id'];
+            referencedRelation: 'batches';
+            referencedColumns: ['id'];
+          }
+        ];
       };
       testimonials: {
         Row: Testimonial;
-        Insert: Partial<Testimonial>;
-        Update: Partial<Testimonial>;
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
       };
       stories: {
         Row: StoryRow;
-        Insert: Partial<StoryRow>;
-        Update: Partial<StoryRow>;
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [
+          {
+            foreignKeyName: 'stories_author_id_fkey';
+            columns: ['author_id'];
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
       };
       events: {
         Row: EventRow;
-        Insert: Partial<EventRow>;
-        Update: Partial<EventRow>;
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
       };
       event_registrations: {
         Row: EventRegistrationRow;
-        Insert: Partial<EventRegistrationRow>;
-        Update: Partial<EventRegistrationRow>;
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [
+          {
+            foreignKeyName: 'event_registrations_event_id_fkey';
+            columns: ['event_id'];
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          }
+        ];
       };
       donations: {
         Row: DonationRow;
-        Insert: Partial<DonationRow>;
-        Update: Partial<DonationRow>;
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [
+          {
+            foreignKeyName: 'donations_campaign_id_fkey';
+            columns: ['campaign_id'];
+            referencedRelation: 'donation_campaigns';
+            referencedColumns: ['id'];
+          }
+        ];
       };
       donation_campaigns: {
         Row: DonationCampaignRow;
-        Insert: Partial<DonationCampaignRow>;
-        Update: Partial<DonationCampaignRow>;
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
       };
       hero_slides: {
         Row: HeroSlide;
-        Insert: Partial<HeroSlide>;
-        Update: Partial<HeroSlide>;
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
       };
       activities: {
         Row: Activity;
-        Insert: Partial<Activity>;
-        Update: Partial<Activity>;
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
       };
       management: {
         Row: Management;
-        Insert: Partial<Management>;
-        Update: Partial<Management>;
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
       };
       dormitories: {
         Row: Dormitory;
-        Insert: Partial<Dormitory>;
-        Update: Partial<Dormitory>;
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
       };
       clusters: {
         Row: Cluster;
-        Insert: Partial<Cluster>;
-        Update: Partial<Cluster>;
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+    };
+    Views: {
+      vw_donation_campaign_progress: {
+        Row: DonationCampaignWithProgress;
+        Relationships: [];
+      };
+      vw_campaign_donor_wall: {
+        Row: CampaignDonorWall;
+        Relationships: [];
+      };
+      vw_donation_overall_stats: {
+        Row: {
+          total_paid_amount: number;
+          total_paid_count: number;
+        };
+        Relationships: [];
       };
     };
     Functions: {
@@ -89,7 +153,41 @@ export interface Database {
         };
         Returns: string;
       };
+      get_published_stories: {
+        Args: {
+          p_limit: number;
+          p_offset: number;
+          p_category: string | null;
+        };
+        Returns: {
+          id: string;
+          title: string;
+          slug: string;
+          excerpt: string | null;
+          hero_image: string | null;
+          category: string;
+          featured: boolean;
+          published_at: string | null;
+          author_name: string;
+          author_angkatan: number | null;
+          author_photo: string | null;
+        }[];
+      };
+      get_dashboard_stats: {
+        Args: Record<string, never>;
+        Returns: {
+          total_stories: number;
+          pending_stories: number;
+          total_users: number;
+          total_events: number;
+          upcoming_events: number;
+          total_registrations: number;
+          total_donations: number;
+          total_donations_amount: number;
+        };
+      };
     };
+    Enums: Record<string, never>;
   };
 }
 
@@ -145,17 +243,18 @@ export interface BatchLeader {
 export interface Testimonial {
   id: string;
   name: string;
-  title: string | null;
-  content: string;
-  quote: string | null;
+  title: string;
+  content: string | null;
+  quote: string;
   photo: string | null;
-  angkatan: number | null;
-  type: 'alumni' | 'tokoh_ternama';
+  angkatan: string | null;
+  type: 'ketua_angkatan' | 'tokoh_ternama';
   is_active: boolean;
-  order_index: number;
+  order_index: number | null;
   created_at: string;
 }
 
+export type StoryStatus = 'draft' | 'pending' | 'published' | 'rejected';
 export type StoryCategory = 'alumni' | 'organisasi' | 'inspirasi' | 'kegiatan';
 
 export interface StoryRow {
@@ -167,8 +266,9 @@ export interface StoryRow {
   hero_image: string | null;
   category: StoryCategory;
   tags: string[] | null;
+  status: StoryStatus;
+  rejected_reason: string | null;
   featured: boolean;
-  is_published: boolean;
   published_at: string | null;
   author_id: string | null;
   created_at: string;
@@ -184,7 +284,7 @@ export interface EventRow {
   date: string;
   location: string | null;
   image_url: string | null;
-  is_live: boolean;
+  is_active: boolean;
   registration_enabled: boolean;
   max_participants: number | null;
   registration_deadline: string | null;
@@ -207,6 +307,8 @@ export interface EventRegistrationRow {
   phone: string | null;
   angkatan: number | null;
   asrama: string | null;
+  kampus: string | null;
+  organization: string | null;
   status: 'registered' | 'confirmed' | 'attended' | 'cancelled';
   payment_status: 'pending' | 'paid' | 'refunded';
   payment_amount: number;
@@ -278,7 +380,7 @@ export interface HeroSlide {
   cta_text: string | null;
   cta_link: string | null;
   link_url: string | null;
-  order_index: number | null;
+  order_index: number;
   is_active: boolean;
   created_at: string;
 }
@@ -306,7 +408,7 @@ export interface Management {
   id: string;
   name: string;
   position: string;
-  role: string;
+  role: 'pengurus_inti' | 'ketua_angkatan';
   photo: string | null;
   angkatan: string | null;
   period: string | null;
@@ -320,7 +422,7 @@ export interface Management {
 export interface Dormitory {
   id: string;
   name: string;
-  code: string;
+  code: string | null;
   city: string;
   province: string | null;
   description: string | null;
@@ -328,19 +430,19 @@ export interface Dormitory {
   color: string | null;
   total_rooms: number | null;
   occupied_rooms: number | null;
-  order_index: number;
+  order_index: number | null;
   created_at: string;
 }
 
 export interface Cluster {
   id: string;
   name: string;
-  short_name: string | null;
-  code: string;
+  short_name: string;
+  code: string | null;
   description: string | null;
   image_url: string | null;
-  color: string | null;
+  color: 'red' | 'blue' | 'yellow' | null;
   icon: string | null;
-  order_index: number;
+  order_index: number | null;
   created_at: string;
 }

@@ -16,7 +16,9 @@
       "Bash(pnpm build:*)",
       "Bash(find:*)",
       "Bash(ls:*)",
-      "WebFetch(domain:pakasir.com)"
+      "WebFetch(domain:pakasir.com)",
+      "Bash(npx supabase gen types typescript --help:*)",
+      "Bash(npx supabase gen types typescript:*)"
     ]
   }
 }

@@ -80,8 +80,7 @@ export default function StoryDetailPage() {
     setActionLoading(true);
 
     const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('stories')
       .update({
         status: 'published',
@@ -107,11 +106,10 @@ export default function StoryDetailPage() {
 
     setActionLoading(true);
     const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('stories')
       .update({
-        status: 'rejected',
+        status: 'rejected' as const,
         rejected_reason: rejectionReason,
       })
       .eq('id', story.id);

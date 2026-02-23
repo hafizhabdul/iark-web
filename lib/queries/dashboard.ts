@@ -29,17 +29,14 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 async function fetchDashboardStatsFallback(): Promise<DashboardStats> {
   const supabase = createClient();
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const client = supabase as any;
-  
   const [storiesRes, pendingRes, usersRes, eventsRes, upcomingRes, registrationsRes, donationsRes] = await Promise.all([
-    client.from('stories').select('id', { count: 'exact', head: true }).eq('status', 'published'),
-    client.from('stories').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    client.from('profiles').select('id', { count: 'exact', head: true }),
-    client.from('events').select('id', { count: 'exact', head: true }),
-    client.from('events').select('id', { count: 'exact', head: true }).gte('date', new Date().toISOString().split('T')[0]),
-    client.from('event_registrations').select('id', { count: 'exact', head: true }),
-    client.from('donations').select('amount').eq('payment_status', 'paid'),
+    supabase.from('stories').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+    supabase.from('stories').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }),
+    supabase.from('events').select('id', { count: 'exact', head: true }),
+    supabase.from('events').select('id', { count: 'exact', head: true }).gte('date', new Date().toISOString().split('T')[0]),
+    supabase.from('event_registrations').select('id', { count: 'exact', head: true }),
+    supabase.from('donations').select('amount').eq('payment_status', 'paid'),
   ]);
   
   const donationsAmount = (donationsRes.data || []).reduce((sum: number, d: { amount: number }) => sum + d.amount, 0);

@@ -42,7 +42,7 @@ export default function AdminHeroSlidesPage() {
   const [isActive, setIsActive] = useState(true);
   const [uploading, setUploading] = useState(false);
 
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   useEffect(() => {
     fetchSlides();
@@ -140,8 +140,7 @@ export default function AdminHeroSlidesPage() {
     };
 
     if (editingSlide) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('hero_slides')
         .update(slideData)
         .eq('id', editingSlide.id);
@@ -157,8 +156,7 @@ export default function AdminHeroSlidesPage() {
       // Get next display order
       const maxOrder = slides.length > 0 ? Math.max(...slides.map(s => s.order_index)) : 0;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from('hero_slides').insert({
+      const { error } = await supabase.from('hero_slides').insert({
         ...slideData,
         order_index: maxOrder + 1,
       });
@@ -178,8 +176,7 @@ export default function AdminHeroSlidesPage() {
   async function deleteSlide(id: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus slide ini?')) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).from('hero_slides').delete().eq('id', id);
+    const { error } = await supabase.from('hero_slides').delete().eq('id', id);
 
     if (error) {
       console.error('Error deleting slide:', error);
@@ -190,8 +187,7 @@ export default function AdminHeroSlidesPage() {
   }
 
   async function toggleSlideStatus(id: string, currentStatus: boolean) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('hero_slides')
       .update({ is_active: !currentStatus })
       .eq('id', id);
@@ -218,13 +214,11 @@ export default function AdminHeroSlidesPage() {
 
     // Swap display orders
     await Promise.all([
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (supabase as any)
+      supabase
         .from('hero_slides')
         .update({ order_index: otherSlide.order_index })
         .eq('id', currentSlide.id),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (supabase as any)
+      supabase
         .from('hero_slides')
         .update({ order_index: currentSlide.order_index })
         .eq('id', otherSlide.id),

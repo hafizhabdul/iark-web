@@ -282,8 +282,12 @@ export interface EventRow {
   description: string | null;
   content: string | null;
   date: string;
+  time: string | null;
   location: string | null;
+  category: string | null;
   image_url: string | null;
+  is_live: boolean;
+  is_featured: boolean;
   is_active: boolean;
   registration_enabled: boolean;
   max_participants: number | null;

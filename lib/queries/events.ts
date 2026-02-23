@@ -10,6 +10,7 @@ export interface EventWithRegistrations {
   location: string | null;
   category: string | null;
   image_url: string | null;
+  is_live: boolean;
   is_active: boolean;
   capacity: number | null;
   registration_count: number;
@@ -22,8 +23,11 @@ interface EventWithRegJoin {
   title: string;
   description: string | null;
   date: string;
+  time: string | null;
   location: string | null;
+  category: string | null;
   image_url: string | null;
+  is_live: boolean;
   is_active: boolean;
   max_participants: number | null;
   content?: string | null;
@@ -44,8 +48,11 @@ export async function fetchEventsWithRegistrations(): Promise<EventWithRegistrat
       title,
       description,
       date,
+      time,
       location,
+      category,
       image_url,
+      is_live,
       is_active,
       max_participants,
       event_registrations(count)
@@ -62,10 +69,11 @@ export async function fetchEventsWithRegistrations(): Promise<EventWithRegistrat
     title: event.title,
     description: event.description,
     date: event.date,
-    time: null,
+    time: event.time,
     location: event.location,
-    category: null,
+    category: event.category,
     image_url: event.image_url,
+    is_live: event.is_live,
     is_active: event.is_active,
     capacity: event.max_participants,
     registration_count: event.event_registrations?.[0]?.count || 0,
@@ -78,8 +86,12 @@ export interface EventData {
   slug: string;
   description: string;
   date: string;
+  time: string | null;
   location: string;
+  category: string | null;
   image_url: string | null;
+  is_live: boolean;
+  is_featured: boolean;
   is_active: boolean;
   registration_enabled: boolean;
   max_participants: number | null;
@@ -167,8 +179,11 @@ export async function fetchEventById(id: string): Promise<EventWithRegistrations
       title,
       description,
       date,
+      time,
       location,
+      category,
       image_url,
+      is_live,
       is_active,
       max_participants,
       content,
@@ -190,10 +205,11 @@ export async function fetchEventById(id: string): Promise<EventWithRegistrations
     title: event.title,
     description: event.description,
     date: event.date,
-    time: null,
+    time: event.time,
     location: event.location,
-    category: null,
+    category: event.category,
     image_url: event.image_url,
+    is_live: event.is_live,
     is_active: event.is_active,
     capacity: event.max_participants,
     registration_count: event.event_registrations?.[0]?.count || 0,

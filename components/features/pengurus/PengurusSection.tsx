@@ -32,7 +32,12 @@ export async function PengurusSection({ className = '' }: PengurusSectionProps) 
   }
 
   // Semua data di /tentang hanya angkatan 7
-  const angkatan7Members = allMembers.filter(m => m.angkatan === '7' || m.angkatan === 'Angkatan 7');
+  const isAngkatan7 = (angkatan: string | null) => {
+    if (!angkatan) return false;
+    const low = angkatan.toLowerCase();
+    return low === '7' || low === 'angkatan 7';
+  };
+  const angkatan7Members = allMembers.filter(m => isAngkatan7(m.angkatan));
 
   // 1. Ketua Umum (Level 1)
   const ketuaUmum = angkatan7Members.find(
@@ -124,7 +129,7 @@ export async function PengurusSection({ className = '' }: PengurusSectionProps) 
                   <p className="text-iark-red font-bold uppercase text-sm tracking-wide">{ketuaUmum.position}</p>
                 </div>
                 {ketuaUmum.angkatan && (
-                  <p className="text-sm text-gray-500 mt-4 font-medium">Angkatan {ketuaUmum.angkatan}</p>
+                  <p className="text-sm text-gray-500 mt-4 font-medium">{ketuaUmum.angkatan.toLowerCase().includes('angkatan') ? ketuaUmum.angkatan : `Angkatan ${ketuaUmum.angkatan}`}</p>
                 )}
               </div>
             </div>
@@ -163,7 +168,7 @@ export async function PengurusSection({ className = '' }: PengurusSectionProps) 
                   <p className="text-iark-blue font-semibold text-sm mb-2">{member.position}</p>
                   {member.angkatan && (
                     <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-md">
-                      Angkatan {member.angkatan}
+                      {member.angkatan.toLowerCase().includes('angkatan') ? member.angkatan : `Angkatan ${member.angkatan}`}
                     </span>
                   )}
                 </div>

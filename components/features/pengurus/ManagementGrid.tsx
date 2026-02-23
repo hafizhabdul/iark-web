@@ -40,7 +40,8 @@ export function ManagementGrid({ className = '', initialData }: ManagementGridPr
 
   const isAngkatan7 = (angkatan: string | null) => {
     if (!angkatan) return false;
-    return angkatan === '7' || angkatan === 'Angkatan 7';
+    const low = angkatan.toLowerCase();
+    return low === '7' || low === 'angkatan 7';
   };
 
   const ketuaUmum = allMembers.find(

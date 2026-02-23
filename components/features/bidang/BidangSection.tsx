@@ -33,9 +33,10 @@ export async function BidangSection({ className = '' }: BidangSectionProps) {
   }
 
   // Filter: Angkatan 7 yang jabatannya mengandung "Ketua Bidang"
-  const ketuaBidangList = allMembers.filter(m =>
-    (m.angkatan === '7' || m.angkatan === 'Angkatan 7') && m.position.toLowerCase().includes('ketua bidang')
-  );
+  const ketuaBidangList = allMembers.filter(m => {
+    const a = m.angkatan?.toLowerCase() || '';
+    return (a === '7' || a === 'angkatan 7') && m.position.toLowerCase().includes('ketua bidang');
+  });
 
   return (
     <section className={`relative py-24 px-8 bg-white overflow-hidden ${className}`}>
@@ -97,7 +98,7 @@ export async function BidangSection({ className = '' }: BidangSectionProps) {
                   {bidang.angkatan && (
                     <div className="border-t border-gray-100 pt-4 w-full">
                       <p className="text-sm text-gray-500 font-medium">
-                        Angkatan {bidang.angkatan}
+                        {bidang.angkatan.toLowerCase().includes('angkatan') ? bidang.angkatan : `Angkatan ${bidang.angkatan}`}
                       </p>
                     </div>
                   )}

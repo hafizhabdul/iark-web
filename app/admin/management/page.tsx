@@ -17,6 +17,7 @@ import {
   ChevronUp,
   ChevronDown,
 } from 'lucide-react';
+import { revalidateManagement } from '@/lib/actions/revalidate';
 
 interface ManagementMember {
   id: string;
@@ -163,6 +164,7 @@ export default function AdminManagementPage() {
         alert('Gagal mengupdate anggota');
       } else {
         fetchMembers();
+        await revalidateManagement();
         closeModal();
       }
     } else {
@@ -187,6 +189,7 @@ export default function AdminManagementPage() {
         alert('Gagal menambahkan anggota');
       } else {
         fetchMembers();
+        await revalidateManagement();
         closeModal();
       }
     }
@@ -206,13 +209,14 @@ export default function AdminManagementPage() {
       alert('Gagal menghapus anggota');
     } else {
       fetchMembers();
+      await revalidateManagement();
     }
   }
 
   async function moveOrder(member: ManagementMember, direction: 'up' | 'down') {
     const filteredByRole = members.filter(m => m.role === member.role);
     const currentIndex = filteredByRole.findIndex(m => m.id === member.id);
-    
+
     if (direction === 'up' && currentIndex === 0) return;
     if (direction === 'down' && currentIndex === filteredByRole.length - 1) return;
 
@@ -237,6 +241,7 @@ export default function AdminManagementPage() {
       console.error('Error updating order:', error1 || error2);
     } else {
       fetchMembers();
+      await revalidateManagement();
     }
   }
 
@@ -334,11 +339,10 @@ export default function AdminManagementPage() {
                 )}
                 <div className="flex items-center gap-2 mt-2">
                   <span
-                    className={`text-xs px-2 py-0.5 rounded ${
-                      member.role === 'pengurus_inti'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-green-100 text-green-700'
-                    }`}
+                    className={`text-xs px-2 py-0.5 rounded ${member.role === 'pengurus_inti'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-green-100 text-green-700'
+                      }`}
                   >
                     {getRoleLabel(member.role)}
                   </span>

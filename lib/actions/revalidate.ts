@@ -5,7 +5,7 @@ import { revalidateTag, revalidatePath } from 'next/cache';
 export async function revalidateManagement() {
     try {
         // Hapus cache berdasarkan tag 'management'
-        revalidateTag('management');
+        revalidateTag('management', 'max');
 
         // Pastikan halaman-halaman terkait di-render ulang
         revalidatePath('/', 'layout');

@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://ia-rk.com'),
   title: "IARK - Ikatan Alumni Rumah Kepemimpinan",
   description: "Wadah kolaborasi alumni Rumah Kepemimpinan yang menumbuhkan semangat kepemimpinan sejati dan berdampak nyata untuk Indonesia yang lebih baik.",
   icons: {

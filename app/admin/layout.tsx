@@ -39,9 +39,20 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, isLoading } = useAuth();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-iark-red border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Memuat...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAdmin) {
     return (

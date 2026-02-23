@@ -38,13 +38,26 @@ export interface ManagementGridProps {
 export function ManagementGrid({ className = '', initialData }: ManagementGridProps) {
   const allMembers = initialData || [];
 
+  const isAngkatan7 = (angkatan: string | null) => {
+    if (!angkatan) return false;
+    return angkatan === '7' || angkatan === 'Angkatan 7';
+  };
+
   const ketuaUmum = allMembers.find(
-    (m) => m.role === 'pengurus_inti' && m.position.toLowerCase().includes('ketua umum') && !m.position.toLowerCase().includes('wakil') && m.angkatan === '7'
+    (m) =>
+      m.role === 'pengurus_inti' &&
+      m.position.toLowerCase().includes('ketua umum') &&
+      !m.position.toLowerCase().includes('wakil') &&
+      isAngkatan7(m.angkatan)
   );
+
   const pengurusInti = [
     ...(ketuaUmum ? [ketuaUmum] : []),
     ...allMembers.filter(
-      (m) => m.role === 'pengurus_inti' && m.id !== ketuaUmum?.id
+      (m) =>
+        m.role === 'pengurus_inti' &&
+        m.id !== ketuaUmum?.id &&
+        isAngkatan7(m.angkatan)
     ),
   ];
   const ketuaAngkatan = allMembers.filter((m) => m.role === 'ketua_angkatan');

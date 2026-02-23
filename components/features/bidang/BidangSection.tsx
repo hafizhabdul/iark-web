@@ -34,7 +34,7 @@ export async function BidangSection({ className = '' }: BidangSectionProps) {
 
   // Filter: Angkatan 7 yang jabatannya mengandung "Ketua Bidang"
   const ketuaBidangList = allMembers.filter(m =>
-    m.angkatan === '7' && m.position.toLowerCase().includes('ketua bidang')
+    (m.angkatan === '7' || m.angkatan === 'Angkatan 7') && m.position.toLowerCase().includes('ketua bidang')
   );
 
   return (

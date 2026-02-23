@@ -32,7 +32,7 @@ export async function PengurusSection({ className = '' }: PengurusSectionProps) 
   }
 
   // Semua data di /tentang hanya angkatan 7
-  const angkatan7Members = allMembers.filter(m => m.angkatan === '7');
+  const angkatan7Members = allMembers.filter(m => m.angkatan === '7' || m.angkatan === 'Angkatan 7');
 
   // 1. Ketua Umum (Level 1)
   const ketuaUmum = angkatan7Members.find(

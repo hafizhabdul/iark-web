@@ -1,5 +1,6 @@
 import { createPublicClient as createClient } from '@/lib/supabase/public';
 import type { Database } from '@/lib/supabase/types';
+import { unstable_cache } from 'next/cache';
 
 type HeroSlide = Database['public']['Tables']['hero_slides']['Row'];
 type Testimonial = Database['public']['Tables']['testimonials']['Row'];
@@ -40,40 +41,44 @@ interface HomepageRpcResponse {
   clusters: Cluster[];
 }
 
-// Fetch all homepage data in a single RPC call
-export async function fetchHomepageData(): Promise<HomepageData> {
-  const supabase = createClient();
+// Fetch all homepage data in a single RPC call (cached with tags for revalidation)
+export const fetchHomepageData = unstable_cache(
+  async (): Promise<HomepageData> => {
+    const supabase = createClient();
 
-  const { data, error } = await supabase.rpc('get_homepage_data');
+    const { data, error } = await supabase.rpc('get_homepage_data');
 
-  if (error) {
-    console.error('Error fetching homepage data:', error);
-    // Fallback to individual queries if RPC fails
-    return fetchHomepageDataFallback();
-  }
+    if (error) {
+      console.error('Error fetching homepage data:', error);
+      // Fallback to individual queries if RPC fails
+      return fetchHomepageDataFallback();
+    }
 
-  const rpcData = data as HomepageRpcResponse;
+    const rpcData = data as HomepageRpcResponse;
 
-  // If RPC doesn't provide clusters, fetch it separately to ensure stability
-  let clusters = rpcData.clusters || [];
-  if (clusters.length === 0) {
-    const { data: clusterData } = await supabase
-      .from('clusters')
-      .select('*')
-      .order('order_index');
-    clusters = clusterData || [];
-  }
+    // If RPC doesn't provide clusters, fetch it separately to ensure stability
+    let clusters = rpcData.clusters || [];
+    if (clusters.length === 0) {
+      const { data: clusterData } = await supabase
+        .from('clusters')
+        .select('*')
+        .order('order_index');
+      clusters = clusterData || [];
+    }
 
-  return {
-    heroSlides: rpcData.hero_slides || [],
-    testimonials: rpcData.testimonials || [],
-    featuredStories: rpcData.featured_stories || [],
-    recentActivities: rpcData.recent_activities || [],
-    management: rpcData.management || [],
-    dormitories: rpcData.dormitories || [],
-    clusters: clusters,
-  };
-}
+    return {
+      heroSlides: rpcData.hero_slides || [],
+      testimonials: rpcData.testimonials || [],
+      featuredStories: rpcData.featured_stories || [],
+      recentActivities: rpcData.recent_activities || [],
+      management: rpcData.management || [],
+      dormitories: rpcData.dormitories || [],
+      clusters: clusters,
+    };
+  },
+  ['homepage-data'],
+  { revalidate: 3600, tags: ['management', 'homepage'] }
+);
 
 // Fallback: fetch data with parallel queries
 async function fetchHomepageDataFallback(): Promise<HomepageData> {

@@ -7,12 +7,14 @@ export async function middleware(request: NextRequest) {
   const { pathname } = url;
 
   // Skip internal Next.js paths (static files, API internals, etc.)
+  // Do NOT call updateSession here — these don't need auth and cause
+  // unnecessary refresh_token requests leading to 429/400 errors.
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
     pathname.includes('.')
   ) {
-    return await updateSession(request);
+    return NextResponse.next();
   }
 
   // Subdomain detection
@@ -61,7 +63,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.rewrite(url);
     }
     // In development, let next.config.ts rewrites handle it
-    return await updateSession(request);
+    return NextResponse.next();
   }
 
   // Redirect: /checkout (generic) → /donasi-umum/checkout on donasi subdomain
@@ -79,7 +81,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.rewrite(url);
     }
     // In development, let next.config.ts rewrites handle it
-    return await updateSession(request);
+    return NextResponse.next();
   }
 
   // Default: main domain + session update

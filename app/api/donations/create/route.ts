@@ -61,8 +61,7 @@ export async function POST(request: NextRequest) {
 
     if (campaign_id) {
       // Verify the provided campaign exists and is active
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: campaign, error: campaignError } = await (adminClient as any)
+      const { data: campaign, error: campaignError } = await adminClient
         .from('donation_campaigns')
         .select('id, is_active')
         .eq('id', campaign_id)
@@ -85,8 +84,7 @@ export async function POST(request: NextRequest) {
       resolvedCampaignId = campaign_id;
     } else {
       // Get default "donasi-umum" campaign
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: defaultCampaign, error: defaultError } = await (adminClient as any)
+      const { data: defaultCampaign, error: defaultError } = await adminClient
         .from('donation_campaigns')
         .select('id')
         .eq('slug', 'donasi-umum')
@@ -107,8 +105,7 @@ export async function POST(request: NextRequest) {
     const order_id = `DON-${Date.now()}-${nanoid(6).toUpperCase()}`;
 
     // Create donation record
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: donation, error: insertError } = await (adminClient as any)
+    const { data: donation, error: insertError } = await adminClient
       .from('donations')
       .insert({
         order_id,

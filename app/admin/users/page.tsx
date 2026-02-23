@@ -174,7 +174,7 @@ export default function AdminUsersPage() {
         {/* Filter Row */}
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm text-gray-500 font-medium">Filter:</span>
-          
+
           <select
             value={angkatanFilter}
             onChange={(e) => setAngkatanFilter(e.target.value)}
@@ -304,8 +304,8 @@ export default function AdminUsersPage() {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${user.role === 'admin'
-                            ? 'bg-purple-100 text-purple-700'
-                            : 'bg-gray-100 text-gray-700'
+                          ? 'bg-purple-100 text-purple-700'
+                          : 'bg-gray-100 text-gray-700'
                           }`}
                       >
                         {user.role === 'admin' ? (
@@ -331,8 +331,8 @@ export default function AdminUsersPage() {
                         <button
                           onClick={() => toggleAdminRole(user.id, user.role)}
                           className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${user.role === 'admin'
-                              ? 'text-red-600 hover:bg-red-50'
-                              : 'text-purple-600 hover:bg-purple-50'
+                            ? 'text-red-600 hover:bg-red-50'
+                            : 'text-purple-600 hover:bg-purple-50'
                             }`}
                           title={user.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
                         >

@@ -68,9 +68,8 @@ export function AsramaGallerySection({
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {dormitories.map((dorm, index) => (
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              <DormCard key={dorm.id} dormitory={dorm as any} index={index} />
+            {dormitories.map((dorm: Dormitory, index: number) => (
+              <DormCard key={dorm.id} dormitory={dorm} index={index} />
             ))}
           </div>
         )}

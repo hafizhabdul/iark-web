@@ -1,31 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { EventCard } from '@/components/features/event';
 import { Calendar, Search } from 'lucide-react';
+import type { EventWithRegistrationCount } from '@/lib/queries/events';
 
 export const revalidate = 60; // ISR: revalidate every 60 seconds
 
-interface EventWithCount {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  date: string;
-  location: string;
-  image_url: string | null;
-  is_live: boolean;
-  registration_enabled: boolean;
-  max_participants: number | null;
-  registration_deadline: string | null;
-  event_type: 'online' | 'offline' | 'hybrid';
-  meeting_link: string | null;
-  contact_person: string | null;
-  contact_whatsapp: string | null;
-  price: number;
-  created_at: string;
-  registration_count: number;
-}
-
-async function getEvents(): Promise<{ upcoming: EventWithCount[]; past: EventWithCount[] }> {
+async function getEvents(): Promise<{ upcoming: EventWithRegistrationCount[]; past: EventWithRegistrationCount[] }> {
   const supabase = await createClient();
   const now = new Date().toISOString();
 
@@ -56,12 +36,12 @@ async function getEvents(): Promise<{ upcoming: EventWithCount[]; past: EventWit
   if (pastError) console.error('Error fetching past events:', pastError);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mapEvents = (events: any[]): EventWithCount[] => {
+  const mapEvents = (events: any[]): EventWithRegistrationCount[] => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (events || []).map((event: any) => ({
       ...event,
       registration_count: event.event_registrations?.[0]?.count || 0,
-    })) as EventWithCount[];
+    })) as EventWithRegistrationCount[];
   };
 
   return {

@@ -8,7 +8,7 @@ interface EventForRegistration {
   title: string;
   slug: string;
   date: string;
-  location: string;
+  location: string | null;
   registration_enabled: boolean;
   max_participants: number | null;
   registration_deadline: string | null;
@@ -19,8 +19,7 @@ interface EventForRegistration {
 async function getEventForRegistration(slug: string): Promise<EventForRegistration | null> {
   const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('events')
     .select(`
       id,
@@ -62,8 +61,7 @@ async function getCurrentUser() {
 
   if (!user) return null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase as any)
+  const { data: profile } = await supabase
     .from('profiles')
     .select('name, phone, angkatan, regional, asrama')
     .eq('id', user.id)
@@ -72,9 +70,9 @@ async function getCurrentUser() {
   return {
     id: user.id,
     email: user.email || '',
-    name: profile?.name || user.user_metadata?.full_name || '',
+    name: profile?.name || String(user.user_metadata?.full_name || ''),
     phone: profile?.phone || '',
-    angkatan: profile?.angkatan || null,
+    angkatan: profile?.angkatan ?? undefined,
     regional: profile?.regional || '',
     asrama: profile?.asrama || '',
   };
@@ -137,10 +135,12 @@ export default async function EventRegistrationPage({
               <Clock className="w-4 h-4 text-iark-red" />
               <span>{formattedTime} WIB</span>
             </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-iark-red" />
-              <span>{event.location}</span>
-            </div>
+            {event.location && (
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-iark-red" />
+                <span>{event.location}</span>
+              </div>
+            )}
           </div>
 
           {event.price > 0 && (
@@ -176,7 +176,7 @@ export default async function EventRegistrationPage({
             eventSlug={event.slug}
             eventTitle={event.title}
             eventDate={formattedDate}
-            eventLocation={event.location}
+            eventLocation={event.location ?? ''}
             user={user}
           />
         </div>

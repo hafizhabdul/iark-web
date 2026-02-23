@@ -33,8 +33,7 @@ export default function EditStoryPage() {
 
   async function fetchStory() {
     const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('stories')
       .select('*')
       .eq('id', params.id as string)
@@ -49,7 +48,7 @@ export default function EditStoryPage() {
 
     setTitle(data.title);
     setExcerpt(data.excerpt || '');
-    setContent(data.content);
+    setContent(data.content || '');
     setFeaturedImage(data.hero_image);
     setStatus(data.status);
     setLoading(false);
@@ -130,8 +129,7 @@ export default function EditStoryPage() {
       updateData.rejected_reason = null;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('stories')
       .update(updateData)
       .eq('id', params.id as string);

@@ -54,7 +54,7 @@ export default function AdminStoriesPage() {
         .order('created_at', { ascending: false });
 
       if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
+        query = query.eq('status', statusFilter as Story['status']);
       }
 
       const { data, error } = await query;

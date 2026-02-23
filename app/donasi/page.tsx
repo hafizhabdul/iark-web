@@ -18,8 +18,7 @@ export const metadata: Metadata = {
 async function fetchActiveCampaignsServer(): Promise<DonationCampaignWithProgress[]> {
   try {
     const supabase = await createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('vw_donation_campaign_progress')
       .select('*')
       .eq('is_active', true)
@@ -39,8 +38,7 @@ async function fetchActiveCampaignsServer(): Promise<DonationCampaignWithProgres
 async function fetchOverallDonationStatsServer(): Promise<{ paid_amount: number; paid_count: number }> {
   try {
     const supabase = await createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('vw_donation_overall_stats')
       .select('*')
       .single();

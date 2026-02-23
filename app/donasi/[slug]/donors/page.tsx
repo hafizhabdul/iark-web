@@ -16,8 +16,7 @@ interface Props {
 async function getCampaignBySlug(slug: string): Promise<DonationCampaignWithProgress | null> {
   const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('vw_donation_campaign_progress')
     .select('*')
     .eq('slug', slug)
@@ -39,8 +38,7 @@ async function getCampaignDonors(
   const supabase = await createClient();
   const offset = (page - 1) * perPage;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error, count } = await (supabase as any)
+  const { data, error, count } = await supabase
     .from('vw_campaign_donor_wall')
     .select('*', { count: 'exact' })
     .eq('campaign_id', campaignId)

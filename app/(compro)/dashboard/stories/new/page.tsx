@@ -81,8 +81,7 @@ export default function NewStoryPage() {
     setSaving(true);
     const supabase = createClient();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('stories')
       .insert({
         author_id: user?.id,

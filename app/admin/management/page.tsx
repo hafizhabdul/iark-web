@@ -179,7 +179,7 @@ export default function AdminManagementPage() {
     setSaving(true);
     try {
       if (editingMember) {
-          const { error } = await supabase
+        const { error } = await supabase
           .from('management')
           .update({
             name: name.trim(),

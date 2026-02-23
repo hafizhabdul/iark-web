@@ -9,31 +9,28 @@ export const revalidate = 120;
 interface DonationStats {
   total_paid_amount: number;
   total_paid_count: number;
-  total_campaigns: number;
 }
 
 async function getDonationStats(): Promise<DonationStats> {
   const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('vw_donation_overall_stats')
     .select('*')
     .single();
 
   if (error) {
     console.error('Error fetching stats:', error);
-    return { total_paid_amount: 0, total_paid_count: 0, total_campaigns: 0 };
+    return { total_paid_amount: 0, total_paid_count: 0 };
   }
 
-  return data || { total_paid_amount: 0, total_paid_count: 0, total_campaigns: 0 };
+  return data || { total_paid_amount: 0, total_paid_count: 0 };
 }
 
 async function getAllDonors(): Promise<CampaignDonorWall[]> {
   const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('vw_campaign_donor_wall')
     .select('*')
     .order('paid_at', { ascending: false })
@@ -80,7 +77,7 @@ export default async function DonorsPage() {
           </p>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
+          <div className="grid grid-cols-2 gap-4 mt-8">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Users className="w-5 h-5 text-white/80" />
@@ -94,13 +91,6 @@ export default async function DonorsPage() {
               </div>
               <p className="text-2xl md:text-3xl font-bold">{formatCurrency(stats.total_paid_amount)}</p>
               <p className="text-white/80">Total Terkumpul</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Heart className="w-5 h-5 text-white/80" />
-              </div>
-              <p className="text-3xl font-bold">{stats.total_campaigns || 0}</p>
-              <p className="text-white/80">Kampanye Aktif</p>
             </div>
           </div>
         </div>

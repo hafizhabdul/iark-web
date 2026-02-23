@@ -10,8 +10,7 @@ export async function GET(
 
     const supabase = await createClient();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('donations')
       .select('order_id, amount, donor_name, payment_status, is_anonymous')
       .eq('order_id', orderId)

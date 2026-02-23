@@ -35,7 +35,7 @@ interface PendingStory {
   created_at: string;
   author: {
     name: string;
-    angkatan: string | null;
+    angkatan: number | null;
     photo: string | null;
   } | null;
 }

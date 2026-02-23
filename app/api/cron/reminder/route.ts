@@ -39,8 +39,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Get events happening in 3 days
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: h3Events } = await (supabase as any)
+    const { data: h3Events } = await supabase
       .from('events')
       .select('id, title, date, location')
       .gte('date', `${h3DateStr}T00:00:00`)
@@ -49,8 +48,7 @@ export async function GET(request: NextRequest) {
 
     // Get registrations for H-3 events that haven't received H-3 reminder
     for (const event of h3Events || []) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: registrations } = await (supabase as any)
+      const { data: registrations } = await supabase
         .from('event_registrations')
         .select('id, email, full_name')
         .eq('event_id', event.id)
@@ -75,8 +73,7 @@ export async function GET(request: NextRequest) {
 
           if (sent) {
             // Mark as sent
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await (supabase as any)
+            await supabase
               .from('event_registrations')
               .update({ reminder_h3_sent: true })
               .eq('id', reg.id);
@@ -90,8 +87,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get events happening tomorrow
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: h1Events } = await (supabase as any)
+    const { data: h1Events } = await supabase
       .from('events')
       .select('id, title, date, location')
       .gte('date', `${h1DateStr}T00:00:00`)
@@ -100,8 +96,7 @@ export async function GET(request: NextRequest) {
 
     // Get registrations for H-1 events that haven't received H-1 reminder
     for (const event of h1Events || []) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: registrations } = await (supabase as any)
+      const { data: registrations } = await supabase
         .from('event_registrations')
         .select('id, email, full_name')
         .eq('event_id', event.id)
@@ -126,8 +121,7 @@ export async function GET(request: NextRequest) {
 
           if (sent) {
             // Mark as sent
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await (supabase as any)
+            await supabase
               .from('event_registrations')
               .update({ reminder_h1_sent: true })
               .eq('id', reg.id);

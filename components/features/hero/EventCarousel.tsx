@@ -35,8 +35,7 @@ export function EventCarousel({
   const { data: slides = [], isLoading } = useQuery({
     queryKey: queryKeys.heroSlides,
     queryFn: fetchHeroSlides,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    initialData: initialData as any,
+    initialData,
     staleTime: staleTime.static,
   });
 

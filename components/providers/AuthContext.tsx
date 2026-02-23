@@ -58,8 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Only log non-abort errors
         const errorMsg = error.message?.toLowerCase() || '';
         const isAbort = errorMsg.includes('abort') ||
-          (error as any).name === 'AbortError' ||
-          (error as any).code === 20; // 20 is the code for AbortError
+          (error as { name?: string }).name === 'AbortError' ||
+          String((error as { code?: string | number }).code) === '20'; // 20 is the code for AbortError
 
         if (!isAbort) {
           console.error('Error fetching profile:', error);
@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: any, session: any) => {
         if (!isMounted || isSigningOut) return;
 
         if (session?.user) {
@@ -211,7 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { error } = await supabase
         .from('profiles')
-        .update(data as any)
+        .update(data)
         .eq('id', user.id);
 
       if (error) {

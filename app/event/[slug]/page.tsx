@@ -36,8 +36,7 @@ interface EventDetail {
 async function getEvent(slug: string): Promise<EventDetail | null> {
   const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('events')
     .select(`
       *,

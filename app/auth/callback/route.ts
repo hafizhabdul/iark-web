@@ -28,8 +28,7 @@ export async function GET(request: Request) {
       
       if (user) {
         // Fetch profile to check role
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: profile } = await (supabase as any)
+        const { data: profile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', user.id)

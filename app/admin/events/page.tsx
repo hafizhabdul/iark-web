@@ -21,9 +21,9 @@ import {
 interface Event {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   date: string;
-  location: string;
+  location: string | null;
   image_url: string | null;
   is_active: boolean;
   created_at: string;
@@ -72,9 +72,9 @@ export default function AdminEventsPage() {
     if (event) {
       setEditingEvent(event);
       setTitle(event.title);
-      setDescription(event.description);
+      setDescription(event.description || '');
       setDate(event.date.split('T')[0]);
-      setLocation(event.location);
+      setLocation(event.location || '');
       setImageUrl(event.image_url || '');
       setIsActive(event.is_active);
     } else {
@@ -138,7 +138,7 @@ export default function AdminEventsPage() {
     setSaving(true);
 
     const slug = title.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    
+
     if (editingEvent) {
       const { error } = await supabase
         .from('events')
@@ -263,9 +263,8 @@ export default function AdminEventsPage() {
           filteredEvents.map((event) => (
             <div
               key={event.id}
-              className={`bg-white rounded-xl shadow-sm overflow-hidden ${
-                !event.is_active ? 'opacity-60' : ''
-              }`}
+              className={`bg-white rounded-xl shadow-sm overflow-hidden ${!event.is_active ? 'opacity-60' : ''
+                }`}
             >
               <div className="aspect-video bg-gray-100">
                 {event.image_url ? (

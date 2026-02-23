@@ -69,8 +69,7 @@ export function RegistrationForm({ eventId, eventSlug, eventTitle, eventDate, ev
       const supabase = createClient();
 
       // Call RPC function for race-condition-safe registration
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error: rpcError } = await (supabase as any).rpc('register_for_event', {
+      const { data, error: rpcError } = await supabase.rpc('register_for_event', {
         p_event_id: eventId,
         p_user_id: user?.id || null,
         p_full_name: formData.fullName,

@@ -14,8 +14,7 @@ interface CampaignForCheckout {
 async function getCampaignForCheckout(slug: string): Promise<CampaignForCheckout | null> {
   const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('vw_donation_campaign_progress')
     .select('id, title, slug, description, image_url, is_active')
     .eq('slug', slug)
@@ -38,8 +37,7 @@ async function getCurrentUser() {
 
   if (!user) return null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase as any)
+  const { data: profile } = await supabase
     .from('profiles')
     .select('name, phone')
     .eq('id', user.id)

@@ -1,9 +1,13 @@
 // Database types for Supabase
 //
-// Insert/Update use Record<string, unknown> because Supabase v2.94's type
-// inference resolves Partial<Interface> to `never` when used as GenericTable
-// constraints. Row types remain fully typed for read queries.
-// If you need write type safety, use the row interfaces directly at call sites.
+// IMPORTANT: Row types MUST be declared as `type` aliases (not `interface`).
+// TypeScript interfaces do not satisfy `Record<string, unknown>` constraints,
+// which Supabase's GenericSchema requires. Using `interface` causes
+// Database['public'] to fail the `extends GenericSchema` check, making
+// Schema resolve to `never` and all query results become `never`.
+//
+// Insert/Update use Record<string, unknown> to keep write operations permissive
+// while maintaining full type safety on Row (read) types.
 
 export interface Database {
   public: {
@@ -186,12 +190,16 @@ export interface Database {
           total_donations_amount: number;
         };
       };
+      get_homepage_data: {
+        Args: Record<string, never>;
+        Returns: unknown;
+      };
     };
     Enums: Record<string, never>;
   };
 }
 
-export interface Profile {
+export type Profile = {
   id: string;
   name: string;
   email: string;
@@ -211,9 +219,9 @@ export interface Profile {
   instagram: string | null;
   created_at: string;
   updated_at: string;
-}
+};
 
-export interface Batch {
+export type Batch = {
   id: string;
   angkatan: number;
   name: string | null;
@@ -224,9 +232,9 @@ export interface Batch {
   fun_fact: string | null;
   year: number | null;
   created_at: string;
-}
+};
 
-export interface BatchLeader {
+export type BatchLeader = {
   id: string;
   batch_id: string;
   name: string;
@@ -238,9 +246,9 @@ export interface BatchLeader {
   quote: string | null;
   job_title: string | null;
   created_at: string;
-}
+};
 
-export interface Testimonial {
+export type Testimonial = {
   id: string;
   name: string;
   title: string;
@@ -252,12 +260,12 @@ export interface Testimonial {
   is_active: boolean;
   order_index: number | null;
   created_at: string;
-}
+};
 
 export type StoryStatus = 'draft' | 'pending' | 'published' | 'rejected';
 export type StoryCategory = 'alumni' | 'organisasi' | 'inspirasi' | 'kegiatan';
 
-export interface StoryRow {
+export type StoryRow = {
   id: string;
   title: string;
   slug: string;
@@ -273,9 +281,9 @@ export interface StoryRow {
   author_id: string | null;
   created_at: string;
   updated_at: string;
-}
+};
 
-export interface EventRow {
+export type EventRow = {
   id: string;
   title: string;
   slug: string;
@@ -300,9 +308,9 @@ export interface EventRow {
   registration_url: string | null;
   created_at: string;
   updated_at: string;
-}
+};
 
-export interface EventRegistrationRow {
+export type EventRegistrationRow = {
   id: string;
   event_id: string;
   user_id: string | null;
@@ -322,9 +330,9 @@ export interface EventRegistrationRow {
   cancelled_at: string | null;
   reminder_h3_sent: boolean;
   reminder_h1_sent: boolean;
-}
+};
 
-export interface DonationRow {
+export type DonationRow = {
   id: string;
   user_id: string | null;
   campaign_id: string | null;
@@ -342,9 +350,9 @@ export interface DonationRow {
   webhook_processed_at: string | null;
   created_at: string;
   updated_at: string;
-}
+};
 
-export interface DonationCampaignRow {
+export type DonationCampaignRow = {
   id: string;
   slug: string;
   title: string;
@@ -359,24 +367,24 @@ export interface DonationCampaignRow {
   sort_order: number;
   created_at: string;
   updated_at: string;
-}
+};
 
-export interface DonationCampaignWithProgress extends DonationCampaignRow {
+export type DonationCampaignWithProgress = DonationCampaignRow & {
   paid_amount: number;
   paid_count: number;
   progress_pct: number;
-}
+};
 
-export interface CampaignDonorWall {
+export type CampaignDonorWall = {
   campaign_id: string;
   donation_id: string;
   display_name: string;
   amount: number;
   message: string | null;
   paid_at: string | null;
-}
+};
 
-export interface HeroSlide {
+export type HeroSlide = {
   id: string;
   title: string;
   subtitle: string | null;
@@ -387,9 +395,9 @@ export interface HeroSlide {
   order_index: number;
   is_active: boolean;
   created_at: string;
-}
+};
 
-export interface Activity {
+export type Activity = {
   id: string;
   title: string;
   subtitle: string | null;
@@ -406,9 +414,9 @@ export interface Activity {
   is_active: boolean;
   is_live: boolean;
   created_at: string;
-}
+};
 
-export interface Management {
+export type Management = {
   id: string;
   name: string;
   position: string;
@@ -421,9 +429,9 @@ export interface Management {
   order_index: number | null;
   is_active: boolean;
   created_at: string;
-}
+};
 
-export interface Dormitory {
+export type Dormitory = {
   id: string;
   name: string;
   code: string | null;
@@ -436,9 +444,9 @@ export interface Dormitory {
   occupied_rooms: number | null;
   order_index: number | null;
   created_at: string;
-}
+};
 
-export interface Cluster {
+export type Cluster = {
   id: string;
   name: string;
   short_name: string;
@@ -449,4 +457,4 @@ export interface Cluster {
   icon: string | null;
   order_index: number | null;
   created_at: string;
-}
+};

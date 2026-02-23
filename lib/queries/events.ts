@@ -84,10 +84,10 @@ export interface EventData {
   id: string;
   title: string;
   slug: string;
-  description: string;
+  description: string | null;
   date: string;
   time: string | null;
-  location: string;
+  location: string | null;
   category: string | null;
   image_url: string | null;
   is_live: boolean;

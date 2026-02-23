@@ -5,12 +5,12 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import type { EventRegistrationRow } from '@/lib/supabase/types';
-import { 
-  ArrowLeft, 
-  Search, 
-  Download, 
-  CheckCircle, 
-  XCircle, 
+import {
+  ArrowLeft,
+  Search,
+  Download,
+  CheckCircle,
+  XCircle,
   Clock,
   Users,
   Mail,
@@ -107,7 +107,7 @@ export default function EventRegistrationsPage() {
 
   async function bulkUpdateStatus(newStatus: string) {
     if (selectedIds.size === 0) return;
-    
+
     const action = newStatus === 'confirmed' ? 'konfirmasi' : newStatus === 'cancelled' ? 'batalkan' : 'update';
     if (!confirm(`Apakah Anda yakin ingin ${action} ${selectedIds.size} pendaftar?`)) return;
 

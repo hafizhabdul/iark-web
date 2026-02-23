@@ -285,7 +285,7 @@ export default function AdminDormitoriesPage() {
                       {dormitory.description}
                     </p>
                   )}
-                  
+
                   {/* Occupancy */}
                   {dormitory.total_rooms && (
                     <div className="mb-3">
@@ -300,13 +300,12 @@ export default function AdminDormitoriesPage() {
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
-                          className={`h-2 rounded-full transition-all ${
-                            occupancy >= 90
-                              ? 'bg-red-500'
-                              : occupancy >= 70
+                          className={`h-2 rounded-full transition-all ${occupancy >= 90
+                            ? 'bg-red-500'
+                            : occupancy >= 70
                               ? 'bg-yellow-500'
                               : 'bg-green-500'
-                          }`}
+                            }`}
                           style={{ width: `${occupancy}%` }}
                         />
                       </div>

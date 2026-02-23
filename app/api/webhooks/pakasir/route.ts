@@ -53,8 +53,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createAdminClient();
 
     // Check if already processed (idempotency)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existing } = await (supabase as any)
+    const { data: existing } = await supabase
       .from('donations')
       .select('id, payment_status, webhook_processed_at, donor_email, donor_name')
       .eq('order_id', order_id)
@@ -70,8 +69,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update donation status atomically
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: updateError } = await (supabase as any)
+    const { error: updateError } = await supabase
       .from('donations')
       .update({
         payment_status: 'paid',

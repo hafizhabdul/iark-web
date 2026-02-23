@@ -347,9 +347,8 @@ export default function AdminTestimonialsPage() {
           filteredTestimonials.map((testimonial, index) => (
             <div
               key={testimonial.id}
-              className={`bg-white rounded-xl shadow-sm overflow-hidden ${
-                !testimonial.is_active ? 'opacity-60' : ''
-              }`}
+              className={`bg-white rounded-xl shadow-sm overflow-hidden ${!testimonial.is_active ? 'opacity-60' : ''
+                }`}
             >
               <div className="p-4">
                 <div className="flex items-start gap-4 mb-4">

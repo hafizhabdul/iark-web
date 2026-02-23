@@ -17,6 +17,7 @@ import {
   ChevronUp,
   ChevronDown,
 } from 'lucide-react';
+import { revalidateManagement } from '@/lib/actions/revalidate';
 
 interface ManagementMember {
   id: string;
@@ -40,6 +41,9 @@ export default function AdminManagementPage() {
   const [editingMember, setEditingMember] = useState<ManagementMember | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Single supabase instance for the component
+  const [supabase] = useState(() => createClient());
+
   // Form state
   const [name, setName] = useState('');
   const [position, setPosition] = useState('');
@@ -55,19 +59,21 @@ export default function AdminManagementPage() {
   }, []);
 
   async function fetchMembers() {
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from('management')
-      .select('*')
-      .order('order_index', { ascending: true, nullsFirst: false })
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('management')
+        .select('*')
+        .order('order_index', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching management:', error);
-    } else {
-      setMembers(data || []);
+      if (error) {
+        console.error('Error fetching management:', error);
+      } else {
+        setMembers(data || []);
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   function openModal(member?: ManagementMember) {
@@ -113,25 +119,25 @@ export default function AdminManagementPage() {
     }
 
     setUploading(true);
-    const supabase = createClient();
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `management-${Date.now()}.${fileExt}`;
+      const filePath = `management/${fileName}`;
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `management-${Date.now()}.${fileExt}`;
-    const filePath = `management/${fileName}`;
+      const { error: uploadError } = await supabase.storage
+        .from('general')
+        .upload(filePath, file);
 
-    const { error: uploadError } = await supabase.storage
-      .from('general')
-      .upload(filePath, file);
-
-    if (uploadError) {
-      console.error('Error uploading image:', uploadError);
-      alert('Gagal mengupload gambar');
-    } else {
-      const { data } = supabase.storage.from('general').getPublicUrl(filePath);
-      setPhoto(data.publicUrl);
+      if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        alert('Gagal mengupload gambar');
+      } else {
+        const { data } = supabase.storage.from('general').getPublicUrl(filePath);
+        setPhoto(data.publicUrl);
+      }
+    } finally {
+      setUploading(false);
     }
-
-    setUploading(false);
   }
 
   async function saveMember() {
@@ -141,13 +147,38 @@ export default function AdminManagementPage() {
     }
 
     setSaving(true);
-    const supabase = createClient();
+    try {
+      if (editingMember) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
+          .from('management')
+          .update({
+            name: name.trim(),
+            position: position.trim(),
+            angkatan: angkatan.trim() || null,
+            photo: photo || null,
+            role,
+            instagram: instagram.trim() || null,
+            linkedin: linkedin.trim() || null,
+          })
+          .eq('id', editingMember.id);
 
-    if (editingMember) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
-        .from('management')
-        .update({
+        if (error) {
+          console.error('Error updating member:', error);
+          alert('Gagal mengupdate anggota: ' + error.message);
+        } else {
+          await fetchMembers();
+          // Trigger revalidasi cache agar Home & Tentang langsung berubah
+          await revalidateManagement();
+          closeModal();
+        }
+      } else {
+        const maxOrderIndex = members.length > 0
+          ? Math.max(...members.map(m => m.order_index || 0)) + 1
+          : 0;
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any).from('management').insert({
           name: name.trim(),
           position: position.trim(),
           angkatan: angkatan.trim() || null,
@@ -155,57 +186,44 @@ export default function AdminManagementPage() {
           role,
           instagram: instagram.trim() || null,
           linkedin: linkedin.trim() || null,
-        })
-        .eq('id', editingMember.id);
+          order_index: maxOrderIndex,
+        });
 
-      if (error) {
-        console.error('Error updating member:', error);
-        alert('Gagal mengupdate anggota');
-      } else {
-        fetchMembers();
-        closeModal();
+        if (error) {
+          console.error('Error creating member:', error);
+          alert('Gagal menambahkan anggota: ' + error.message);
+        } else {
+          await fetchMembers();
+          // Trigger revalidasi cache agar Home & Tentang langsung berubah
+          await revalidateManagement();
+          closeModal();
+        }
       }
-    } else {
-      const maxOrderIndex = members.length > 0
-        ? Math.max(...members.map(m => m.order_index || 0)) + 1
-        : 0;
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from('management').insert({
-        name: name.trim(),
-        position: position.trim(),
-        angkatan: angkatan.trim() || null,
-        photo: photo || null,
-        role,
-        instagram: instagram.trim() || null,
-        linkedin: linkedin.trim() || null,
-        order_index: maxOrderIndex,
-      });
-
-      if (error) {
-        console.error('Error creating member:', error);
-        alert('Gagal menambahkan anggota');
-      } else {
-        fetchMembers();
-        closeModal();
-      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      alert('Terjadi kesalahan mendadak');
+    } finally {
+      setSaving(false);
     }
-
-    setSaving(false);
   }
 
   async function deleteMember(id: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus anggota ini?')) return;
 
-    const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).from('management').delete().eq('id', id);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any).from('management').delete().eq('id', id);
 
-    if (error) {
-      console.error('Error deleting member:', error);
-      alert('Gagal menghapus anggota');
-    } else {
-      fetchMembers();
+      if (error) {
+        console.error('Error deleting member:', error);
+        alert('Gagal menghapus anggota');
+      } else {
+        await fetchMembers();
+        // Trigger revalidasi cache agar Home & Tentang langsung berubah
+        await revalidateManagement();
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
     }
   }
 
@@ -236,7 +254,9 @@ export default function AdminManagementPage() {
     if (error1 || error2) {
       console.error('Error updating order:', error1 || error2);
     } else {
-      fetchMembers();
+      await fetchMembers();
+      // Trigger revalidasi cache agar Home & Tentang langsung berubah
+      await revalidateManagement();
     }
   }
 

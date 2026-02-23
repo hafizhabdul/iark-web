@@ -17,7 +17,6 @@ import {
   ChevronUp,
   ChevronDown,
 } from 'lucide-react';
-import { revalidateManagement } from '@/lib/actions/revalidate';
 
 interface ManagementMember {
   id: string;
@@ -164,7 +163,6 @@ export default function AdminManagementPage() {
         alert('Gagal mengupdate anggota');
       } else {
         fetchMembers();
-        await revalidateManagement();
         closeModal();
       }
     } else {
@@ -189,7 +187,6 @@ export default function AdminManagementPage() {
         alert('Gagal menambahkan anggota');
       } else {
         fetchMembers();
-        await revalidateManagement();
         closeModal();
       }
     }
@@ -209,7 +206,6 @@ export default function AdminManagementPage() {
       alert('Gagal menghapus anggota');
     } else {
       fetchMembers();
-      await revalidateManagement();
     }
   }
 
@@ -241,7 +237,6 @@ export default function AdminManagementPage() {
       console.error('Error updating order:', error1 || error2);
     } else {
       fetchMembers();
-      await revalidateManagement();
     }
   }
 

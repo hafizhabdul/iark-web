@@ -31,22 +31,20 @@ export async function PengurusSection({ className = '' }: PengurusSectionProps) 
     console.error('Error fetching pengurus:', error);
   }
 
-  // Helper untuk mencari member berdasarkan posisi
-  const findMember = (positionQuery: string) =>
-    allMembers.find(m => m.position.toLowerCase().includes(positionQuery.toLowerCase()));
+  // Semua data di /tentang hanya angkatan 7
+  const angkatan7Members = allMembers.filter(m => m.angkatan === '7');
 
   // 1. Ketua Umum (Level 1)
-  const ketuaUmum = findMember('Ketua Umum');
+  const ketuaUmum = angkatan7Members.find(
+    m => m.position.toLowerCase().includes('ketua umum') && !m.position.toLowerCase().includes('wakil')
+  );
+
+  // Sisanya (exclude Ketua Umum)
+  const restMembers = angkatan7Members.filter(m => m.id !== ketuaUmum?.id);
 
   // 2. Wakil Ketua Umum & Sekretariat Inti (Level 2)
-  // Prioritas urutan: Waketum -> Sekjen -> Bendum
-  // Kita cari semua yang bukan Ketua Umum dan bukan Ketua Bidang
-  const coreOfficers = allMembers.filter(m => {
+  const coreOfficers = restMembers.filter(m => {
     const pos = m.position.toLowerCase();
-    // Exclude Ketua Umum
-    if (pos.includes('ketua umum') && !pos.includes('wakil')) return false;
-
-    // Include Waketum, Sekjen, Bendum, and their deputies
     return (
       pos.includes('wakil ketua umum') ||
       pos.includes('sekretaris jenderal') ||
@@ -55,33 +53,28 @@ export async function PengurusSection({ className = '' }: PengurusSectionProps) 
       pos.includes('wakil bendahara')
     );
   }).sort((a, b) => {
-    // Custom sort order
     const getScore = (pos: string) => {
       pos = pos.toLowerCase();
       if (pos.includes('wakil ketua umum')) return 1;
       if (pos.includes('sekretaris jenderal') && !pos.includes('wakil')) return 2;
       if (pos.includes('bendahara') && !pos.includes('wakil')) return 3;
-      return 4; // Wakil-wakil lainnya
+      return 4;
     };
     return getScore(a.position) - getScore(b.position);
   });
 
   // 3. Ketua Bidang/Divisi (Level 3)
-  const ketuaDivisi = allMembers.filter(m => {
+  const ketuaDivisi = restMembers.filter(m => {
     const pos = m.position.toLowerCase();
-    // Anything starting with "Ketua" but not Ketua Umum/Waketum
-    // Or anything explicitly containing "Ketua Bidang"
-    // Also include specific known patterns like "Ketua 1", "Ketua 2"
     return (
       (pos.startsWith('ketua') && !pos.includes('ketua umum')) ||
       pos.includes('ketua bidang') ||
       pos.includes('ketua divisi')
-    ) && !coreOfficers.some(c => c.id === m.id); // Ensure not already in core
+    ) && !coreOfficers.some(c => c.id === m.id);
   });
 
   // 4. Sisanya (Lainnya)
-  const others = allMembers.filter(m =>
-    m.id !== ketuaUmum?.id &&
+  const others = restMembers.filter(m =>
     !coreOfficers.some(c => c.id === m.id) &&
     !ketuaDivisi.some(k => k.id === m.id)
   );

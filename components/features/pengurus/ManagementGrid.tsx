@@ -38,7 +38,15 @@ export interface ManagementGridProps {
 export function ManagementGrid({ className = '', initialData }: ManagementGridProps) {
   const allMembers = initialData || [];
 
-  const pengurusInti = allMembers.filter((m) => m.role === 'pengurus_inti');
+  const ketuaUmum = allMembers.find(
+    (m) => m.role === 'pengurus_inti' && m.position.toLowerCase().includes('ketua umum') && !m.position.toLowerCase().includes('wakil') && m.angkatan === '7'
+  );
+  const pengurusInti = [
+    ...(ketuaUmum ? [ketuaUmum] : []),
+    ...allMembers.filter(
+      (m) => m.role === 'pengurus_inti' && m.id !== ketuaUmum?.id
+    ),
+  ];
   const ketuaAngkatan = allMembers.filter((m) => m.role === 'ketua_angkatan');
 
   return (

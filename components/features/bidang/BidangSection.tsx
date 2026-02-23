@@ -32,9 +32,9 @@ export async function BidangSection({ className = '' }: BidangSectionProps) {
     console.error('Error fetching bidang data:', error);
   }
 
-  // Filter: Ambil yang jabatannya mengandung "Ketua Bidang"
+  // Filter: Angkatan 7 yang jabatannya mengandung "Ketua Bidang"
   const ketuaBidangList = allMembers.filter(m =>
-    m.position.toLowerCase().includes('ketua bidang')
+    m.angkatan === '7' && m.position.toLowerCase().includes('ketua bidang')
   );
 
   return (

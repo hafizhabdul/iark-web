@@ -56,10 +56,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         // Only log non-abort errors
-        const isAbort = error.message?.includes('AbortError') ||
-          error.details?.includes('AbortError') ||
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (error as any).name === 'AbortError';
+        const errorMsg = error.message?.toLowerCase() || '';
+        const isAbort = errorMsg.includes('abort') ||
+          (error as any).name === 'AbortError' ||
+          (error as any).code === 20; // 20 is the code for AbortError
 
         if (!isAbort) {
           console.error('Error fetching profile:', error);
@@ -68,8 +68,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       return data as Profile;
-    } catch (err) {
+    } catch (err: any) {
       // Silently ignore abort errors
+      const errMsg = err?.message?.toLowerCase() || '';
+      if (!errMsg.includes('abort') && err?.name !== 'AbortError') {
+        console.error('Unexpected profile fetch error:', err);
+      }
       return null;
     }
   };
@@ -106,9 +110,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUserFromSupabase(supabaseUser, profileData);
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         // Silently ignore abort errors
-        if (error instanceof Error && !error.message.includes('AbortError')) {
+        const errMsg = error?.message?.toLowerCase() || '';
+        const isAbort = errMsg.includes('abort') || error?.name === 'AbortError';
+
+        if (!isAbort) {
           console.error('Error initializing auth:', error);
         }
       } finally {
@@ -157,7 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.user) {
         const profileData = await fetchProfile(data.user.id);
         setUserFromSupabase(data.user, profileData);
-        
+
         // Redirect admin to admin panel, others to dashboard
         const redirectPath = profileData?.role === 'admin' ? '/admin' : '/dashboard';
         router.push(redirectPath);

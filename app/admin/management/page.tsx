@@ -18,6 +18,8 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { revalidateManagement } from '@/lib/actions/revalidate';
+import Cropper from 'react-easy-crop';
+import getCroppedImg from '@/lib/utils/cropImage';
 
 interface ManagementMember {
   id: string;
@@ -53,6 +55,12 @@ export default function AdminManagementPage() {
   const [instagram, setInstagram] = useState('');
   const [linkedin, setLinkedin] = useState('');
   const [uploading, setUploading] = useState(false);
+
+  // Cropper state
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
 
   useEffect(() => {
     fetchMembers();
@@ -113,28 +121,50 @@ export default function AdminManagementPage() {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Ukuran file maksimal 5MB');
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Ukuran file maksimal 10MB');
       return;
     }
 
+    const reader = new FileReader();
+    reader.addEventListener('load', () => {
+      setImageToCrop(reader.result as string);
+    });
+    reader.readAsDataURL(file);
+  }
+
+  async function handleCropSave() {
+    if (!imageToCrop || !croppedAreaPixels) return;
+
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `management-${Date.now()}.${fileExt}`;
+      // 1. Dapatkan hasil crop
+      const croppedImage = await getCroppedImg(imageToCrop, croppedAreaPixels);
+      if (!croppedImage) throw new Error('Gagal memproses potongan gambar');
+
+      // 2. Gunakan client baru untuk upload guna memastikan session segar
+      const supabaseUpload = createClient();
+      const fileName = `management-${Date.now()}.jpg`;
       const filePath = `management/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabaseUpload.storage
         .from('general')
-        .upload(filePath, file);
+        .upload(filePath, croppedImage, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
       if (uploadError) {
         console.error('Error uploading image:', uploadError);
-        alert('Gagal mengupload gambar');
+        alert('Gagal mengupload gambar: ' + uploadError.message);
       } else {
-        const { data } = supabase.storage.from('general').getPublicUrl(filePath);
+        const { data } = supabaseUpload.storage.from('general').getPublicUrl(filePath);
         setPhoto(data.publicUrl);
+        setImageToCrop(null);
       }
+    } catch (err: any) {
+      console.error('Crop save error:', err);
+      alert('Terjadi kesalahan: ' + (err.message || 'Gagal memproses gambar'));
     } finally {
       setUploading(false);
     }
@@ -432,166 +462,219 @@ export default function AdminManagementPage() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b sticky top-0 bg-white">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {editingMember ? 'Edit Anggota' : 'Tambah Anggota'}
-                </h3>
-                <button
-                  onClick={closeModal}
-                  className="p-2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
+            {/* Modal Content */}
+            {imageToCrop ? (
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Sesuaikan Foto</h3>
+                <div className="relative w-full aspect-square bg-gray-100 rounded-lg overflow-hidden mb-6">
+                  <Cropper
+                    image={imageToCrop}
+                    crop={crop}
+                    zoom={zoom}
+                    aspect={3 / 4}
+                    onCropChange={setCrop}
+                    onCropComplete={(_, pixels) => setCroppedAreaPixels(pixels)}
+                    onZoomChange={setZoom}
+                  />
+                </div>
 
-            <div className="p-6 space-y-4">
-              {/* Photo */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Foto
-                </label>
-                {photo ? (
-                  <div className="relative aspect-square max-w-[200px] bg-gray-100 rounded-lg overflow-hidden">
-                    <img
-                      src={photo}
-                      alt="Photo"
-                      className="w-full h-full object-cover"
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm text-gray-500 mb-2">Zoom</label>
+                    <input
+                      type="range"
+                      value={zoom}
+                      min={1}
+                      max={3}
+                      step={0.1}
+                      aria-labelledby="Zoom"
+                      onChange={(e) => setZoom(Number(e.target.value))}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                     />
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
                     <button
-                      onClick={() => setPhoto('')}
-                      className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-black/70"
+                      onClick={() => setImageToCrop(null)}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                     >
-                      <X className="w-4 h-4" />
+                      Batal
+                    </button>
+                    <button
+                      onClick={handleCropSave}
+                      disabled={uploading}
+                      className="flex-1 px-4 py-2 bg-iark-red text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
+                      Terapkan & Upload
                     </button>
                   </div>
-                ) : (
-                  <label className="flex flex-col items-center justify-center aspect-square max-w-[200px] bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100">
-                    {uploading ? (
-                      <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="p-6 border-b sticky top-0 bg-white z-10">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {editingMember ? 'Edit Anggota' : 'Tambah Anggota'}
+                    </h3>
+                    <button
+                      onClick={closeModal}
+                      className="p-2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-6 space-y-4">
+                  {/* Photo */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Foto (Rekomendasi 3:4)
+                    </label>
+                    {photo ? (
+                      <div className="relative aspect-[3/4] max-w-[200px] bg-gray-100 rounded-lg overflow-hidden group">
+                        <img
+                          src={photo}
+                          alt="Photo"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <label className="p-2 bg-white rounded-full text-gray-700 cursor-pointer hover:scale-110 transition-transform">
+                            <ImageIcon className="w-5 h-5" />
+                            <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                          </label>
+                          <button
+                            onClick={() => setPhoto('')}
+                            className="p-2 bg-white rounded-full text-red-600 hover:scale-110 transition-transform"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
                     ) : (
-                      <>
+                      <label className="flex flex-col items-center justify-center aspect-[3/4] max-w-[200px] bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
                         <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
-                        <span className="text-gray-500 text-sm">Upload foto</span>
-                      </>
+                        <span className="text-gray-500 text-sm">Upload & Sesuaikan</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                      </label>
                     )}
+                  </div>
+
+                  {/* Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nama *
+                    </label>
                     <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      disabled={uploading}
-                      className="hidden"
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent outline-none"
                     />
-                  </label>
-                )}
-              </div>
+                  </div>
 
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nama *
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent"
-                />
-              </div>
+                  {/* Position */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Posisi *
+                    </label>
+                    <input
+                      type="text"
+                      value={position}
+                      onChange={(e) => setPosition(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent outline-none"
+                    />
+                  </div>
 
-              {/* Position */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Posisi *
-                </label>
-                <input
-                  type="text"
-                  value={position}
-                  onChange={(e) => setPosition(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent"
-                />
-              </div>
+                  {/* Angkatan */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Angkatan
+                    </label>
+                    <input
+                      type="text"
+                      value={angkatan}
+                      onChange={(e) => setAngkatan(e.target.value)}
+                      placeholder="Contoh: 7 atau Angkatan 7"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent outline-none"
+                    />
+                  </div>
 
-              {/* Angkatan */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Angkatan
-                </label>
-                <input
-                  type="text"
-                  value={angkatan}
-                  onChange={(e) => setAngkatan(e.target.value)}
-                  placeholder="Contoh: 2020"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent"
-                />
-              </div>
+                  {/* Role */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Role *
+                    </label>
+                    <select
+                      value={role}
+                      onChange={(e) => setRole(e.target.value as 'pengurus_inti' | 'ketua_angkatan')}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent outline-none"
+                    >
+                      <option value="pengurus_inti">Pengurus Inti</option>
+                      <option value="ketua_angkatan">Ketua Angkatan</option>
+                    </select>
+                  </div>
 
-              {/* Role */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Role *
-                </label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as 'pengurus_inti' | 'ketua_angkatan')}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent"
-                >
-                  <option value="pengurus_inti">Pengurus Inti</option>
-                  <option value="ketua_angkatan">Ketua Angkatan</option>
-                </select>
-              </div>
+                  {/* Instagram */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Instagram
+                    </label>
+                    <div className="relative">
+                      <Instagram className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="text"
+                        value={instagram}
+                        onChange={(e) => setInstagram(e.target.value)}
+                        placeholder="username"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent outline-none"
+                      />
+                    </div>
+                  </div>
 
-              {/* Instagram */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Instagram
-                </label>
-                <div className="relative">
-                  <Instagram className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={instagram}
-                    onChange={(e) => setInstagram(e.target.value)}
-                    placeholder="username"
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent"
-                  />
+                  {/* LinkedIn */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      LinkedIn
+                    </label>
+                    <div className="relative">
+                      <Linkedin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="text"
+                        value={linkedin}
+                        onChange={(e) => setLinkedin(e.target.value)}
+                        placeholder="username atau URL lengkap"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent outline-none"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* LinkedIn */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  LinkedIn
-                </label>
-                <div className="relative">
-                  <Linkedin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={linkedin}
-                    onChange={(e) => setLinkedin(e.target.value)}
-                    placeholder="username atau URL lengkap"
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-iark-red focus:border-transparent"
-                  />
+                <div className="p-6 border-t bg-gray-50 flex justify-end gap-3 sticky bottom-0">
+                  <button
+                    onClick={closeModal}
+                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={saveMember}
+                    disabled={saving}
+                    className="px-4 py-2 bg-iark-red text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                    Simpan
+                  </button>
                 </div>
-              </div>
-            </div>
-
-            <div className="p-6 border-t bg-gray-50 flex justify-end gap-3">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                Batal
-              </button>
-              <button
-                onClick={saveMember}
-                disabled={saving}
-                className="px-4 py-2 bg-iark-red text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                {saving ? 'Menyimpan...' : 'Simpan'}
-              </button>
-            </div>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -45,37 +45,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const supabase = createClient();
   const signOutFlagRef = useRef<(value: boolean) => void>(() => { });
 
-  // Fetch profile data
-  const fetchProfile = async (userId: string): Promise<Profile | null> => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+  // Fetch profile data with retry for production resilience
+  const fetchProfile = async (userId: string, retries = 2): Promise<Profile | null> => {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
 
-      if (error) {
-        // Only log non-abort errors
-        const errorMsg = error.message?.toLowerCase() || '';
-        const isAbort = errorMsg.includes('abort') ||
-          (error as { name?: string }).name === 'AbortError' ||
-          String((error as { code?: string | number }).code) === '20'; // 20 is the code for AbortError
+        if (error) {
+          const errorMsg = error.message?.toLowerCase() || '';
+          const isAbort = errorMsg.includes('abort') ||
+            (error as { name?: string }).name === 'AbortError' ||
+            String((error as { code?: string | number }).code) === '20';
 
-        if (!isAbort) {
+          if (isAbort) return null;
+
+          // Retry on transient errors
+          if (attempt < retries) {
+            await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+            continue;
+          }
           console.error('Error fetching profile:', error);
+          return null;
         }
+
+        return data as Profile;
+      } catch (err: any) {
+        const errMsg = err?.message?.toLowerCase() || '';
+        if (errMsg.includes('abort') || err?.name === 'AbortError') return null;
+
+        if (attempt < retries) {
+          await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+          continue;
+        }
+        console.error('Unexpected profile fetch error:', err);
         return null;
       }
-
-      return data as Profile;
-    } catch (err: any) {
-      // Silently ignore abort errors
-      const errMsg = err?.message?.toLowerCase() || '';
-      if (!errMsg.includes('abort') && err?.name !== 'AbortError') {
-        console.error('Unexpected profile fetch error:', err);
-      }
-      return null;
     }
+    return null;
   };
 
   // Set user from Supabase user and profile
@@ -107,6 +117,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
     let isSigningOut = false;
+
+    // Safety timeout: if onAuthStateChange never fires (e.g., network issues),
+    // stop showing loading after 5 seconds
+    const loadingTimeout = setTimeout(() => {
+      if (isMounted && isLoading) {
+        setIsLoading(false);
+      }
+    }, 5000);
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -143,6 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       isMounted = false;
+      clearTimeout(loadingTimeout);
       subscription.unsubscribe();
     };
   }, []);

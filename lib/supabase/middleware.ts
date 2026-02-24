@@ -84,8 +84,5 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // NOTE: Admin role check is handled client-side by AdminLayout (useAuth().isAdmin)
-  // to avoid an extra DB query on every request which causes 429 rate limit errors.
-
   return supabaseResponse;
 }

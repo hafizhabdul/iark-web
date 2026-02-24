@@ -67,7 +67,7 @@ export default function AdminDashboardContent({
     },
     {
       label: 'Pendaftar Event',
-      value: stats.total_registrations,
+      value: stats.total_registrations ?? 0,
       icon: UserCheck,
       color: 'bg-indigo-500',
       href: '/admin/events',
@@ -79,7 +79,7 @@ export default function AdminDashboardContent({
         currency: 'IDR',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
-      }).format(stats.total_donations_amount),
+      }).format(stats.total_donations_amount || 0),
       icon: Heart,
       color: 'bg-pink-500',
       href: '/admin/donations',

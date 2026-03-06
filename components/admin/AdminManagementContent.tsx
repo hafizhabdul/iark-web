@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { swapOrderIndex } from '@/lib/supabase/swap-order';
 import {
   Plus,
   Search,
@@ -264,18 +265,18 @@ export default function AdminManagementContent({ initialData }: AdminManagementC
     const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     const swapMember = filteredByRole[swapIndex];
 
-    const { error: error1 } = await supabase
-      .from('management')
-      .update({ order_index: swapMember.order_index })
-      .eq('id', member.id);
+    // Atomic swap via RPC (prevents partial update race condition)
+    const { error } = await swapOrderIndex(
+      supabase,
+      'management',
+      member.id,
+      member.order_index,
+      swapMember.id,
+      swapMember.order_index,
+    );
 
-    const { error: error2 } = await supabase
-      .from('management')
-      .update({ order_index: member.order_index })
-      .eq('id', swapMember.id);
-
-    if (error1 || error2) {
-      console.error('Error updating order:', error1 || error2);
+    if (error) {
+      console.error('Error updating order:', error);
     } else {
       await fetchMembers();
       // Trigger revalidasi cache agar Home & Tentang langsung berubah

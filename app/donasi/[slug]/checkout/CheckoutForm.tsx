@@ -109,6 +109,7 @@ export function CheckoutForm({ campaign, user }: CheckoutFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return; // Guard against double-submit
     setError(null);
 
     // Validation

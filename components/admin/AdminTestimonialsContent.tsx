@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
+import { swapOrderIndex } from '@/lib/supabase/swap-order';
 import { fetchTestimonialsAdmin } from '@/lib/queries/homepage';
 import { queryKeys, staleTime } from '@/lib/queries';
 import {
@@ -137,7 +138,7 @@ export default function AdminTestimonialsContent({ initialTestimonials }: { init
       currentId,
       swapId,
       currentOrderIndex,
-      swapOrderIndex,
+      swapOrderIndex: swapOrder,
     }: {
       currentId: string;
       swapId: string;
@@ -145,15 +146,16 @@ export default function AdminTestimonialsContent({ initialTestimonials }: { init
       swapOrderIndex: number | null;
     }) => {
       const supabase = createClient();
-      const { error: error1 } = await supabase
-        .from('testimonials')
-        .update({ order_index: swapOrderIndex })
-        .eq('id', currentId);
-      const { error: error2 } = await supabase
-        .from('testimonials')
-        .update({ order_index: currentOrderIndex })
-        .eq('id', swapId);
-      if (error1 || error2) throw error1 || error2;
+      // Atomic swap via RPC (prevents partial update race condition)
+      const { error } = await swapOrderIndex(
+        supabase,
+        'testimonials',
+        currentId,
+        currentOrderIndex,
+        swapId,
+        swapOrder,
+      );
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.testimonialsAdmin });

@@ -107,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const profileRef = useRef<Profile | null>(null);
+  const fetchingProfileRef = useRef<string | null>(null);
 
   // Keep profileRef in sync with profile state
   useEffect(() => {
@@ -133,7 +134,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (session?.user) {
           // Only fetch profile if we don't have it for this user yet
-          if (profileRef.current?.id !== session.user.id) {
+          // and no other fetch is in progress for this user (prevents race with signIn)
+          if (
+            profileRef.current?.id !== session.user.id &&
+            fetchingProfileRef.current !== session.user.id
+          ) {
+            fetchingProfileRef.current = session.user.id;
             try {
               const profileData = await fetchProfile(session.user.id);
               if (isMounted) {
@@ -141,6 +147,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             } catch (error) {
               console.error('Error in auth state change:', error);
+            } finally {
+              fetchingProfileRef.current = null;
             }
           }
         } else {
@@ -178,12 +186,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        const profileData = await fetchProfile(data.user.id);
-        setUserFromSupabase(data.user, profileData);
+        // Set fetching ref to prevent onAuthStateChange from racing
+        fetchingProfileRef.current = data.user.id;
+        try {
+          const profileData = await fetchProfile(data.user.id);
+          setUserFromSupabase(data.user, profileData);
 
-        // Redirect admin to admin panel, others to dashboard
-        const redirectPath = profileData?.role === 'admin' ? '/admin' : '/dashboard';
-        router.push(redirectPath);
+          // Redirect admin to admin panel, others to dashboard
+          const redirectPath = profileData?.role === 'admin' ? '/admin' : '/dashboard';
+          router.push(redirectPath);
+        } finally {
+          fetchingProfileRef.current = null;
+        }
       }
 
       return { error: null };

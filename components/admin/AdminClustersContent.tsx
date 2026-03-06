@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { swapOrderIndex } from '@/lib/supabase/swap-order';
 import {
   Plus,
   Search,
@@ -162,19 +163,18 @@ export default function AdminClustersContent({ initialData }: { initialData: Clu
     const currentCluster = clusters[currentIndex];
     const targetCluster = clusters[targetIndex];
 
-    // Swap order_index values
-    const { error: error1 } = await supabase
-      .from('clusters')
-      .update({ order_index: targetCluster.order_index })
-      .eq('id', currentCluster.id);
+    // Atomic swap via RPC (prevents partial update race condition)
+    const { error } = await swapOrderIndex(
+      supabase,
+      'clusters',
+      currentCluster.id,
+      currentCluster.order_index,
+      targetCluster.id,
+      targetCluster.order_index,
+    );
 
-    const { error: error2 } = await supabase
-      .from('clusters')
-      .update({ order_index: currentCluster.order_index })
-      .eq('id', targetCluster.id);
-
-    if (error1 || error2) {
-      console.error('Error reordering clusters:', error1 || error2);
+    if (error) {
+      console.error('Error reordering clusters:', error);
     } else {
       fetchClusters();
     }

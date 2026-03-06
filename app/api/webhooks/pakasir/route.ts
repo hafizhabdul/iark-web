@@ -18,6 +18,13 @@ function verifySignature(payload: string, signature: string): boolean {
     .update(payload)
     .digest('hex');
 
+  // timingSafeEqual throws if buffers have different lengths,
+  // so check length first (length comparison is not timing-sensitive
+  // because an attacker already knows the expected length: sha256 hex = 64 chars)
+  if (signature.length !== expectedSignature.length) {
+    return false;
+  }
+
   return crypto.timingSafeEqual(
     Buffer.from(signature),
     Buffer.from(expectedSignature)
@@ -69,7 +76,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Update donation status atomically
-    const { error: updateError } = await supabase
+    // The .is('webhook_processed_at', null) guard ensures only one concurrent
+    // webhook call can successfully update this row (prevents race condition)
+    const { data: updatedRows, error: updateError } = await supabase
       .from('donations')
       .update({
         payment_status: 'paid',
@@ -79,14 +88,20 @@ export async function POST(request: NextRequest) {
       })
       .eq('order_id', order_id)
       .eq('amount', amount) // Extra safety check
-      .is('webhook_processed_at', null); // Only update if not already processed
+      .is('webhook_processed_at', null) // Only update if not already processed
+      .select('id');
 
     if (updateError) {
       console.error('Webhook update error:', updateError);
       return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
     }
 
-    // Send thank you email (fire-and-forget, don't fail webhook)
+    // If no rows were updated, another webhook already processed this
+    if (!updatedRows || updatedRows.length === 0) {
+      return NextResponse.json({ success: true, message: 'Already processed (concurrent)' });
+    }
+
+    // Send thank you email only if we actually updated the row (prevents double email)
     try {
       await sendDonationThankYou(
         existing.donor_email,

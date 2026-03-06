@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { swapOrderIndex } from '@/lib/supabase/swap-order';
 import {
   Plus,
   Search,
@@ -208,17 +209,19 @@ export default function AdminHeroSlidesContent({ initialData }: { initialData: H
     const otherSlide = slides[newIndex];
     const currentSlide = slides[currentIndex];
 
-    // Swap display orders
-    await Promise.all([
-      supabase
-        .from('hero_slides')
-        .update({ order_index: otherSlide.order_index })
-        .eq('id', currentSlide.id),
-      supabase
-        .from('hero_slides')
-        .update({ order_index: currentSlide.order_index })
-        .eq('id', otherSlide.id),
-    ]);
+    // Atomic swap via RPC (prevents partial update race condition)
+    const { error } = await swapOrderIndex(
+      supabase,
+      'hero_slides',
+      currentSlide.id,
+      currentSlide.order_index,
+      otherSlide.id,
+      otherSlide.order_index,
+    );
+
+    if (error) {
+      console.error('Error reordering slides:', error);
+    }
 
     fetchSlides();
   }
